@@ -1,0 +1,6 @@
+#!/bin/bash
+cd `dirname $0`
+
+export PYTHONPATH=${PYTHONPATH}:../..
+python ./manage.py test async_exec \
+    --with-coverage --cover-erase --cover-package=async_exec
