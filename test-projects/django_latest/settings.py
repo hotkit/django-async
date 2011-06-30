@@ -119,6 +119,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'async_exec'
 )
 
 # A sample logging configuration. The only tangible logging
