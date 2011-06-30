@@ -1,0 +1,8 @@
+# Requirements
+
+# Used for testing
+coverage
+django-nose
+mock
+nose
+unittest2
