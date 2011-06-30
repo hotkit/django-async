@@ -121,6 +121,10 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 
+    # Needed to get the Django nose test runner working
+    'django_nose',
+
+    # Add this for the Django Async functionality
     'async_exec'
 )
 
