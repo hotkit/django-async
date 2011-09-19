@@ -4,7 +4,7 @@ class Job(Model):
     """Execute a Python function asynchronously.
 
     Do not create these objects directly.
-    Use the function async_execute to make them.
+    Use the function create to make them.
     """
     name = CharField(max_length = 100, blank=False)
     args = TextField()
@@ -22,6 +22,10 @@ class Job(Model):
 
     def __unicode__(self):
         return self.name
+
+    @classmethod
+    def create(cls, function, *args, **kwargs):
+        return cls(name = function.func_name, args = args, kwargs = kwargs)
 
     class Meta:
         ordering = ['-id']
