@@ -1,5 +1,6 @@
 from datetime import datetime
 from inspect import getmodule
+from json import dumps
 from roles.django import ModelRoleType
 
 def full_name(function):
@@ -9,9 +10,11 @@ def full_name(function):
 class Task(object):
     __metaclass__ = ModelRoleType
 
-    def schedule(self, function_name, args=[], kwargs={}, time_to_execute = None):
-        self.name = function_name
-        self.args = args
-        self.kwargs = kwargs
+    def set_call(self, function, *args, **kwargs):
+        self.name = full_name(function)
+        self.args = dumps(args)
+        self.kwargs = dumps(kwargs)
+
+    def schedule(self, time_to_execute):
         self.scheduled = time_to_execute
 

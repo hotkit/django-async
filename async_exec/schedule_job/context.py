@@ -10,7 +10,8 @@ class ScheduleJob(object):
     def __enter__(self):
         # pre conditions here
         self.job = Task(self.job)
-        self.job.schedule(self.function, time_to_execute = self.time_to_execute)
+        self.job.set_call(self.function)
+        self.job.schedule(self.time_to_execute)
         self.job.save() 
         return self
 
