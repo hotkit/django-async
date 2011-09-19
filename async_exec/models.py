@@ -23,10 +23,6 @@ class Job(Model):
     def __unicode__(self):
         return self.name
 
-    @classmethod
-    def create(cls, function, *args, **kwargs):
-        return cls(name = function.func_name, args = args, kwargs = kwargs)
-
     class Meta:
         ordering = ['-id']
  

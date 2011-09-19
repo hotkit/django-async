@@ -6,19 +6,22 @@ from async_exec.models import Job
 
 class TestScheduleJob(TestCase):
     def test_successfully_schedule_job_with_no_scheduled_time(self):
-        owner = 'An application' 
-        job = Job.create(sample_function, name = 'John')
-        with ScheduleJob(owner, job, sample_function) as schedule_job:
+        job = Job()
+        with ScheduleJob(None, job, sample_function) as schedule_job:
             # Conditions may not change in here because post conditions are met! 
-            self.assertTrue(schedule_job.job)
-            self.assertEqual(schedule_job.job.scheduled, None)
+            self.assertTrue(schedule_job.job.id)
+            self.assertEqual(None, schedule_job.job.scheduled)
 
     def test_successfully_schedule_job_with_scheduled_time(self):
-        owner = 'An application' 
-        job = Job.create(sample_function, name = 'John')
+        job = Job()
         scheduled_time = datetime.now()
-        with ScheduleJob(owner, job, sample_function, scheduled_time) as schedule_job:
+        with ScheduleJob(scheduled_time, job, sample_function) as schedule_job:
             # Conditions may not change in here because post conditions are met! 
-            self.assertTrue(schedule_job.job)
-            self.assertEqual(schedule_job.job.scheduled, scheduled_time)
+            self.assertEqual(scheduled_time, schedule_job.job.scheduled)
+        
+    def test_successfully_schedule_job_with_kwargs(self):
+        job = Job()
+        with ScheduleJob(None, job, sample_function, name = 'John') as schedule_job:
+            # Conditions may not change in here because post conditions are met! 
+            self.assertEqual('{"name": "John"}', schedule_job.job.kwargs)
         
