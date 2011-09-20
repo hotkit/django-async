@@ -6,6 +6,7 @@ from django.test import TestCase
 class TestExecuteJob(TestCase):
     def setUp(self):
         self.job = Job()
+        self.job.name = 'async_exec.tests.function_for_test.hello_world'
 
     def test_execute_job_marks_job_as_executed(self):
         with ExecuteJob(self.job) as context:

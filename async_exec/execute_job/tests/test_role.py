@@ -1,8 +1,9 @@
-from async_exec.execute_job.role import Process, load_function, split
+from async_exec.execute_job.role import Process, load_function, load_module
 from async_exec.tests.function_for_test import hello_world
 from datetime import datetime
 from django.test import TestCase
 from yas.stub import ModelStub
+import json
 
 class TestProcess(TestCase):
     def setUp(self):
@@ -17,8 +18,29 @@ class TestProcess(TestCase):
         self.assertFalse(self.process.is_executed())
 
     def test_execute_set_execution_time(self):
+        self.process.name = 'async_exec.tests.function_for_test.hello_world'
         self.process.execute() 
         self.assertIsNotNone(self.process.executed)
+
+    def test_get_args__happy(self):
+        self.process.args = '[1, 2, 3]'
+        args = self.process.get_args()
+        self.assertListEqual([1, 2, 3], args)
+
+    def test_get_args_return_empty_array_when_args_is_none(self):
+        self.process.args = None 
+        args = self.process.get_args()
+        self.assertListEqual([], args)
+
+    def test_get_kwargs__happy(self):
+        self.process.kwargs = '{"DCI": "rocks!"}'
+        kwargs = self.process.get_kwargs()
+        self.assertDictEqual({'DCI': 'rocks!'}, kwargs)
+
+    def test_get_kwargs_return_empty_dict_when_kwargs_is_none(self):
+        self.process.kwargs = None 
+        kwargs = self.process.get_kwargs()
+        self.assertDictEqual({}, kwargs)
 
     def test_execute_really_call_function(self):
         pass
@@ -30,11 +52,8 @@ class TestLoadFunction(TestCase):
         function = load_function(function_name)
         self.assertEqual(hello_world, function)
 
-
-class TestSplit(TestCase):
-    def test_split(self):
-        full_name = 'async_exec.tests.function_for_test.hello_world'
-        module_name, function_name = split(full_name)
-        self.assertEqual('async_exec.tests.function_for_test', module_name)
-        self.assertEqual('hello_world', function_name)
+    def test_load_module(self):
+        module_name = 'json'
+        module = load_module(module_name)
+        self.assertEqual(json, module)
 
