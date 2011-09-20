@@ -19,3 +19,4 @@ class TestExecuteJob(TestCase):
         # check execution time in the database
         job = Job.objects.get(id = self.job.id) 
         self.assertIsNotNone(job.executed)
+

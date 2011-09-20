@@ -22,14 +22,19 @@ class Process(object):
 
     def execute(self):
         function = self.get_function()
+        args = self.get_args()
+        kwargs = self.get_kwargs()
+        function(*args, **kwargs)
         self.executed = datetime.now()
 
     def get_function(self):
         return load_function(self.name)
 
     def get_args(self):
-        return [] if self.args is None else loads(self.args)
+        args = getattr(self, 'args', None)
+        return [] if not args else loads(args)
 
     def get_kwargs(self):
-        return {} if self.kwargs is None else loads(self.kwargs)
+        kwargs = getattr(self, 'kwargs', None)
+        return {} if not kwargs else loads(kwargs)
 
