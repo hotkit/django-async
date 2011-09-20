@@ -14,5 +14,7 @@ class TestExecuteJob(TestCase):
     def test_execute_job_logs_execution_time(self):
         before_execute = datetime.now()
         with ExecuteJob(self.job) as context:
-            self.assertLessEqual(before_execute, context.job.executed)
-        
+            pass
+        # check execution time in the database
+        job = Job.objects.get(id = self.job.id) 
+        self.assertIsNotNone(job.executed)
