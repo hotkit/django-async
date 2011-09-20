@@ -1,6 +1,6 @@
 from async_exec.api import schedule
 from async_exec.models import Job
-from async_exec.schedule_job.tests.function_for_test import sample_function
+from async_exec.tests.function_for_test import sample_function
 from datetime import datetime
 from django.test import TestCase
 

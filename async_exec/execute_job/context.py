@@ -7,8 +7,9 @@ class ExecuteJob(object):
 
     def __enter__(self):
         self.job.execute()
+        self.job.save()
         return self 
 
     def __exit__(self, type, value, traceback):
-        pass
+        Process.revoke(self.job) 
 
