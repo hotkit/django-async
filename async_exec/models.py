@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db.models import Model, CharField, TextField, DateTimeField
 
 class Job(Model):
@@ -12,5 +13,5 @@ class Job(Model):
         return self.name
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['id']
  
