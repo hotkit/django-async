@@ -12,12 +12,6 @@ class Job(Model):
     def __unicode__(self):
         return self.name
 
-    @classmethod
-    def next_job(cls):
-        now = datetime.now()
-        remaining_job = Job.objects.filter(executed__isnull = True, scheduled__lt=now)
-        return None if not remaining_job else remaining_job[0] 
-
     class Meta:
         ordering = ['id']
  
