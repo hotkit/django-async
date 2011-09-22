@@ -13,9 +13,10 @@ class TestFlushEmptyQueue(TestCase):
 class TestFlushQueueWithSchedukedJobs(TestCase):
     def setUp(self):
         yesterday = datetime.now() - timedelta(days=1)
-        Job(scheduled = yesterday).save()
-        Job(scheduled = yesterday).save()
-        Job(scheduled = yesterday).save()
+        function_name = 'async_exec.tests.function_for_test.hello_world'
+        Job(name = function_name, scheduled = yesterday).save()
+        Job(name = function_name, scheduled = yesterday).save()
+        Job(name = function_name, scheduled = yesterday).save()
 
     def test_no_next_job_left_after_flush_queue__past_jobs_in_queue(self):
         queue = Job.objects
