@@ -1,4 +1,5 @@
 # Requirements
+git+git://github.com/amolenaar/roles.git
 
 # Used for testing
 coverage
