@@ -29,7 +29,14 @@ class TestExecuteJobsWithJobsScheduledInPast(TestCase):
             pass
         number_of_executed_jobs = Job.objects.filter(executed__isnull = False).count()
         self.assertEqual(3, number_of_executed_jobs)
-        
+
+    def test_executed_job_has_execution_time_logged(self):
+        queue = Job.objects
+        with ExecuteJobs(queue) as context:
+            pass
+        job = Job.objects.all()[0]
+        self.assertIsNotNone(job.executed)
+
 
 class TestExecuteJobsWithJobsScheduledInFuture(TestCase):
     def setUp(self):
