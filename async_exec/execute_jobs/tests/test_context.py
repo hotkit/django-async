@@ -8,7 +8,7 @@ class TestExecuteJobsWithEmptyQueue(TestCase):
     def test_no_next_job_left_after_execute_jobs__empty_queue(self):
         queue = Job.objects
         with ExecuteJobs(queue) as context:
-            self.assertIsNone(context.queue.next_job())
+            self.assertIsNone(context.priority_queue.find_first_job())
 
 class TestExecuteJobsWithJobsScheduledInPast(TestCase):
     def setUp(self):
@@ -21,7 +21,7 @@ class TestExecuteJobsWithJobsScheduledInPast(TestCase):
     def test_no_next_job_left_after_flushed_queue(self):
         queue = Job.objects
         with ExecuteJobs(queue) as context:
-            self.assertIsNone(context.queue.next_job())
+            self.assertIsNone(context.priority_queue.find_first_job())
 
     def test_all_job_are_executed_after_flushed_queue(self):
         queue = Job.objects
@@ -56,5 +56,5 @@ class TestExecuteJobsWithJobsScheduledInFuture(TestCase):
     def test_no_next_job_after_flushed_queue(self):
         queue = Job.objects
         with ExecuteJobs(queue) as context:
-            self.assertIsNone(context.queue.next_job())
+            self.assertIsNone(context.priority_queue.find_first_job())
 
