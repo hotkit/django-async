@@ -2,5 +2,8 @@
 cd `dirname $0`
 
 export PYTHONPATH=${PYTHONPATH}:../..
-python ./manage.py test async_exec \
+GIVEN_MODULE=$1
+MODULE=${GIVEN_MODULE:="async_exec"}
+echo "running test on $MODULE"
+python ./manage.py test $MODULE \
     --with-coverage --cover-erase --cover-package=async_exec
