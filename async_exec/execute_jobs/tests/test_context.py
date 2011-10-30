@@ -1,4 +1,4 @@
-from async_exec.execute_job.context import ExecuteJob
+from async_exec.execute_jobs.context import ExecuteJob
 from async_exec.models import Job
 from datetime import datetime
 from django.test import TestCase

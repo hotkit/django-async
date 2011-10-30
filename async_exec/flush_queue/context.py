@@ -1,5 +1,5 @@
 from async_exec.flush_queue.role import Queue
-from async_exec.execute_job.context import ExecuteJob 
+from async_exec.execute_jobs.context import ExecuteJob 
 
 class FlushQueue(object):
     def __init__(self, queue):

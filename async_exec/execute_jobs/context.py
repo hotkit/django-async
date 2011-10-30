@@ -1,4 +1,4 @@
-from async_exec.execute_job.role import Process 
+from async_exec.execute_jobs.role import Process 
 from datetime import datetime
 
 class ExecuteJob(object):
