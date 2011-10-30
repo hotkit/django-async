@@ -1,7 +1,7 @@
 from async_exec.flush_queue.role import Queue
-from async_exec.execute_jobs.context import ExecuteJob 
+from async_exec.execute_jobs.role import Process
 
-class FlushQueue(object):
+class ExecuteJobs(object):
     def __init__(self, queue):
         self.queue = Queue(queue)
 
@@ -10,8 +10,10 @@ class FlushQueue(object):
             next_job = self.queue.next_job()
             if next_job is None:
                 break
-            with ExecuteJob(next_job) as execute_job:
-                pass
+            Process(next_job)
+            next_job.execute()
+            next_job.save()
+            Process.revoke(next_job) 
         return self
 
     def __exit__(self, type, value, traceback):
