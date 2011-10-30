@@ -1,4 +1,4 @@
-from async_exec.flush_queue.role import Queue
+from async_exec.execute_jobs.role import Queue
 from async_exec.models import Job 
 from datetime import datetime, timedelta
 from django.test import TestCase

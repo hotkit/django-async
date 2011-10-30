@@ -1,4 +1,4 @@
-from async_exec.execute_job.role import Process, load_function, load_module
+from async_exec.execute_jobs.role import Process, load_function, load_module
 from async_exec.tests.function_for_test import hello_world
 from datetime import datetime
 from django.test import TestCase
