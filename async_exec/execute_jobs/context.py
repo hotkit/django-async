@@ -1,5 +1,4 @@
-from async_exec.flush_queue.role import Queue
-from async_exec.execute_jobs.role import Process
+from async_exec.execute_jobs.role import Process, Queue
 
 class ExecuteJobs(object):
     def __init__(self, queue):
