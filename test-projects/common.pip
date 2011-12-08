@@ -1,0 +1,9 @@
+# Requirements
+git+git://github.com/amolenaar/roles.git
+
+# Used for testing
+coverage
+django-nose
+mock
+nose
+unittest2

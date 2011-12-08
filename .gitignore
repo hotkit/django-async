@@ -1,0 +1,3 @@
+*.pyc
+/test-projects/django_latest/.coverage
+*.swp
