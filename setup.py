@@ -6,7 +6,7 @@ def read(fname):
 
 setup(
     name = "django_async",
-    version = "0.1.1",
+    version = "0.2",
     author_email = "kirit@felspar.com",
     description = ("Asynchronous task execution for Django"),
     long_description = read('README.markdown'),
