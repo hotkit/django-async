@@ -6,7 +6,7 @@ def read(fname):
 
 setup(
     name = "django_async",
-    version = "0.2",
+    version = "0.2.1",
     author_email = "kirit@felspar.com",
     description = ("Asynchronous task execution for Django"),
     long_description = read('README.markdown'),
@@ -19,7 +19,11 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
         "License :: OSI Approved :: Boost Software License - Version 1.0 - August 17th, 2003",
     ],
-    packages = ['async_exec'],
+    packages = ['async_exec',
+        'async_exec.execute_jobs',
+        'async_exec.management',
+        'async_exec.management.commands',
+        'async_exec.schedule_job'],
     install_requires = ['roles'],
     dependency_links = [
         'git://github.com/amolenaar/roles.git'],
