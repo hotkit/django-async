@@ -1,5 +1,6 @@
 from datetime import datetime
 from json import loads
+from roles import RoleType
 from roles.django import ModelRoleType
 
 def load_function(full_name):
@@ -37,4 +38,20 @@ class Process(object):
     def get_kwargs(self):
         kwargs = getattr(self, 'kwargs', None)
         return {} if not kwargs else loads(kwargs)
+
+
+class PriorityQueue(object):
+    __metaclass__ = RoleType
+
+    def find_first_job(self):
+        now = datetime.now()
+        remaining_job = self.filter(executed__isnull = True, scheduled__lt=now)
+        return None if not remaining_job else remaining_job[0] 
+
+class EconomyQueue(object):
+    __metaclass__ = RoleType
+
+    def find_first_job(self):
+        remaining_job = self.filter(executed__isnull = True, scheduled__isnull=True)
+        return None if not remaining_job else remaining_job[0] 
 

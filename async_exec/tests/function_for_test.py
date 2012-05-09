@@ -3,3 +3,6 @@ def hello_world():
 
 def sample_function(name):
     print name
+
+def function_that_takes_job(job):
+    print job 

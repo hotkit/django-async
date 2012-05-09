@@ -1,7 +1,7 @@
 from async_exec.schedule_job.role import Task 
 
 class ScheduleJob(object):
-    def __init__(self, time_to_execute, job, function, *args, **kwargs):
+    def __init__(self, time_to_execute, job, function, args = [], kwargs = {}):
         # pre conditions here
         self.function = function
         self.args = args
