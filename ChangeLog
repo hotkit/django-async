@@ -1,4 +1,7 @@
-2011-12-13  Juacompe  <juacompe@proteus-tech.com>
+2012-05-09  Juacompe  <juacompe@proteus-tech.com>
+ Fixes for the latest version of the roles library.
+
+2012-05-08  Juacompe  <juacompe@proteus-tech.com>
  Add missing packages to pip install.
 
 2011-12-14  Kirit Saelensminde  <kirit@felspar.com>
