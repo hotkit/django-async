@@ -14,9 +14,9 @@ class ScheduleJob(object):
         self.job.set_call(self.function, *self.args, **self.kwargs)
         if self.time_to_execute:
             self.job.schedule(self.time_to_execute)
-        self.job.save() 
         return self
 
     def __exit__(self, type, value, traceback):
         Task.revoke(self.job)
+        self.job.save()
 
