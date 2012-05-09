@@ -8,9 +8,20 @@ def load_function(full_name):
     # load 1st item as module to start with
     module = load_module(items[0])
     items[0] = module
-    # keep getting attribute of next element
-    attr_of = lambda module, component: getattr(module, component)
-    return reduce(attr_of, items) 
+
+    def keep_getting_attribute_of_next_element(module, component):
+        try:
+            import_module(module.__name__ + '.' + component)
+        except ImportError, e:
+            msg = 'No module named %s' % component
+            if e.message == msg:
+                pass
+            else:
+                raise e
+
+        return getattr(module, component)
+
+    return reduce(keep_getting_attribute_of_next_element, items)
 
 def load_module(module_name):
     return __import__(module_name)
