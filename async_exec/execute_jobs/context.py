@@ -23,5 +23,5 @@ def process(queue):
         return False
     with Process.played_by(next_job):
         next_job.execute()
-        next_job.save()
+    next_job.save()
     return True
