@@ -10,7 +10,8 @@ class TestScheduleJob(TestCase):
 
     def test_job_is_persisted(self):
         with ScheduleJob(None, self.job, sample_function) as context:
-            self.assertTrue(context.job.id)
+            pass
+        self.assertTrue(context.job.id)
         
     def test_successfully_schedule_job_with_no_scheduled_time(self):
         with ScheduleJob(None, self.job, sample_function) as context:
