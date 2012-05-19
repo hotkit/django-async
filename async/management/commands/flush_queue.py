@@ -19,4 +19,8 @@ class Command(BaseCommand):
     def handle(self, **options):
         """Command implementation.
         """
-        pass
+        jobs = Job.objects.filter(executed=None).exclude(
+            scheduled_gt=datetime.now())
+        for job in jobs.iterator():
+            print job
+            job()
