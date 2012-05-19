@@ -125,11 +125,19 @@ INSTALLED_APPS = (
     'django_nose',
 
     # Add this for the Django Async functionality
-    'async_exec'
+    'async'
 )
 
 # Needed to get the Django nose test runner working
 TEST_RUNNER='django_nose.NoseTestSuiteRunner'
+
+NOSE_ARGS = [
+    '--with-coverage',
+    '--cover-erase',
+    '--cover-branches',
+    '--cover-package=async',
+    '--cover-html', '--cover-html-dir=../../coverage',
+]
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
