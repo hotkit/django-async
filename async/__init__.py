@@ -1,4 +1,12 @@
 """
     Django Async implementation.
 """
-from async.schedule import schedule
+
+
+def schedule(*a, **kw):
+    """Wrapper for async.schedule.schedule that allow coverage.
+    """
+    # Redefining name 'schedule' from outer scope
+    # pylint: disable=W0621
+    from async.schedule import schedule
+    return schedule(*a, **kw)
