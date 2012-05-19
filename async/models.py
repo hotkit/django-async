@@ -2,6 +2,7 @@
     Django Async models.
 """
 from django.db import models
+from simplejson import loads
 
 
 class Job(models.Model):
@@ -20,6 +21,10 @@ class Job(models.Model):
     scheduled = models.DateTimeField(null=True, blank=True,
         help_text = "If not set, will be executed ASAP")
     executed = models.DateTimeField(null=True, blank=True)
+
+    def __unicode__(self):
+        args = ', '.join([unicode(s) for s in loads(self.args)])
+        return u'%s(%s)' % (self.name, args)
 
 
 class Error(models.Model):
