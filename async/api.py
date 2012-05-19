@@ -14,6 +14,6 @@ def schedule(function, args = None, kwargs = None,
     job = Job(
         name=full_name(function),
             args=dumps(args or []), kwargs=dumps(kwargs or {}),
-        meta=dumps(meta or {}), retried=0, notes='', scheduled=run_after)
+        meta=dumps(meta or {}), scheduled=run_after)
     job.save()
     return job

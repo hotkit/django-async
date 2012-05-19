@@ -4,6 +4,7 @@
 from django.test import TestCase
 
 from async import schedule
+from async.models import Job
 
 
 # Redefining name '_EXECUTED' from outer scope
@@ -18,6 +19,7 @@ def _function(*a, **kw):
     global _EXECUTED
     _EXECUTED = (a, kw)
     assert kw.get('assert', True)
+    return kw.get('result', None)
 
 
 class TestExecution(TestCase):
@@ -32,18 +34,23 @@ class TestExecution(TestCase):
     def test_simple(self):
         """Execute a basic function.
         """
-        schedule(_function)()
-        self.assertEqual(_EXECUTED, ((), {}))
+        job = schedule(_function, kwargs={'result': 'something'})
+        job()
+        self.assertEqual(_EXECUTED, ((), {'result': 'something'}))
+        self.assertEqual('"something"', job.result)
+        self.assertIsNotNone(job.executed)
 
     def test_error_recording(self):
         """Make sure that if there is an error in the function it is dealt
         with properly.
         """
-        job = schedule(_function, kwargs={'assert': False})
+        job = Job.objects.get(
+            pk=schedule(_function, kwargs={'assert': False}).pk)
         self.assertEqual(job.errors.count(), 0)
         with self.assertRaises(AssertionError):
             job()
         self.assertEqual(_EXECUTED, ((), {'assert': False}))
+        job = Job.objects.get(pk=job.pk)
         self.assertEqual(job.errors.count(), 1)
         error = job.errors.all()[0]
         self.assertIn('AssertionError', error.exception)
