@@ -30,3 +30,9 @@ def object_at_end_of_path(path):
                 module = getattr(module, step)
             break
     return getattr(module, access_path[-1])
+
+
+def non_unicode_kwarg_keys(kwargs):
+    """Convert all the keys to strings as Python won't accept unicode.
+    """
+    return dict([(str(k), v) for k, v in kwargs.items()]) if kwargs else {}

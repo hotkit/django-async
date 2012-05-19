@@ -1,11 +1,13 @@
 """
     Django Async models.
 """
+from datetime import datetime, timedelta
 from django.db import models
 from simplejson import loads
+from traceback import format_exc
 
 from async import _logger
-from async.utils import object_at_end_of_path
+from async.utils import object_at_end_of_path, non_unicode_kwarg_keys
 
 
 class Job(models.Model):
@@ -33,11 +35,25 @@ class Job(models.Model):
         return u'%s(%s)' % (self.name, args)
 
     def __call__(self, **meta):
+        _logger.info("%s %s", self.id, unicode(self))
         try:
+            args = loads(self.args)
+            kwargs = non_unicode_kwarg_keys(loads(self.kwargs))
             function = object_at_end_of_path(self.name)
             _logger.debug(u"%s resolved to %s" % (self.name, function))
-            function()
-        except Exception, _exception:
+            self.retried += 1
+            function(*args, **kwargs)
+        except Exception, exception:
+            self.scheduled = (datetime.now() +
+                timedelta(seconds=4 ** self.retried))
+            def record():
+                """Local function allows us to wrap these updates into a
+                transaction.
+                """
+                Error.objects.create(job=self, exception=repr(exception),
+                    traceback=format_exc())
+                self.save()
+            record()
             raise
 
 
@@ -45,7 +61,7 @@ class Error(models.Model):
     """
         Recorded when an error happens during execution of a job.
     """
-    job = models.ForeignKey(Job)
+    job = models.ForeignKey(Job, related_name='errors')
     executed = models.DateTimeField(auto_now_add=True)
     exception = models.TextField()
     traceback = models.TextField()

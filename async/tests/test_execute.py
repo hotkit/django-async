@@ -17,6 +17,7 @@ def _function(*a, **kw):
     # pylint: disable = W0603
     global _EXECUTED
     _EXECUTED = (a, kw)
+    assert kw.get('assert', True)
 
 
 class TestExecution(TestCase):
@@ -33,3 +34,18 @@ class TestExecution(TestCase):
         """
         schedule(_function)()
         self.assertEqual(_EXECUTED, ((), {}))
+
+    def test_error_recording(self):
+        """Make sure that if there is an error in the function it is dealt
+        with properly.
+        """
+        job = schedule(_function, kwargs={'assert': False})
+        self.assertEqual(job.errors.count(), 0)
+        with self.assertRaises(AssertionError):
+            job()
+        self.assertEqual(_EXECUTED, ((), {'assert': False}))
+        self.assertEqual(job.errors.count(), 1)
+        error = job.errors.all()[0]
+        self.assertIn('AssertionError', error.exception)
+        self.assertIn('django_1_3/async/tests/test_execute.py', error.traceback)
+        self.assertIsNotNone(job.scheduled)
