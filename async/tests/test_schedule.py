@@ -18,8 +18,8 @@ class TestSchedule(TestCase):
     def test_schedule_by_name(self):
         """We must be able to schedule a job by giving its name.
         """
-        job = schedule('example.function')
-        self.assertEqual(job.name, 'example.function')
+        job = schedule('async.tests.test_schedule._example')
+        self.assertEqual(job.name, 'async.tests.test_schedule._example')
 
     def test_schedule_by_function(self):
         """We must be able to schedule a job by giving a function.
