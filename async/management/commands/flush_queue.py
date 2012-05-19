@@ -23,7 +23,7 @@ class Command(BaseCommand):
         """Command implementation.
         """
         jobs = Job.objects.filter(executed=None).exclude(
-            scheduled_gt=datetime.now())
+            scheduled__gt=datetime.now())
         for job in jobs.iterator():
             print job
             job()
