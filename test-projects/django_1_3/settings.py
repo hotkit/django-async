@@ -125,7 +125,7 @@ INSTALLED_APPS = (
     'django_nose',
 
     # Add this for the Django Async functionality
-    'async_exec'
+    'async'
 )
 
 # Needed to get the Django nose test runner working
