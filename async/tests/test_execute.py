@@ -62,7 +62,7 @@ class TestExecution(TransactionTestCase):
         self.assertEqual(job.errors.count(), 1)
         error = job.errors.all()[0]
         self.assertIn('AssertionError', error.exception)
-        self.assertIn('django_1_3/async/tests/test_execute.py', error.traceback)
+        self.assertIn('async/tests/test_execute.py', error.traceback)
         self.assertIsNotNone(job.scheduled)
         self.assertEqual(
             User.objects.filter(username='async-test-user').count(), 0)

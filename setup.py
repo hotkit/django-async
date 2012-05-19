@@ -10,7 +10,7 @@ def read(fname1, fname2):
 
 setup(
     name = "django-async",
-    version = "0.2.2.5",
+    version = "0.2.2.6",
     author_email = "kirit@felspar.com",
     description = ("Asynchronous task execution for Django"),
     long_description = read('README','README.markdown'),
