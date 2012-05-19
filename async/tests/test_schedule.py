@@ -25,5 +25,6 @@ class TestSchedule(TestCase):
         """We must be able to schedule a job by giving a function.
         """
         job = schedule(_example)
-        self.assertEqual(job.name,
-            'django_1_3.async.tests.test_schedule._example')
+        # Different versions of Django will import this file differently
+        self.assertTrue(job.name.endswith(
+            'async.tests.test_schedule._example'))
