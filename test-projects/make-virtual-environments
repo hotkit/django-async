@@ -4,5 +4,5 @@ cd `dirname $0`
 source virtualenvwrapper.sh
 
 mkvirtualenv async_1.3
-pip install -r common.pip -r django_1.3/setup.pip
+pip install -r common.pip -r django_1_3/setup.pip
 deactivate

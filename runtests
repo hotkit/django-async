@@ -11,8 +11,8 @@ function check_worked {
 }
 
 workon async_1.3
-cd test-projects/django_1.3
-echo Django latest
+cd test-projects/django_1_3
+echo Django 1.3
 check_worked python -tt manage.py test async
 
 cd ../..
