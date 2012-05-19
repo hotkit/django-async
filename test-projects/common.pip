@@ -1,9 +1,8 @@
-# Requirements
-git+git://github.com/amolenaar/roles.git
+simplejson
+psycopg2==2.4.1
 
 # Used for testing
 coverage
-django-nose
 mock
-nose
 unittest2
+pylint
