@@ -1,4 +1,4 @@
 """
     Django Async implementation.
 """
-from schedule import schedule
+from async.schedule import schedule
