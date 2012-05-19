@@ -17,7 +17,18 @@ class Job(models.Model):
     retried = models.IntegerField()
     notes = models.TextField()
 
+    added = models.DateTimeField(auto_now_add=True)
     scheduled = models.DateTimeField(null=True, blank=True,
         help_text = "If not set, will be executed ASAP")
     executed = models.DateTimeField(null=True, blank=True)
+
+
+class Error(models.Model):
+    """
+        Recorded when an error happens during execution of a job.
+    """
+    job = models.ForeignKey(Job)
+    executed = models.DateTimeField(auto_now_add=True)
+    exception = models.TextField()
+    traceback = models.TextField()
 
