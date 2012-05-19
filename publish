@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+cd `dirname $0`
+
+source virtualenvwrapper.sh
+
+function check_worked {
+    if ! $*
+    then
+        exit 1
+    fi
+}
+
+pandoc -f markdown -t rst README.markdown > README
+check_worked python setup.py sdist upload
+rm -r dist django_async.egg-info README
