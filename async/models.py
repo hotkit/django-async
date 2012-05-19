@@ -23,7 +23,10 @@ class Job(models.Model):
     executed = models.DateTimeField(null=True, blank=True)
 
     def __unicode__(self):
-        args = ', '.join([unicode(s) for s in loads(self.args)])
+        # __unicode__: Instance of 'bool' has no 'items' member
+        # pylint: disable=E1103
+        args = ', '.join([unicode(s) for s in loads(self.args)] +
+            ['%s=%s' % (k, repr(v)) for k, v in loads(self.kwargs).items()])
         return u'%s(%s)' % (self.name, args)
 
 
