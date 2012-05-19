@@ -1,13 +1,13 @@
 """
     Testing that models work properly.
 """
-from django.test import TestCase
+from django.test import TransactionTestCase
 
 from async import schedule
 from async.models import Job
 
 
-class TestJob(TestCase):
+class TestJob(TransactionTestCase):
     """Make sure the basic model features work properly.
     """
     def test_model_creation(self):

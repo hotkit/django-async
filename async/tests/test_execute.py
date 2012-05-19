@@ -2,7 +2,7 @@
     Tests for task execution.
 """
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import TransactionTestCase
 
 from async import schedule
 from async.models import Job
@@ -20,12 +20,12 @@ def _function(*a, **kw):
     global _EXECUTED
     _EXECUTED = (a, kw)
     for name in a:
-        User.objects.create(username=name)
+        User(username=name).save()
     assert kw.get('assert', True)
     return kw.get('result', None)
 
 
-class TestExecution(TestCase):
+class TestExecution(TransactionTestCase):
     """Test that execution of a job works correctly in all circumstances.
     """
     def setUp(self):
@@ -64,3 +64,5 @@ class TestExecution(TestCase):
         self.assertIn('AssertionError', error.exception)
         self.assertIn('django_1_3/async/tests/test_execute.py', error.traceback)
         self.assertIsNotNone(job.scheduled)
+        self.assertEqual(
+            User.objects.filter(username='async-test-user').count(), 0)
