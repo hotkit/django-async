@@ -16,6 +16,8 @@ Tasks can be run by executing the management command `flush_queue`:
 
     python manage.py flush_queue
 
+`flush_queue` will run once through the jobs that are scheduled to run at that time, but will exit early if any job throws an exception. Normally you would use it from an external script that simply keeps re-running the command.
+
 ##`async.schedule`##
 
     schedule(function, args = None, kwargs = None, run_after= None, meta = None)
@@ -36,11 +38,9 @@ Database transactions are hard to get right, and unfortunately Django doesn't ma
 Django has two major flaws when it comes to transaction handling:
 
 1. The Django transaction functionality fails to create composable transactions.
-2. The Django documentation makes a very poor recommendation about where to put the `django.middleware.transaction.TransactionMiddleware`.
+2. The [https://docs.djangoproject.com/en/dev/topics/db/transactions/](Django documentation) makes a very poor recommendation about where to put the `django.middleware.transaction.TransactionMiddleware`.
 
-The first problem is not going to get fixed in Django, but the second can be handled by
-
-The path to happy transactions starts with the use of the transaction middleware described at <https://docs.djangoproject.com/en/dev/topics/db/transactions/>. This allows you to pretty much ignore transactions in your request handling code in Django. Note though that the Django documentation suggests that you put it in the wrong place. For best results you should always put it as early as you can, but certainly before things like the `django.contrib.sessions.middleware.SessionMiddleware` which will write to the database.
+The first problem is not going to get fixed in Django, but the second can be handled by putting the middleware in the right place -- that is, as early as possible. The only middleware that should run before the transaction middleware is any whose functionality relies on it being first.
 
 Within the async task execution each task is executed decorated by `django.db.transaction.commit_on_success`. _This means that you cannot execute a task directly from within a page request if you are using the transaction middleware._
 
