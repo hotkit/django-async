@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+cd `dirname $0`
+
+source virtualenvwrapper.sh
+
+function check_worked {
+    if ! $*
+    then
+        exit 1
+    fi
+}
+
+workon async_1.3
+cd test-projects/django_1.3
+echo Django latest
+check_worked python -tt manage.py test async
+
+cd ../..
+check_worked pylint --rcfile=pylintrc --output-format=colorized async
