@@ -1,6 +1,7 @@
 """
     Django Async implementation.
 """
+import logging as _logger
 
 
 def schedule(*a, **kw):

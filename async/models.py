@@ -4,6 +4,9 @@
 from django.db import models
 from simplejson import loads
 
+from async import _logger
+from async.utils import object_at_end_of_path
+
 
 class Job(models.Model):
     """
@@ -28,6 +31,14 @@ class Job(models.Model):
         args = ', '.join([repr(s) for s in loads(self.args)] +
             ['%s=%s' % (k, repr(v)) for k, v in loads(self.kwargs).items()])
         return u'%s(%s)' % (self.name, args)
+
+    def __call__(self, **meta):
+        try:
+            function = object_at_end_of_path(self.name)
+            _logger.debug(u"%s resolved to %s" % (self.name, function))
+            function()
+        except Exception, _exception:
+            raise
 
 
 class Error(models.Model):
