@@ -11,5 +11,7 @@ class TestJob(TestCase):
     """Make sure the basic model features work properly.
     """
     def test_model_creation(self):
+        """Make sure schedule API works.
+        """
         schedule('async.cron')
         self.assertEqual(Job.objects.all().count(), 1)
