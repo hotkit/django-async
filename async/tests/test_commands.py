@@ -1,7 +1,10 @@
 """
     Tests for the Django management commands.
 """
+from django.core import management
 from django.test import TestCase
+
+from async.models import Job
 
 
 class TestFlushQueue(TestCase):
@@ -10,4 +13,5 @@ class TestFlushQueue(TestCase):
     def test_empty_queue(self):
         """Make sure we don't get any errors if the queue is empty.
         """
-        pass
+        management.call_command('flush_queue')
+        self.assertEqual(Job.objects.all().count(), 0)
