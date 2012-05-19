@@ -35,7 +35,7 @@ class TestExecution(TestCase):
         """Execute a basic function.
         """
         job = schedule(_function, kwargs={'result': 'something'})
-        job()
+        self.assertEqual(job(), "something")
         self.assertEqual(_EXECUTED, ((), {'result': 'something'}))
         self.assertEqual('"something"', job.result)
         self.assertIsNotNone(job.executed)
