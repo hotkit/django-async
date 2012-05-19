@@ -8,7 +8,6 @@ class Job(models.Model):
     """
         An asynchronous task that is to be executed.
     """
-    module = models.CharField(max_length=100, blank=False)
     name = models.CharField(max_length=100, blank=False)
     args = models.TextField()
     kwargs = models.TextField()
