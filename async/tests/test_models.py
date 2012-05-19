@@ -22,10 +22,10 @@ class TestJob(TestCase):
         """
         self.assertEqual(unicode(schedule(
                 'example.function', args=['argument'])),
-            'example.function(argument)')
+            "example.function('argument')")
         self.assertEqual(unicode(schedule(
                 'example.function', args=['a1', 'a2'])),
-            'example.function(a1, a2)')
+            "example.function('a1', 'a2')")
         self.assertEqual(unicode(schedule(
                 'example.function.somewhere', args=[1, 2])),
             'example.function.somewhere(1, 2)')
@@ -46,4 +46,4 @@ class TestJob(TestCase):
         self.assertEqual(unicode(schedule(
                 'example.function.somewhere',
                     args=['argument'], kwargs=dict(k='v', x=None))),
-            "example.function.somewhere(argument, x=None, k='v')")
+            "example.function.somewhere('argument', x=None, k='v')")

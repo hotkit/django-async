@@ -25,7 +25,7 @@ class Job(models.Model):
     def __unicode__(self):
         # __unicode__: Instance of 'bool' has no 'items' member
         # pylint: disable=E1103
-        args = ', '.join([unicode(s) for s in loads(self.args)] +
+        args = ', '.join([repr(s) for s in loads(self.args)] +
             ['%s=%s' % (k, repr(v)) for k, v in loads(self.kwargs).items()])
         return u'%s(%s)' % (self.name, args)
 
