@@ -8,5 +8,5 @@ def schedule(*a, **kw):
     """
     # Redefining name 'schedule' from outer scope
     # pylint: disable=W0621
-    from async.schedule import schedule
+    from async.api import schedule
     return schedule(*a, **kw)
