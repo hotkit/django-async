@@ -32,13 +32,17 @@ class Job(models.Model):
             ['%s=%s' % (k, repr(v)) for k, v in loads(self.kwargs).items()])
         return u'%s(%s)' % (self.name, args)
 
-    def __call__(self, **meta):
-        _logger.info("%s %s", self.id, unicode(self))
-        args = loads(self.args)
-        kwargs = non_unicode_kwarg_keys(loads(self.kwargs))
-        function = object_at_end_of_path(self.name)
-        _logger.debug(u"%s resolved to %s" % (self.name, function))
+    def execute(self, **_meta):
+        """
+            Run the job using the specified meta values to control the
+            execution.
+        """
         try:
+            _logger.info("%s %s", self.id, unicode(self))
+            args = loads(self.args)
+            kwargs = non_unicode_kwarg_keys(loads(self.kwargs))
+            function = object_at_end_of_path(self.name)
+            _logger.debug(u"%s resolved to %s" % (self.name, function))
             result = transaction.commit_on_success(function)(*args, **kwargs)
         except Exception, exception:
             self.scheduled = (datetime.now() +
@@ -67,4 +71,7 @@ class Error(models.Model):
     executed = models.DateTimeField(auto_now_add=True)
     exception = models.TextField()
     traceback = models.TextField()
+
+    def __unicode__(self):
+        return u'%s : %s' % (self.executed, self.exception)
 

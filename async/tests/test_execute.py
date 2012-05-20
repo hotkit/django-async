@@ -25,6 +25,19 @@ def _function(*a, **kw):
     return kw.get('result', None)
 
 
+class _class(object):
+    """Test class holder.
+    """
+    @classmethod
+    def class_method(cls, *a, **kw):
+        """Class method so we can be sure these work.
+        """
+        # Using the global statement
+        # pylint: disable = W0603
+        global _EXECUTED
+        _EXECUTED = (a, kw)
+
+
 class TestExecution(TransactionTestCase):
     """Test that execution of a job works correctly in all circumstances.
     """
@@ -39,7 +52,7 @@ class TestExecution(TransactionTestCase):
         """
         job = schedule(_function,
             args=['async-test-user'], kwargs={'result': 'something'})
-        self.assertEqual(job(), "something")
+        self.assertEqual(job.execute(), "something")
         self.assertEqual(_EXECUTED,
             (('async-test-user',), {'result': 'something'}))
         self.assertEqual('"something"', job.result)
@@ -56,7 +69,7 @@ class TestExecution(TransactionTestCase):
                 args=['async-test-user'], kwargs={'assert': False}).pk)
         self.assertEqual(job.errors.count(), 0)
         with self.assertRaises(AssertionError):
-            job()
+            job.execute()
         self.assertEqual(_EXECUTED, (('async-test-user',), {'assert': False}))
         job = Job.objects.get(pk=job.pk)
         self.assertEqual(job.errors.count(), 1)
@@ -66,3 +79,10 @@ class TestExecution(TransactionTestCase):
         self.assertIsNotNone(job.scheduled)
         self.assertEqual(
             User.objects.filter(username='async-test-user').count(), 0)
+
+    def test_class_method_works(self):
+        """Make sure that we can execute a class method.
+        """
+        job = schedule(_class.class_method)
+        job.execute()
+        self.assertIsNotNone(job.executed)
