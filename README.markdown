@@ -22,7 +22,7 @@ Tasks can be run by executing the management command `flush_queue`:
 
     schedule(function, args = None, kwargs = None, run_after= None, meta = None)
 
-Returns a Job instance that is used to record the task in the database. The job is a callable, and calling it will execute the task. **Don't do this directly until you've fullly understood how transactions are handled**
+Returns a Job instance that is used to record the task in the database. The job has a method `execute` which will attempt to run the job. **Don't do this directly until you've fullly understood how transactions are handled**
 
 * _function_ Either the fully qualified name of the function that is to be run, or the function itself.
 * _args_ A tuple or list of arguments to be given to the function.

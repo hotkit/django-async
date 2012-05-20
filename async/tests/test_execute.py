@@ -52,7 +52,7 @@ class TestExecution(TransactionTestCase):
         """
         job = schedule(_function,
             args=['async-test-user'], kwargs={'result': 'something'})
-        self.assertEqual(job(), "something")
+        self.assertEqual(job.execute(), "something")
         self.assertEqual(_EXECUTED,
             (('async-test-user',), {'result': 'something'}))
         self.assertEqual('"something"', job.result)
@@ -69,7 +69,7 @@ class TestExecution(TransactionTestCase):
                 args=['async-test-user'], kwargs={'assert': False}).pk)
         self.assertEqual(job.errors.count(), 0)
         with self.assertRaises(AssertionError):
-            job()
+            job.execute()
         self.assertEqual(_EXECUTED, (('async-test-user',), {'assert': False}))
         job = Job.objects.get(pk=job.pk)
         self.assertEqual(job.errors.count(), 1)
@@ -84,5 +84,5 @@ class TestExecution(TransactionTestCase):
         """Make sure that we can execute a class method.
         """
         job = schedule(_class.class_method)
-        job()
+        job.execute()
         self.assertIsNotNone(job.executed)

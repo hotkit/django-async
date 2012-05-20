@@ -25,5 +25,5 @@ class Command(BaseCommand):
         jobs = Job.objects.filter(executed=None).exclude(
             scheduled__gt=datetime.now())
         for job in jobs.iterator():
-            print job
-            job()
+            print "%s:" % job.pk, job
+            job.execute()
