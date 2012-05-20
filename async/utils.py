@@ -1,16 +1,24 @@
 """
     Various Python utilities.
 """
-from inspect import getmodule
+from inspect import getmembers, getmodule, isfunction, ismethod
 
 
-def full_name(function):
-    """Return the full name of a function instance.
+def full_name(item):
+    """Return the full name of a something passed in so it can be retrieved
+    later on.
     """
-    if isinstance(function, basestring):
-        return function
-    module_name = getmodule(function).__name__
-    return '.'.join([module_name, function.func_name])
+    if isinstance(item, basestring):
+        return item
+    if ismethod(item):
+        module_name = full_name(dict(getmembers(item))['im_self'])
+    else:
+        module_name = getmodule(item).__name__
+    if isfunction(item):
+        name = item.func_name
+    else:
+        name = item.__name__
+    return '.'.join([module_name, name])
 
 
 def object_at_end_of_path(path):
