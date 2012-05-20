@@ -3,8 +3,10 @@
 """
 from django.core import management
 from django.test import TestCase
+from mock import patch
 
 from async import schedule
+from async.api import health
 from async.models import Job
 
 
@@ -44,3 +46,16 @@ class TestFlushQueue(TestCase):
         self.assertEqual(Job.objects.filter(executed=None).count(), 2)
         management.call_command('flush_queue')
         self.assertEqual(Job.objects.filter(executed=None).count(), 1)
+
+
+class TestHealth(TestCase):
+    """Make sure the health command runs without any errors.
+    """
+    def test_health(self):
+        """Excecute command.
+        """
+        with patch(
+                'async.management.commands.queue_health.dumps',
+                lambda x: self.assertEqual(x, health())):
+            management.call_command('queue_health')
+
