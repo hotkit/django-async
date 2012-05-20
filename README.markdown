@@ -30,6 +30,12 @@ Returns a Job instance that is used to record the task in the database. The job 
 * _run_after_ The earliest time that the function should be run.
 * _meta_ Parameters for controlling how the function is to be executed.
 
+##`async.api.health`##
+
+    info = health()
+
+Returns a `dict` containing basic information about the queue which can be used for monitoring.
+
 
 # Transaction handling #
 
