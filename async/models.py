@@ -18,7 +18,7 @@ class Job(models.Model):
     args = models.TextField()
     kwargs = models.TextField()
     meta = models.TextField()
-    result = models.TextField()
+    result = models.TextField(blank=True)
 
     added = models.DateTimeField(auto_now_add=True)
     scheduled = models.DateTimeField(null=True, blank=True,
