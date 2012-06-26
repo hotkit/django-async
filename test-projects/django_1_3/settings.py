@@ -118,6 +118,8 @@ INSTALLED_APPS = (
 
     'django.contrib.admin',
 
+    'slumber',
+
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 
