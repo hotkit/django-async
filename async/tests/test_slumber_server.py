@@ -1,6 +1,7 @@
 """
     Tests for the Slumber operations.
 """
+from datetime import datetime
 from django.contrib.auth.models import User, Permission
 from django.test import TestCase
 from simplejson import dumps, loads
@@ -72,6 +73,7 @@ class TestSchedule(TestCase):
         self.assertEqual(response.status_code, 200)
         job = Job.objects.get(name='test-job-1')
         self.assertEqual(job.args, '[]')
+        self.assertIsNone(job.scheduled)
         json = loads(response.content)
         self.assertEqual(json, dict(
             job=dict(id=job.id),
@@ -86,6 +88,7 @@ class TestSchedule(TestCase):
         self.assertEqual(response.status_code, 200)
         job = Job.objects.get(name='test-job-1')
         self.assertEqual(job.args, dumps(["1", "True", "Hello"]))
+        self.assertIsNone(job.scheduled)
         json = loads(response.content)
         self.assertEqual(json, dict(
             job=dict(id=job.id),
@@ -101,7 +104,23 @@ class TestSchedule(TestCase):
         self.assertEqual(response.status_code, 200)
         job = Job.objects.get(name='test-job-1')
         self.assertEqual(job.args, dumps([1, True, "Hello"]))
+        self.assertIsNone(job.scheduled)
         json = loads(response.content)
         self.assertEqual(json, dict(
             job=dict(id=job.id),
             _meta={'message': 'OK', 'status': 200, 'username': 'test'}))
+
+    def test_run_at(self):
+        """Make sure that the run at time is properly handled.
+        """
+        response = self.client.post(self.URL, dict(
+            name='test-job-1', run_after='2011-04-12 14:12:43'))
+        self.assertEqual(response.status_code, 200)
+        job = Job.objects.get(name='test-job-1')
+        self.assertEqual(job.args, '[]')
+        self.assertEqual(job.scheduled, datetime(2011, 4, 12, 14, 12, 43))
+        json = loads(response.content)
+        self.assertEqual(json, dict(
+            job=dict(id=job.id),
+            _meta={'message': 'OK', 'status': 200, 'username': 'test'}))
+
