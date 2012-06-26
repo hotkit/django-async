@@ -23,8 +23,12 @@ class Schedule(ModelOperation):
     def post(self, request, response, _app, _model):
         """Wrap the API.
         """
+        if hasattr(request.POST, 'getlist'):
+            args = request.POST.getlist('args')
+        else:
+            args = request.POST.get('args', [])
         job = schedule(request.POST['name'],
-            args=request.POST.get('args', []),
+            args=args,
             kwargs=request.POST.get('kwargs', {}),
             meta=request.POST.get('meta', {}),
             run_after=request.POST.get('run_after', None))

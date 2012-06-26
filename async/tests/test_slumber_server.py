@@ -3,7 +3,7 @@
 """
 from django.contrib.auth.models import User, Permission
 from django.test import TestCase
-from simplejson import loads
+from simplejson import dumps, loads
 
 from async.models import Job
 
@@ -71,8 +71,37 @@ class TestSchedule(TestCase):
             name='test-job-1'))
         self.assertEqual(response.status_code, 200)
         job = Job.objects.get(name='test-job-1')
+        self.assertEqual(job.args, '[]')
         json = loads(response.content)
         self.assertEqual(json, dict(
             job=dict(id=job.id),
             _meta={'message': 'OK', 'status': 200, 'username': 'test'}))
 
+    def test_args_multipart_content(self):
+        """Make sure that arguments are properly processed when using a
+        normal POST.
+        """
+        response = self.client.post(self.URL, dict(
+            name='test-job-1', args=[1, True, "Hello"]))
+        self.assertEqual(response.status_code, 200)
+        job = Job.objects.get(name='test-job-1')
+        self.assertEqual(job.args, dumps(["1", "True", "Hello"]))
+        json = loads(response.content)
+        self.assertEqual(json, dict(
+            job=dict(id=job.id),
+            _meta={'message': 'OK', 'status': 200, 'username': 'test'}))
+
+    def test_args_json(self):
+        """Make sure that arguments are properly processed when using a
+        normal POST.
+        """
+        response = self.client.post(self.URL, dumps(dict(
+                name='test-job-1', args=[1, True, "Hello"])),
+            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        job = Job.objects.get(name='test-job-1')
+        self.assertEqual(job.args, dumps([1, True, "Hello"]))
+        json = loads(response.content)
+        self.assertEqual(json, dict(
+            job=dict(id=job.id),
+            _meta={'message': 'OK', 'status': 200, 'username': 'test'}))
