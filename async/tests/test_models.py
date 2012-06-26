@@ -1,10 +1,10 @@
 """
     Testing that models work properly.
 """
-from django.test import TransactionTestCase
+from django.test import TestCase, TransactionTestCase
 
 from async import schedule
-from async.models import Job
+from async.models import Error, Job
 
 
 def _fn(*_a, **_kw):
@@ -53,3 +53,17 @@ class TestJob(TransactionTestCase):
                 'async.tests.test_models._fn',
                     args=['argument'], kwargs=dict(k='v', x=None))),
             "async.tests.test_models._fn('argument', x=None, k='v')")
+
+
+class TestError(TestCase):
+    """Test the Error model.
+    """
+
+    def test_unicode(self):
+        """Make sure the that the Unicode form of the Error works.
+        """
+        job = schedule('async.tests.test_models._fn')
+        error = Error.objects.create(job=job, exception="Exception text")
+        self.assertTrue(
+            unicode(error).endswith(u' : Exception text'), unicode(error))
+
