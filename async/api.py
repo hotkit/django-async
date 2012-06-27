@@ -21,7 +21,7 @@ def schedule(function, args = None, kwargs = None,
 
 def health():
     """Return information about the health of the queue in a format that
-    can be used turned into JSON.
+    can be turned into JSON.
     """
     output = {'queue': {}, 'errors': {}}
     output['queue']['length'] = Job.objects.all().count()
