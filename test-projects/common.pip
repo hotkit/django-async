@@ -6,3 +6,6 @@ coverage
 mock
 unittest2
 pylint
+
+# Used to test the optional Slumber compatibility.
+django-slumber

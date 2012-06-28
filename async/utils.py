@@ -26,6 +26,7 @@ def object_at_end_of_path(path):
     path by repeated imports and attribute access.
     """
     access_path = path.split('.')
+    module = None
     for index in xrange(1, len(access_path)-1):
         try:
             # import top level module
@@ -37,7 +38,10 @@ def object_at_end_of_path(path):
             for step in access_path[1:-1]: # walk down it
                 module = getattr(module, step)
             break
-    return getattr(module, access_path[-1])
+    if module:
+        return getattr(module, access_path[-1])
+    else:
+        return globals()['__builtins__'][path]
 
 
 def non_unicode_kwarg_keys(kwargs):

@@ -1,3 +1,8 @@
+2012-06-26  Kirit Saelensminde  <kirit@felspar.com>
+ We can now call Python built in functions as scheduled jobs.
+ The Job result field needs to allow blank so that Django admin edits work as expected.
+ Added a Slumber server operation that allows us to schedule new jobs.
+
 2012-05-20  Kirit Saelensminde  <kirit@felspar.com>
  Added in simple queue health API that will allow us to track the queue is running properly.
  Class methods can now also be scheduled properly.
