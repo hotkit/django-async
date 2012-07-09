@@ -3,6 +3,9 @@
 """
 from datetime import datetime, timedelta
 from django.db import models, transaction
+# No name 'sha1' in module 'hashlib'
+# pylint: disable=E0611
+from hashlib import sha1
 from simplejson import dumps, loads
 from traceback import format_exc
 
@@ -20,6 +23,8 @@ class Job(models.Model):
     meta = models.TextField()
     result = models.TextField(blank=True)
 
+    identity = models.CharField(max_length=100, blank=False, db_index=True)
+
     added = models.DateTimeField(auto_now_add=True)
     scheduled = models.DateTimeField(null=True, blank=True,
         help_text = "If not set, will be executed ASAP")
@@ -31,6 +36,10 @@ class Job(models.Model):
         args = ', '.join([repr(s) for s in loads(self.args)] +
             ['%s=%s' % (k, repr(v)) for k, v in loads(self.kwargs).items()])
         return u'%s(%s)' % (self.name, args)
+
+    def save(self, *a, **kw):
+        self.identity = sha1(unicode(self))
+        return super(Job, self).save(*a, **kw)
 
     def execute(self, **_meta):
         """
