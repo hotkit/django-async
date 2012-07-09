@@ -30,6 +30,12 @@ Returns a Job instance that is used to record the task in the database. The job 
 * _run_after_ The earliest time that the function should be run.
 * _meta_ Parameters for controlling how the function is to be executed.
 
+##`async.api.deschedule`##
+
+    deschedule(function, args = None, kwargs = None)
+
+Marks all jobs in the queue that match the given function and arguments as executed.
+
 ##`async.api.health`##
 
     info = health()
