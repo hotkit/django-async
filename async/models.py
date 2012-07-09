@@ -38,7 +38,7 @@ class Job(models.Model):
         return u'%s(%s)' % (self.name, args)
 
     def save(self, *a, **kw):
-        self.identity = sha1(unicode(self))
+        self.identity = sha1(unicode(self)).hexdigest()
         return super(Job, self).save(*a, **kw)
 
     def execute(self, **_meta):
