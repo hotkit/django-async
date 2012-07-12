@@ -49,6 +49,12 @@ class Job(models.Model):
             Run the job using the specified meta values to control the
             execution.
         """
+        def start():
+            """Record the start time for the job.
+            """
+            self.started = datetime.now()
+            self.save()
+        transaction.commit_on_success(start)()
         try:
             _logger.info("%s %s", self.id, unicode(self))
             args = loads(self.args)
