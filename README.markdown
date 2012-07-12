@@ -20,7 +20,7 @@ Tasks can be run by executing the management command `flush_queue`:
 
 ##`async.schedule`##
 
-    schedule(function, args = None, kwargs = None, run_after= None, meta = None)
+    schedule(function, args = None, kwargs = None, run_after= None, meta = None, priority = 5)
 
 Returns a Job instance that is used to record the task in the database. The job has a method `execute` which will attempt to run the job. **Don't do this directly until you've fully understood how transactions are handled**
 
@@ -29,6 +29,7 @@ Returns a Job instance that is used to record the task in the database. The job 
 * _kwargs_ A dict containing key word arguments to be passed to the function.
 * _run_after_ The earliest time that the function should be run.
 * _meta_ Parameters for controlling how the function is to be executed.
+* _priority_ Jobs with higher numbers are always executed before jobs with lower numbers.
 
 ##`async.api.deschedule`##
 
