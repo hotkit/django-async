@@ -1,6 +1,10 @@
 """
     Schedule the execution of an async task.
 """
+from datetime import datetime
+# No name 'sha1' in module 'hashlib'
+# pylint: disable=E0611
+from hashlib import sha1
 from simplejson import dumps
 
 from async.models import Error, Job
@@ -17,6 +21,17 @@ def schedule(function, args = None, kwargs = None,
         meta=dumps(meta or {}), scheduled=run_after)
     job.save()
     return job
+
+
+def deschedule(function, args = None, kwargs = None):
+    """Remove any instances of the job from the queue.
+    """
+    job = Job(
+        name=full_name(function),
+            args=dumps(args or []), kwargs=dumps(kwargs or {}))
+    mark_executed = Job.objects.filter(executed=None,
+        identity=sha1(unicode(job)).hexdigest())
+    mark_executed.update(executed=datetime.now())
 
 
 def health():

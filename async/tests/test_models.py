@@ -22,6 +22,16 @@ class TestJob(TransactionTestCase):
         job = schedule('async.tests.test_models._fn')
         self.assertEqual(Job.objects.all().count(), 1)
         self.assertEqual(unicode(job), "async.tests.test_models._fn()")
+        self.assertEqual(job.identity,
+            '289dbff9c1bd746fc444a20d396986857a6e8f04')
+
+    def test_identity(self):
+        """Make sure that the identity we get is the same as in another
+        test when given the same arguments.
+        """
+        job = schedule('async.tests.test_models._fn')
+        self.assertEqual(job.identity,
+            '289dbff9c1bd746fc444a20d396986857a6e8f04')
 
     def test_unicode_with_args(self):
         """Make sure unicode handling deals with args properly.
@@ -42,17 +52,22 @@ class TestJob(TransactionTestCase):
     def test_unicode_with_kwargs(self):
         """Make sure unicode handling deals with kwargs properly.
         """
-        self.assertEqual(unicode(schedule(
-                'async.tests.test_models._fn', kwargs=dict(k='v', x=None))),
+        job = schedule('async.tests.test_models._fn',
+            kwargs=dict(k='v', x=None))
+        self.assertEqual(unicode(job),
             "async.tests.test_models._fn(x=None, k='v')")
+        self.assertEqual(job.identity,
+            '60941ebcc096c0223ba1db02b3d256f19ba553a3')
 
     def test_unicode_with_args_and_kwargs(self):
         """Make sure unicode handling deals with kwargs properly.
         """
-        self.assertEqual(unicode(schedule(
-                'async.tests.test_models._fn',
-                    args=['argument'], kwargs=dict(k='v', x=None))),
+        job = schedule('async.tests.test_models._fn',
+            args=['argument'], kwargs=dict(k='v', x=None))
+        self.assertEqual(unicode(job),
             "async.tests.test_models._fn('argument', x=None, k='v')")
+        self.assertEqual(job.identity,
+            '2ce2bb7935439a6ab3f111882f359a06b36bf995')
 
 
 class TestError(TestCase):
