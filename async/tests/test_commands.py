@@ -81,8 +81,8 @@ class TestFlushQueue(TestCase):
         """
         global ORDER
         ORDER = []
-        schedule(_dummy, args=[2], priority=5)
-        schedule(_dummy, args=[1], priority=1, run_after=datetime.now())
+        schedule(_dummy, args=[1], priority=5)
+        schedule(_dummy, args=[2], priority=1, run_after=datetime.now())
         management.call_command('flush_queue')
         self.assertEqual(ORDER, [1, 2])
 

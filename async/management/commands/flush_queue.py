@@ -21,19 +21,32 @@ class Command(BaseCommand):
 
     def handle(self, **options):
         """Command implementation.
+
+        This implementation is pretty ugly, but does behave in the
+        right way.
         """
-        def run(jobs):
-            """Run the jobs handed to it
-            """
-            for job in jobs.iterator():
-                print "%s:" % job.pk, job
-                job.execute()
-        jobs = (Job.objects
-            .filter(executed=None, scheduled__lte=datetime.now())
-            .order_by('-priority', 'scheduled', 'id'))
-        run(jobs)
-        jobs = (Job.objects
-            .filter(executed=None, scheduled=None)
-            .order_by('-priority', 'id'))
-        run(jobs)
+        while True:
+            now = datetime.now()
+            by_priority = (Job.objects
+                .filter(executed=None)
+                .exclude(scheduled__gt=now)
+                .order_by('-priority'))
+            number = by_priority.count()
+            if number == 0:
+                return
+            def run(jobs):
+                """Run the jobs handed to it
+                """
+                for job in jobs.iterator():
+                    job.execute()
+                    return False
+                return True
+            priority = by_priority[0].priority
+            if run(Job.objects
+                    .filter(executed=None, scheduled__lte=now,
+                        priority=priority)
+                    .order_by('scheduled', 'id')):
+                run(Job.objects
+                    .filter(executed=None, scheduled=None, priority=priority)
+                    .order_by('id'))
 
