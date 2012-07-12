@@ -23,7 +23,8 @@ class Command(BaseCommand):
         """Command implementation.
         """
         jobs = Job.objects.filter(executed=None).exclude(
-            scheduled__gt=datetime.now())
+            scheduled__gt=datetime.now()).order_by('-priority')
         for job in jobs.iterator():
             print "%s:" % job.pk, job
             job.execute()
+
