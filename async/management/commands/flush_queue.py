@@ -22,8 +22,9 @@ class Command(BaseCommand):
     def handle(self, **options):
         """Command implementation.
         """
-        jobs = Job.objects.filter(executed=None).exclude(
-            scheduled__gt=datetime.now()).order_by('-priority')
+        jobs = (Job.objects.filter(executed=None)
+            .exclude(scheduled__gt=datetime.now())
+            .order_by('-priority', 'scheduled', 'id'))
         for job in jobs.iterator():
             print "%s:" % job.pk, job
             job.execute()
