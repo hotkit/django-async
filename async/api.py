@@ -1,6 +1,7 @@
 """
     Schedule the execution of an async task.
 """
+from datetime import datetime
 from simplejson import dumps
 
 from async.models import Error, Job
@@ -17,6 +18,16 @@ def schedule(function, args = None, kwargs = None,
         meta=dumps(meta or {}), scheduled=run_after)
     job.save()
     return job
+
+
+def deschedule(function, args = None, kwargs = None):
+    """Remove any instances of the job from the queue.
+    """
+    job = Job(
+        name=full_name(function),
+            args=dumps(args or []), kwargs=dumps(kwargs or {}))
+    mark_executed = Job.objects.filter(identity=unicode(job))
+    mark_executed.update(executed=datetime.now())
 
 
 def health():
