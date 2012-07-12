@@ -15,6 +15,8 @@ def schedule(function, args = None, kwargs = None,
         priority = 5, run_after= None, meta = None):
     """Schedule a tast for execution.
     """
+    # Too many arguments
+    # pylint: disable=R0913
     job = Job(
         name=full_name(function),
             args=dumps(args or []), kwargs=dumps(kwargs or {}),
