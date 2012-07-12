@@ -22,10 +22,18 @@ class Command(BaseCommand):
     def handle(self, **options):
         """Command implementation.
         """
-        jobs = (Job.objects.filter(executed=None)
-            .exclude(scheduled__gt=datetime.now())
+        def run(jobs):
+            """Run the jobs handed to it
+            """
+            for job in jobs.iterator():
+                print "%s:" % job.pk, job
+                job.execute()
+        jobs = (Job.objects
+            .filter(executed=None, scheduled__lte=datetime.now())
             .order_by('-priority', 'scheduled', 'id'))
-        for job in jobs.iterator():
-            print "%s:" % job.pk, job
-            job.execute()
+        run(jobs)
+        jobs = (Job.objects
+            .filter(executed=None, scheduled=None)
+            .order_by('-priority', 'id'))
+        run(jobs)
 
