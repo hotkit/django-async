@@ -42,8 +42,9 @@ def health():
     can be turned into JSON.
     """
     output = {'queue': {}, 'errors': {}}
-    output['queue']['length'] = Job.objects.all().count()
-    output['queue']['executed'] = Job.objects.filter(executed=None).count()
+    output['queue']['all-jobs'] = Job.objects.all().count()
+    output['queue']['not-executed'] = Job.objects.filter(executed=None).count()
+    output['queue']['executed'] = Job.objects.exclude(executed=None).count()
     output['errors']['number'] = Error.objects.all().count()
     return output
 
