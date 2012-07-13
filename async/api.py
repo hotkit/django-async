@@ -12,13 +12,16 @@ from async.utils import full_name
 
 
 def schedule(function, args = None, kwargs = None,
-        run_after= None, meta = None):
+        priority = 5, run_after= None, meta = None):
     """Schedule a tast for execution.
     """
+    # Too many arguments
+    # pylint: disable=R0913
     job = Job(
         name=full_name(function),
             args=dumps(args or []), kwargs=dumps(kwargs or {}),
-        meta=dumps(meta or {}), scheduled=run_after)
+        meta=dumps(meta or {}), scheduled=run_after,
+        priority=priority)
     job.save()
     return job
 

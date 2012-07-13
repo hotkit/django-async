@@ -10,7 +10,7 @@ def read(fname1, fname2):
 
 setup(
     name = "django-async",
-    version = "0.4",
+    version = "0.4.0.2",
     author = "Kirit Saelensminde",
     author_email = "kirit@felspar.com",
     url='https://github.com/KayEss/django-async',

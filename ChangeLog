@@ -1,5 +1,6 @@
 2012-06-26  Kirit Saelensminde  <kirit@felspar.com>
  There is a new deschedule API which allows us to take jobs out of the queue by marking them as already executed.
+ Record the time that job execution starts and also allow us to set a priority for jobs.
 
 2012-06-26  Kirit Saelensminde  <kirit@felspar.com>
  We can now call Python built in functions as scheduled jobs.

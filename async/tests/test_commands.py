@@ -1,6 +1,7 @@
 """
     Tests for the Django management commands.
 """
+from datetime import datetime
 from django.core import management
 from django.test import TestCase
 from mock import patch
@@ -10,9 +11,16 @@ from async.api import health
 from async.models import Job
 
 
-def _dummy(error=None):
+# Using the global statement
+# pylint: disable = W0603
+
+
+ORDER = None
+def _dummy(order=None, error=None):
     """Basic dummy function we can use to test the queue execution.
     """
+    if order:
+        ORDER.append(order)
     if error:
         raise Exception(error)
 
@@ -38,7 +46,7 @@ class TestFlushQueue(TestCase):
     def test_queue_fails_on_error(self):
         """Make sure that the queue flushing stops on the first error.
         """
-        schedule(_dummy, "Error")
+        schedule(_dummy, kwargs={'error': "Error"})
         schedule(_dummy)
         self.assertEqual(Job.objects.filter(executed=None).count(), 2)
         with self.assertRaises(Exception):
@@ -46,6 +54,38 @@ class TestFlushQueue(TestCase):
         self.assertEqual(Job.objects.filter(executed=None).count(), 2)
         management.call_command('flush_queue')
         self.assertEqual(Job.objects.filter(executed=None).count(), 1)
+
+    def test_scheduled_runs_first_when_added_first(self):
+        """Make sure that the scheduled job is always run first.
+        """
+        global ORDER
+        ORDER = []
+        schedule(_dummy, args=[1], run_after=datetime.now())
+        schedule(_dummy, args=[2])
+        management.call_command('flush_queue')
+        self.assertEqual(ORDER, [1, 2])
+
+    def test_scheduled_runs_first_when_added_last(self):
+        """Make sure that the scheduled job is always run first.
+        """
+        global ORDER
+        ORDER = []
+        schedule(_dummy, args=[2])
+        schedule(_dummy, args=[1], run_after=datetime.now())
+        management.call_command('flush_queue')
+        self.assertEqual(ORDER, [1, 2])
+
+    def test_scheduled_runs_last_when_has_higher_priority(self):
+        """The lowest priority scheduled job runs before the highest
+        priority non-scheduled job.
+        """
+        global ORDER
+        ORDER = []
+        schedule(_dummy, args=[1], priority=5)
+        schedule(_dummy, args=[2], priority=1, run_after=datetime.now())
+        management.call_command('flush_queue')
+        self.assertEqual(ORDER, [1, 2])
+
 
 
 class TestHealth(TestCase):

@@ -23,12 +23,15 @@ class Job(models.Model):
     meta = models.TextField()
     result = models.TextField(blank=True)
 
+    priority = models.IntegerField()
     identity = models.CharField(max_length=100, blank=False, db_index=True)
 
     added = models.DateTimeField(auto_now_add=True)
     scheduled = models.DateTimeField(null=True, blank=True,
         help_text = "If not set, will be executed ASAP")
+    started = models.DateTimeField(null=True, blank=True)
     executed = models.DateTimeField(null=True, blank=True)
+
 
     def __unicode__(self):
         # __unicode__: Instance of 'bool' has no 'items' member
@@ -46,6 +49,12 @@ class Job(models.Model):
             Run the job using the specified meta values to control the
             execution.
         """
+        def start():
+            """Record the start time for the job.
+            """
+            self.started = datetime.now()
+            self.save()
+        transaction.commit_on_success(start)()
         try:
             _logger.info("%s %s", self.id, unicode(self))
             args = loads(self.args)

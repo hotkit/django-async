@@ -57,6 +57,7 @@ class TestExecution(TransactionTestCase):
             (('async-test-user',), {'result': 'something'}))
         self.assertEqual('"something"', job.result)
         self.assertIsNotNone(job.executed)
+        self.assertLess(job.started, job.executed)
         self.assertEqual(
             User.objects.filter(username='async-test-user').count(), 1)
 

@@ -18,9 +18,13 @@ Tasks can be run by executing the management command `flush_queue`:
 
 `flush_queue` will run once through the jobs that are scheduled to run at that time, but will exit early if any job throws an exception. Normally you would use it from an external script that simply keeps re-running the command.
 
+    while [ true ] ; do ( python manage.py flush_queue && sleep 10 ) ; done
+
+Jobs are executed in priority order first (higher numbers execute earlier), then by the scheduled time (unscheduled jobs will go last, but of course only jobs whose scheduled time has arrived will run) and finally by their ID order (which should be the order they were added). A failed task will be re-scheduled for later execution.
+
 ##`async.schedule`##
 
-    schedule(function, args = None, kwargs = None, run_after= None, meta = None)
+    schedule(function, args = None, kwargs = None, run_after= None, meta = None, priority = 5)
 
 Returns a Job instance that is used to record the task in the database. The job has a method `execute` which will attempt to run the job. **Don't do this directly until you've fully understood how transactions are handled**
 
@@ -29,6 +33,7 @@ Returns a Job instance that is used to record the task in the database. The job 
 * _kwargs_ A dict containing key word arguments to be passed to the function.
 * _run_after_ The earliest time that the function should be run.
 * _meta_ Parameters for controlling how the function is to be executed.
+* _priority_ Jobs with higher numbers are always executed before jobs with lower numbers.
 
 ##`async.api.deschedule`##
 
