@@ -1,4 +1,7 @@
-2012-06-26  Kirit Saelensminde  <kirit@felspar.com>
+2012-07-13  Kirit Saelensminde  <kirit@felspar.com>
+ Make the back off of failed jobs more even. They start off further apart and then don't delay so quickly. The formula is now 1 minute * the number of failures raised to the power 1.6.
+
+2012-07-12  Kirit Saelensminde  <kirit@felspar.com>
  There is a new deschedule API which allows us to take jobs out of the queue by marking them as already executed.
  Record the time that job execution starts and also allow us to set a priority for jobs.
 
