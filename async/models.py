@@ -64,9 +64,11 @@ class Job(models.Model):
             result = transaction.commit_on_success(function)(*args, **kwargs)
         except Exception, exception:
             self.started = None
+            errors = 1 + self.errors.count()
             self.scheduled = (datetime.now() +
-                timedelta(seconds=60 * pow(1 + self.errors.count(), 1.6)))
-            log.error("Job failed. Rescheduled for %s", self.scheduled)
+                timedelta(seconds=60 * pow(errors, 1.6)))
+            _logger.error("Job failed. Rescheduled for %s after %s error(s)",
+                self.scheduled, errors)
             def record():
                 """Local function allows us to wrap these updates into a
                 transaction.
