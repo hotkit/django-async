@@ -3,6 +3,7 @@
 """
 from datetime import datetime, timedelta
 from django.db import models, transaction
+from django.utils import timezone
 # No name 'sha1' in module 'hashlib'
 # pylint: disable=E0611
 from hashlib import sha1
@@ -65,7 +66,7 @@ class Job(models.Model):
         except Exception, exception:
             self.started = None
             errors = 1 + self.errors.count()
-            self.scheduled = (datetime.now() +
+            self.scheduled = (timezone.now() +
                 timedelta(seconds=60 * pow(errors, 1.6)))
             self.priority = self.priority - 1
             _logger.error(
@@ -82,7 +83,7 @@ class Job(models.Model):
             transaction.commit_on_success(record)()
             raise
         else:
-            self.executed = datetime.now()
+            self.executed = timezone.now()
             self.result = dumps(result)
             self.save() # Single SQL statement so no need for transaction
             return result

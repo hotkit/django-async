@@ -3,6 +3,7 @@
 """
 from datetime import datetime
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 from optparse import make_option
 
 from async.models import Job
@@ -26,7 +27,7 @@ class Command(BaseCommand):
         right way.
         """
         while True:
-            now = datetime.now()
+            now = timezone.now()
             by_priority = (Job.objects
                 .filter(executed=None)
                 .exclude(scheduled__gt=now)
@@ -51,4 +52,3 @@ class Command(BaseCommand):
                 run(Job.objects
                     .filter(executed=None, scheduled=None, priority=priority)
                     .order_by('id'))
-
