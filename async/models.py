@@ -3,6 +3,7 @@
 """
 from datetime import datetime, timedelta
 from django.db import models, transaction
+from django.utils import timezone
 from simplejson import dumps, loads
 from traceback import format_exc
 
@@ -45,7 +46,7 @@ class Job(models.Model):
             _logger.debug(u"%s resolved to %s" % (self.name, function))
             result = transaction.commit_on_success(function)(*args, **kwargs)
         except Exception, exception:
-            self.scheduled = (datetime.now() +
+            self.scheduled = (timezone.now() +
                 timedelta(seconds=4 ** (1 + self.errors.count())))
             def record():
                 """Local function allows us to wrap these updates into a
@@ -57,7 +58,7 @@ class Job(models.Model):
             transaction.commit_on_success(record)()
             raise
         else:
-            self.executed = datetime.now()
+            self.executed = timezone.now()
             self.result = dumps(result)
             self.save() # Single SQL statement so no need for transaction
             return result

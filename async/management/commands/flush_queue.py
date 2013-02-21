@@ -3,6 +3,7 @@
 """
 from datetime import datetime
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 from optparse import make_option
 
 from async.models import Job
@@ -23,7 +24,7 @@ class Command(BaseCommand):
         """Command implementation.
         """
         jobs = Job.objects.filter(executed=None).exclude(
-            scheduled__gt=datetime.now())
+            scheduled__gt=timezone.now())
         for job in jobs.iterator():
             print "%s:" % job.pk, job
             job.execute()
