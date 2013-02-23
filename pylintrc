@@ -30,12 +30,13 @@ load-plugins=
 #enable=
 
 # I0011 Locally disabling ...
+# R0801 Similar lines in 2 files
 # R0903 Too few public methods
 # R0904 Too many public methods
 # E1101 Class 'X' has no 'x' member (will be handled by tests)
 # W0142 Used * or ** magic
 # W0212 Access to protected member
-disable=I0011, R0903, R0904, E1101, W0142, W0212
+disable=I0011, R0801, R0903, R0904, E1101, W0142, W0212
 
 
 [REPORTS]
