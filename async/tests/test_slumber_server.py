@@ -40,7 +40,7 @@ class TestSlumber(TestCase):
                 'django.contrib.staticfiles':
                     '/slumber/django/contrib/staticfiles/',
                 'django_nose': '/slumber/django_nose/'},
-            _meta={'message': 'OK', 'status': 200}))
+            _meta={'message': 'OK', 'status': 200}), json)
 
 
 class TestSchedule(TestCase):
