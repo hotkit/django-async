@@ -1,9 +1,13 @@
 """
     Django Async management commands.
 """
-from datetime import datetime
 from django.core.management.base import BaseCommand
-from django.utils import timezone
+try:
+    # No name 'timezone' in module 'django.utils'
+    # pylint: disable=E0611
+    from django.utils import timezone
+except ImportError:
+    from datetime import datetime as timezone
 from optparse import make_option
 
 from async.models import Job
