@@ -1,5 +1,6 @@
 simplejson
 psycopg2==2.4.1
+lockfile
 
 # Used for testing
 coverage
