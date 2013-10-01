@@ -13,7 +13,7 @@ setup(
     version = "0.5",
     author = "Kirit Saelensminde",
     author_email = "kirit@felspar.com",
-    url='https://github.com/KayEss/django-async',
+    url='http://www.kirit.com/Django%20Async',
     description = "Asynchronous task execution with proper database transaction management for Django",
     long_description = read('README','README.markdown'),
     license = "Boost Software License - Version 1.0 - August 17th, 2003",
