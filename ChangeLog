@@ -1,3 +1,6 @@
+2013-10-01  Alexei Gousev  <numegil@gmail.com>
+ Use a filelock to ensure that only a single instance of flush_queue can run at any time.
+
 2012-07-14  Kirit Saelensminde  <kirit@felspar.com>
  When a job errors it's priority is reduced in order to make sure that it won't block other jobs.
 
