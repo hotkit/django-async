@@ -86,6 +86,21 @@ class TestFlushQueue(TestCase):
         management.call_command('flush_queue')
         self.assertEqual(ORDER, [1, 2])
 
+    def test_flush_queue_with_jobs_limit(self):
+        """Make sure that the number of job run is the same as the input jobs limit.
+        """
+        for i in xrange(5):
+            schedule(_dummy)
+        management.call_command('flush_queue', jobs=2)
+        self.assertEqual(Job.objects.filter(executed=None).count(), 3)
+
+    def test_flush_queue_without_jobs_limit__should_limit_at_300_by_default(self):
+        """Make sure that the number of job run is the same as the input jobs limit.
+        """
+        for i in xrange(305):
+            schedule(_dummy)
+        management.call_command('flush_queue')
+        self.assertEqual(Job.objects.filter(executed=None).count(), 5)
 
 
 class TestHealth(TestCase):
