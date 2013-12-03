@@ -50,7 +50,8 @@ class Command(BaseCommand):
         This implementation is pretty ugly, but does behave in the
         right way.
         """
-        jobs_limit = int(options.get('jobs', 300))
+        jobs_limit = int(options.get('jobs', None)) if options.get('jobs', None) else 300
+
         for i in xrange(jobs_limit):
             now = datetime.now()
             by_priority = (Job.objects
