@@ -28,6 +28,7 @@ class TestSlumber(TestCase):
         json = loads(response.content)
         self.assertEqual(json, dict(
             services=None,
+            configuration={},
             apps={
                 'async': '/slumber/async/',
                 'django.contrib.sites': '/slumber/django/contrib/sites/',
