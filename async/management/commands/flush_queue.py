@@ -52,7 +52,7 @@ class Command(BaseCommand):
         """
         jobs_limit = int(options.get('jobs') or 300 )
 
-        for i in xrange(jobs_limit):
+        for _ in xrange(jobs_limit):
             now = datetime.now()
             by_priority = (Job.objects
                 .filter(executed=None)
