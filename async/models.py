@@ -13,6 +13,17 @@ from async import _logger
 from async.utils import object_at_end_of_path, non_unicode_kwarg_keys
 
 
+class Group(models.Model):
+    """
+        A group for jobs that need to be executed.
+    """
+    reference = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True, null=True)
+
+    def __unicode__(self):
+        return u'%s %s' % (self.reference, self.description)
+
+
 class Job(models.Model):
     """
         An asynchronous task that is to be executed.
@@ -32,6 +43,7 @@ class Job(models.Model):
     started = models.DateTimeField(null=True, blank=True)
     executed = models.DateTimeField(null=True, blank=True)
 
+    group = models.ForeignKey(Group, related_name='references', null=True, blank=True)
 
     def __unicode__(self):
         # __unicode__: Instance of 'bool' has no 'items' member
