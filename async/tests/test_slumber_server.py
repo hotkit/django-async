@@ -40,7 +40,8 @@ class TestSlumber(TestCase):
                 'django.contrib.sessions': '/slumber/django/contrib/sessions/',
                 'django.contrib.staticfiles':
                     '/slumber/django/contrib/staticfiles/',
-                'django_nose': '/slumber/django_nose/'},
+                'django_nose': '/slumber/django_nose/',
+                'south': '/slumber/south/'},
             _meta={'message': 'OK', 'status': 200}))
 
 

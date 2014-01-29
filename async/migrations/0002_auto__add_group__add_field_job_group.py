@@ -11,8 +11,9 @@ class Migration(SchemaMigration):
         # Adding model 'Group'
         db.create_table('async_group', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('reference', self.gf('django.db.models.fields.CharField')(unique=True, max_length=100)),
+            ('reference', self.gf('django.db.models.fields.CharField')(max_length=100)),
             ('description', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
         ))
         db.send_create_signal('async', ['Group'])
 
@@ -41,9 +42,10 @@ class Migration(SchemaMigration):
         },
         'async.group': {
             'Meta': {'object_name': 'Group'},
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'reference': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '100'})
+            'reference': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
         'async.job': {
             'Meta': {'object_name': 'Job'},

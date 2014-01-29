@@ -17,11 +17,23 @@ class Group(models.Model):
     """
         A group for jobs that need to be executed.
     """
-    reference = models.CharField(max_length=100, unique=True)
+    reference = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
+    created = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
-        return u'%s %s' % (self.reference, self.description)
+        return u'%s' % self.reference
+
+    def save(self, *args, **kwargs):
+        # We can't create a new group with that reference
+        # if the others still have jobs that havn't executed.
+        if Job.objects.filter(
+                group__reference=self.reference,
+                executed__isnull=True
+        ).count() > 0:
+            raise Exception("Can't add new group with same reference "
+                "if another group with same reference has unexpected jobs.")
+        return super(Group, self).save(*args, **kwargs)
 
 
 class Job(models.Model):
@@ -53,6 +65,14 @@ class Job(models.Model):
         return u'%s(%s)' % (self.name, args)
 
     def save(self, *a, **kw):
+        # Stop us from cheating by adding the new jobs to the old group.
+        if self.group is not None and Job.objects.filter(
+                group__reference=self.group.reference,
+                executed__isnull=True
+        ).count() > 0:
+            raise Exception("Can't add jobs to a group "
+            "if there is another group with same reference with unexecuted jobs.")
+
         self.identity = sha1(unicode(self)).hexdigest()
         return super(Job, self).save(*a, **kw)
 

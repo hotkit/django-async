@@ -29,7 +29,7 @@ class JobAdmin(admin.ModelAdmin):
 class GroupAdmin(admin.ModelAdmin):
     """Allow us to see groups.
     """
-    list_display = ['__unicode__']
+    list_display = ['__unicode__', 'description']
 
 admin.site.register(Error)
 admin.site.register(Job, JobAdmin)
