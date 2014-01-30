@@ -2,6 +2,7 @@
     Testing that models work properly.
 """
 from django.test import TestCase, TransactionTestCase
+from django.core.exceptions import ValidationError
 
 from async import schedule
 from async.models import Error, Job, Group
@@ -128,8 +129,16 @@ class TestGroup(TestCase):
                 priority=3,
             )
 
+        self.j3 = Job.objects.create(
+                name='job3',
+                args='[]',
+                kwargs='{}',
+                meta='{}',
+                priority=3,
+            )
+
     def test_model_creation(self):
-        """ Test if can create model.
+        """ Test if can create model. Get new instance.
         """
         group = Group.objects.create(
             reference='test-group',
@@ -141,75 +150,63 @@ class TestGroup(TestCase):
         self.assertEqual(group.description, 'for testing')
 
     def test_creating_group_with_duplicate_reference_and_executed_job(self):
-        """
+        """ Create new group with reference same as old group which has
+            one job and already executed. Creating should success.
         """
         self.j1.group = self.g1
-        self.j1.executed = datetime.datetime.today() - datetime.timedelta(days=10)
+        self.j1.executed = datetime.datetime(2014,1,1)
         self.j1.save()
 
-        g2 = Group.objects.create(
-                reference=self.g1.reference,
-                description='test group2'
-            )
+        g2 = Group.objects.create(reference=self.g1.reference)
         self.assertEqual(Group.objects.filter(reference=self.g1.reference).count(), 2)
 
-    def test_creating_group_with_duplicate_reference_and_unexecuted_job(self):
+    def test_creating_group_with_duplicate_reference_and_has_one_unexecuted_job(self):
+        """ Create new group with reference same as old group which has
+            unexecuted job. Creating should not success.
+        """
+
+        # Assiging j1, j2, j3 to group1
         self.j1.group = self.g1
         self.j1.save()
-        with self.assertRaises(Exception) as e:
-            Group.objects.create(
-                    reference=self.g1.reference,
-                    description='test group2'
-                )
+
+        self.j2.group = self.g1
+        self.j2.save()
+
+        self.j3.group = self.g1
+        self.j3.save()
+
+        # Mark executed for j1, j2
+        self.j1.executed = datetime.datetime(2014,1,1)
+        self.j1.save()
+
+        self.j2.executed = datetime.datetime(2014,1,1)
+        self.j2.save()
+
+        with self.assertRaises(ValidationError) as e:
+            Group.objects.create(reference=self.g1.reference)
+        self.assertTrue(isinstance(e.exception, ValidationError))
         self.assertEqual(Group.objects.filter(reference=self.g1.reference).count(), 1)
 
+    def test_adding_job_to_group_that_has_executed_job(self):
+        """ Add job to group which have one executed job.
+        """
+        self.j1.group = self.g1
+        self.j1.executed = datetime.datetime.today()
+        self.j1.save()
+
+        with self.assertRaises(ValidationError) as e:
+            self.j2.group = self.g1
+            self.j2.save()
+        self.assertTrue(isinstance(e.exception, ValidationError))
+        self.assertEqual(Job.objects.filter(group=self.g1).count(), 1)
+
     def test_adding_job_to_group_that_has_unexecuted_job(self):
+        """ Add jobs to group which has unexecuted job.
+        """
         self.j1.group = self.g1
         self.j1.save()
 
-        with self.assertRaises(Exception) as e:
-            self.j2.group = self.g1
-            self.j2.save()
+        self.j2.group = self.g1
+        self.j2.save()
 
-        self.assertEqual(Job.objects.filter(group=self.g1).count(), 1)
-
-    def test_creating_groups_with_duplicate_reference_and_unexecuted_jobs(self):
-        gspecs = {
-            'reference': 'instance-group1',
-            'description': 'group1-description'
-        }
-        g1 = Group.objects.create(**gspecs)
-
-        gspecs.update({'description':'group2-description'})
-        g2 = Group.objects.create(**gspecs)
-
-        self.j1.group = g2
-        self.j1.save()
-
-        self.assertEqual(Group.objects.filter(reference=g1.reference).count(), 2)
-        self.assertEqual(Job.objects.filter(group=g1).count(), 0)
-        self.assertEqual(Job.objects.filter(group=g2).count(), 1)
-
-        gspecs.update({'description':'group3-description'})
-        with self.assertRaises(Exception) as e:
-            g3 = Group.objects.create(**gspecs)
-        self.assertEqual(Group.objects.filter(reference=g1.reference).count(), 2)
-
-    def test_adding_jobs_with_duplicate_reference_and_unexecuted_jobs(self):
-        gspecs = {
-            'reference': 'instance-group1',
-            'description': 'group1-description'
-        }
-        g1 = Group.objects.create(**gspecs)
-
-        gspecs.update({'description':'group2-description'})
-        g2 = Group.objects.create(**gspecs)
-
-        self.j1.group = g2
-        self.j1.save()
-
-        with self.assertRaises(Exception) as e:
-            self.j2.group = g2
-            self.j2.save()
-
-        self.assertEqual(Job.objects.filter(group=g2).count(), 1)
+        self.assertEqual(Group.objects.get(reference=self.g1.reference).jobs.count(), 2)

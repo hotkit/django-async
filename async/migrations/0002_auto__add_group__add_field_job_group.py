@@ -19,7 +19,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'Job.group'
         db.add_column('async_job', 'group',
-                      self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='references', null=True, to=orm['async.Group']),
+                      self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='jobs', null=True, to=orm['async.Group']),
                       keep_default=False)
 
 
@@ -52,7 +52,7 @@ class Migration(SchemaMigration):
             'added': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'args': ('django.db.models.fields.TextField', [], {}),
             'executed': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'group': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'references'", 'null': 'True', 'to': "orm['async.Group']"}),
+            'group': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'jobs'", 'null': 'True', 'to': "orm['async.Group']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'identity': ('django.db.models.fields.CharField', [], {'max_length': '100', 'db_index': 'True'}),
             'kwargs': ('django.db.models.fields.TextField', [], {}),

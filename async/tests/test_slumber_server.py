@@ -6,7 +6,7 @@ from django.contrib.auth.models import User, Permission
 from django.test import TestCase
 from simplejson import dumps, loads
 
-from async.models import Job
+from async.models import Job, Group
 
 
 # Instance of 'WSGIRequest' has no 'status_code' member
@@ -126,3 +126,71 @@ class TestSchedule(TestCase):
             job=dict(id=job.id),
             _meta={'message': 'OK', 'status': 200, 'username': 'test'}))
 
+
+class TestProgress(TestCase):
+    URL = '/slumber/async/Group/progress/'
+
+    def setUp(self):
+        super(TestProgress, self).setUp()
+        self.user = User.objects.create(username='test')
+        self.user.set_password('password')
+        self.user.save()
+        self.client.login(username='test', password='password')
+        self.permission = Permission.objects.get(codename='add_job')
+        self.user.user_permissions.add(self.permission)
+
+    def test_get_work(self):
+        group_name = 'test-ddrun'
+        group1 = Group.objects.create(reference=group_name)
+        Job.objects.create(
+            name='test-job1',
+            args='[]',
+            kwargs='{}',
+            meta='{}',
+            priority=3,
+            group=group1
+        )
+        Job.objects.create(
+            name='test-job2',
+            args='[]',
+            kwargs='{}',
+            meta='{}',
+            priority=3,
+            group=group1
+        )
+        test_url = self.URL + group_name + '/'
+
+        response = self.client.get(test_url)
+        self.assertEqual(response.status_code, 200)
+
+        json = loads(response.content)
+        self.assertEqual(json['_meta'],
+            {'message': 'OK', 'status': 200, 'username': 'test'}
+        )
+
+        json_progress = json.get('progress')
+        self.assertTrue(json_progress)
+        self.assertEqual(json_progress.get('id'), group1.id)
+        self.assertEqual(json_progress.get('created'), str(group1.created))
+        self.assertIsNone(json_progress.get('last_job_completed'))
+        self.assertEqual(json_progress.get('total_jobs'), group1.jobs.count())
+        self.assertEqual(json_progress.get('total_executed_jobs'), 0)
+        self.assertEqual(json_progress.get('total_unexecuted_jobs'), 2)
+        self.assertEqual(json_progress.get('total_error_jobs'), 0)
+        self.assertIsNone(json_progress.get('estimated_time_finishing'))
+
+    def test_no_any_job_in_group(self):
+        """ Create group but no job create for that group.
+        """
+        group_name = 'test-ddrun'
+        Group.objects.create(reference=group_name)
+        test_url = self.URL + group_name + '/'
+
+        response = self.client.get(test_url)
+        self.assertEqual(response.status_code, 200)
+
+        json = loads(response.content)
+        self.assertEqual(json['_meta'],
+            {'message': 'OK', 'status': 200, 'username': 'test'}
+        )
+        self.assertTrue(json.get('progress') is None)
