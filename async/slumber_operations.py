@@ -40,7 +40,8 @@ class Schedule(ModelOperation):
 
 class Progress(InstanceOperation):
 
-    def calculate_estimated_time_finishing(self, group):
+    @staticmethod
+    def calculate_estimated_time_finishing(group):
         total_jobs = group.jobs.count()
         if total_jobs:
             total_executed_jobs = group.jobs.filter(executed__isnull=False).count()
@@ -52,12 +53,13 @@ class Progress(InstanceOperation):
                 estimated_time = (time_consumed.seconds/float(total_executed_jobs)) * total_jobs
             else:
                 # All jobs in group are executed.
-                estimated_time = (self.last_job_was_executed_was_executed(group) - group.created).seconds
+                estimated_time = (Progress.last_job_was_executed_was_executed(group) - group.created).seconds
             return datetime.timedelta(seconds=estimated_time)
         else:
             return None
 
-    def last_job_was_executed_was_executed(self, group):
+    @staticmethod
+    def last_job_was_executed_was_executed(group):
         if not group.jobs.filter(executed__isnull=True):
             return group.jobs.latest('executed').executed
 
@@ -74,12 +76,12 @@ class Progress(InstanceOperation):
                     'id': latest_group.id,
                     'reference': latest_group.reference,
                     'created': latest_group.created,
-                    'last_job_completed': self.last_job_was_executed_was_executed(latest_group),
+                    'last_job_completed': Progress.last_job_was_executed_was_executed(latest_group),
                     'total_jobs': total_jobs,
                     'total_executed_jobs': total_executed_jobs,
                     'total_unexecuted_jobs': total_unexecuted_jobs,
-                    'total_error_jobs': latest_group.jobs.filter(errors__isnull=False).count(),
-                    'estimated_time_finishing': self.calculate_estimated_time_finishing(latest_group)
+                    'total_error_jobs': latest_group.jobs.filter(errors__isnull=False).distinct().count(),
+                    'estimated_time_finishing': Progress.calculate_estimated_time_finishing(latest_group)
                 }
 
 
