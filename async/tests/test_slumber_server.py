@@ -6,7 +6,7 @@ from django.contrib.auth.models import User, Permission
 from django.test import TestCase
 from simplejson import dumps, loads
 
-from async.models import Job, Group
+from async.models import Job, Group, Error
 
 
 # Instance of 'WSGIRequest' has no 'status_code' member
@@ -223,4 +223,40 @@ class TestProgress(TestCase):
         self.assertEqual(json_progress.get('total_executed_jobs'), 5)
         self.assertEqual(json_progress.get('total_unexecuted_jobs'), 0)
         self.assertEqual(json_progress.get('total_error_jobs'), 0)
+        self.assertEqual(json_progress.get('estimated_time_finishing'), str(Progress.calculate_estimated_time_finishing(group1)))
+
+    def test_all_jobs_executed_with_error(self):
+        from async.slumber_operations import Progress
+
+        group1 = Group.objects.create(reference='drun1')
+        for i in range(5):
+            Job.objects.create(name='j-%s' % i, args='[]', kwargs='{}', meta='{}', priority=3, group=group1)
+        for job in group1.jobs.all():
+            job.executed=datetime(2014,1,1)
+            job.save()
+
+        j1 = Job.objects.all()[0]
+        j2 = Job.objects.all()[1]
+        e1 = Error.objects.create(job=j1)
+        e2 = Error.objects.create(job=j1)
+        e3 = Error.objects.create(job=j2)
+
+        test_url = self.URL + 'drun1/'
+        response = self.client.get(test_url)
+        self.assertEqual(response.status_code, 200)
+
+        json = loads(response.content)
+        self.assertEqual(json['_meta'],
+            {'message': 'OK', 'status': 200, 'username': 'test'}
+        )
+
+        json_progress = json.get('progress')
+        self.assertTrue(json_progress)
+        self.assertEqual(json_progress.get('id'), group1.id)
+        self.assertEqual(json_progress.get('created'), str(group1.created))
+        self.assertEqual(json_progress.get('last_job_completed'), str(Progress.last_job_was_executed_was_executed(group1)))
+        self.assertEqual(json_progress.get('total_jobs'), group1.jobs.count())
+        self.assertEqual(json_progress.get('total_executed_jobs'), 5)
+        self.assertEqual(json_progress.get('total_unexecuted_jobs'), 0)
+        self.assertEqual(json_progress.get('total_error_jobs'), 2)
         self.assertEqual(json_progress.get('estimated_time_finishing'), str(Progress.calculate_estimated_time_finishing(group1)))

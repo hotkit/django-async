@@ -71,3 +71,4 @@ class Migration(SchemaMigration):
     }
 
     complete_apps = ['async']
+

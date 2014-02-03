@@ -19,7 +19,7 @@ class JobAdmin(admin.ModelAdmin):
     """
 
     def display_group(obj):
-        return u'%s' % obj.group.reference
+        return obj.group.reference
     display_group.short_description = 'Group'
 
     list_display = ['__unicode__', 'scheduled', 'executed', display_group]
@@ -29,7 +29,16 @@ class JobAdmin(admin.ModelAdmin):
 class GroupAdmin(admin.ModelAdmin):
     """Allow us to see groups.
     """
-    list_display = ['__unicode__', 'description']
+
+    def executed_jobs(obj):
+        return obj.jobs.filter(executed__isnull=False).count()
+    executed_jobs.short_description = 'Executed'
+
+    def unexecuted_jobs(obj):
+        return obj.jobs.filter(executed__isnull=True).count()
+    unexecuted_jobs.short_description = 'Unexecuted'
+
+    list_display = ['__unicode__', 'description', executed_jobs, unexecuted_jobs]
 
 admin.site.register(Error)
 admin.site.register(Job, JobAdmin)

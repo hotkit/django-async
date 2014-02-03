@@ -4,6 +4,9 @@
 from slumber.operations import ModelOperation, InstanceOperation
 from slumber.server.http import require_permission
 
+from django.shortcuts import Http404
+from django.db.models import Count
+
 from async import schedule
 from async.models import Group, Job
 import datetime
@@ -42,9 +45,10 @@ class Progress(InstanceOperation):
 
     @staticmethod
     def calculate_estimated_time_finishing(group):
-        total_jobs = group.jobs.count()
-        if total_jobs:
-            total_executed_jobs = group.jobs.filter(executed__isnull=False).count()
+        result = group.jobs.aggregate(job_count=Count('id'), executed_job_count=Count('executed'))
+        total_jobs = result['job_count']
+        total_executed_jobs = result['executed_job_count']
+        if total_jobs > 0:
             # Don't allow to calculate if executed jobs are not valid.
             if total_executed_jobs == 0: return None
             if group.jobs.filter(executed__isnull=True):
@@ -67,9 +71,11 @@ class Progress(InstanceOperation):
         groups = Group.objects.filter(reference=group_reference_name)
         if groups:
             latest_group = groups.latest('created')
-            total_jobs = latest_group.jobs.count()
+            print latest_group
+            result = latest_group.jobs.aggregate(job_count=Count('id'), executed_job_count=Count('executed'))
+            total_jobs = result['job_count']
+            total_executed_jobs = result['executed_job_count']
             if total_jobs > 0:
-                total_executed_jobs = latest_group.jobs.filter(executed__isnull=False).count()
                 total_unexecuted_jobs = total_jobs - total_executed_jobs
 
                 response['progress'] = {
@@ -83,7 +89,8 @@ class Progress(InstanceOperation):
                     'total_error_jobs': latest_group.jobs.filter(errors__isnull=False).distinct().count(),
                     'estimated_time_finishing': Progress.calculate_estimated_time_finishing(latest_group)
                 }
-
+        else:
+            raise Http404("Cannot find group with reference [%s]." % group_reference_name)
 
 
 
