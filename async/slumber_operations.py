@@ -78,7 +78,7 @@ class Progress(InstanceOperation):
         if not group.jobs.filter(executed__isnull=True):
             return group.jobs.latest('executed').executed
 
-    def get(self, request, response, app, models, group_reference_name):
+    def get(self, _request, response, _app, _models, group_reference_name):
         """The current progress and estimated completion time of the job.
         """
         groups = Group.objects.filter(reference=group_reference_name)
