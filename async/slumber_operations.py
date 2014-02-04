@@ -49,19 +49,24 @@ class Progress(InstanceOperation):
         """Estimate of the total amount of time (in seconds) that the group
         will take to execute.
         """
-        result = group.jobs.aggregate(job_count=Count('id'), executed_job_count=Count('executed'))
+        result = group.jobs.aggregate(
+            job_count=Count('id'), executed_job_count=Count('executed'))
         total_jobs = result['job_count']
         total_executed_jobs = result['executed_job_count']
         if total_jobs > 0:
             # Don't allow to calculate if executed jobs are not valid.
-            if total_executed_jobs == 0: return None
+            if total_executed_jobs == 0:
+                return None
             if group.jobs.filter(executed__isnull=True):
                 # Some jobs are unexecuted.
                 time_consumed = datetime.datetime.today() - group.created
-                estimated_time = (time_consumed.seconds/float(total_executed_jobs)) * total_jobs
+                estimated_time = ((
+                    time_consumed.seconds/float(total_executed_jobs))
+                        * total_jobs)
             else:
                 # All jobs in group are executed.
-                estimated_time = (Progress.latest_executed_job_time(group) - group.created).seconds
+                estimated_time = (Progress.latest_executed_job_time(group)
+                    - group.created).seconds
             return datetime.timedelta(seconds=estimated_time)
         else:
             return None
