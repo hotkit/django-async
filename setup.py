@@ -10,7 +10,7 @@ def read(fname1, fname2):
 
 setup(
     name = "django-async",
-    version = "0.5.4",
+    version = "0.5.4.2",
     author = "Kirit Saelensminde",
     author_email = "kirit@felspar.com",
     url='http://www.kirit.com/Django%20Async',
@@ -26,7 +26,7 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
         "License :: OSI Approved",
     ],
-    install_requires = ['lockfile', 'simplejson'],
+    install_requires = ['lockfile', 'simplejson', 'south'],
     packages = ['async',
         'async.tests',
         'async.management',
