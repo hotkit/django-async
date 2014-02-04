@@ -8,7 +8,7 @@ from django.shortcuts import Http404
 from django.db.models import Count
 
 from async import schedule
-from async.models import Group, Job
+from async.models import Group
 import datetime
 
 
