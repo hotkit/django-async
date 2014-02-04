@@ -72,7 +72,8 @@ class Progress(InstanceOperation):
         if groups:
             latest_group = groups.latest('created')
             print latest_group
-            result = latest_group.jobs.aggregate(job_count=Count('id'), executed_job_count=Count('executed'))
+            result = latest_group.jobs.aggregate(
+                job_count=Count('id'), executed_job_count=Count('executed'))
             total_jobs = result['job_count']
             total_executed_jobs = result['executed_job_count']
             if total_jobs > 0:
@@ -82,15 +83,18 @@ class Progress(InstanceOperation):
                     'id': latest_group.id,
                     'reference': latest_group.reference,
                     'created': latest_group.created,
-                    'last_job_completed': Progress.last_job_was_executed_was_executed(latest_group),
+                    'last_job_completed':
+                        self.last_job_was_executed_was_executed(latest_group),
                     'total_jobs': total_jobs,
                     'total_executed_jobs': total_executed_jobs,
                     'total_unexecuted_jobs': total_unexecuted_jobs,
-                    'total_error_jobs': latest_group.jobs.filter(errors__isnull=False).distinct().count(),
-                    'estimated_time_finishing': Progress.calculate_estimated_time_finishing(latest_group)
+                    'total_error_jobs':
+                        latest_group.jobs.filter(errors__isnull=False)
+                            .distinct().count(),
+                    'estimated_time_finishing':
+                        self.calculate_estimated_time_finishing(latest_group)
                 }
         else:
-            raise Http404("Cannot find group with reference [%s]." % group_reference_name)
-
-
+            raise Http404("Cannot find group with reference [%s]." %
+                group_reference_name)
 
