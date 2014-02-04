@@ -42,9 +42,13 @@ class Schedule(ModelOperation):
 
 
 class Progress(InstanceOperation):
-
+    """Return information about the progress of a job.
+    """
     @staticmethod
-    def calculate_estimated_time_finishing(group):
+    def estimate_execution_duration(group):
+        """Estimate of the total amount of time (in seconds) that the group
+        will take to execute.
+        """
         result = group.jobs.aggregate(job_count=Count('id'), executed_job_count=Count('executed'))
         total_jobs = result['job_count']
         total_executed_jobs = result['executed_job_count']
@@ -57,17 +61,21 @@ class Progress(InstanceOperation):
                 estimated_time = (time_consumed.seconds/float(total_executed_jobs)) * total_jobs
             else:
                 # All jobs in group are executed.
-                estimated_time = (Progress.last_job_was_executed_was_executed(group) - group.created).seconds
+                estimated_time = (Progress.latest_executed_job_time(group) - group.created).seconds
             return datetime.timedelta(seconds=estimated_time)
         else:
             return None
 
     @staticmethod
-    def last_job_was_executed_was_executed(group):
+    def latest_executed_job_time(group):
+        """When the last executed job in the group was completed.
+        """
         if not group.jobs.filter(executed__isnull=True):
             return group.jobs.latest('executed').executed
 
     def get(self, request, response, app, models, group_reference_name):
+        """The current progress and estimated completion time of the job.
+        """
         groups = Group.objects.filter(reference=group_reference_name)
         if groups:
             latest_group = groups.latest('created')
@@ -84,15 +92,15 @@ class Progress(InstanceOperation):
                     'reference': latest_group.reference,
                     'created': latest_group.created,
                     'last_job_completed':
-                        self.last_job_was_executed_was_executed(latest_group),
+                        self.latest_executed_job_time(latest_group),
                     'total_jobs': total_jobs,
                     'total_executed_jobs': total_executed_jobs,
                     'total_unexecuted_jobs': total_unexecuted_jobs,
                     'total_error_jobs':
                         latest_group.jobs.filter(errors__isnull=False)
                             .distinct().count(),
-                    'estimated_time_finishing':
-                        self.calculate_estimated_time_finishing(latest_group)
+                    'estimated_group_duration':
+                        self.estimate_execution_duration(latest_group)
                 }
         else:
             raise Http404("Cannot find group with reference [%s]." %

@@ -218,12 +218,12 @@ class TestProgress(TestCase):
         self.assertTrue(json_progress)
         self.assertEqual(json_progress.get('id'), group1.id)
         self.assertEqual(json_progress.get('created'), str(group1.created))
-        self.assertEqual(json_progress.get('last_job_completed'), str(Progress.last_job_was_executed_was_executed(group1)))
+        self.assertEqual(json_progress.get('last_job_completed'), str(Progress.latest_executed_job_time(group1)))
         self.assertEqual(json_progress.get('total_jobs'), group1.jobs.count())
         self.assertEqual(json_progress.get('total_executed_jobs'), 5)
         self.assertEqual(json_progress.get('total_unexecuted_jobs'), 0)
         self.assertEqual(json_progress.get('total_error_jobs'), 0)
-        self.assertEqual(json_progress.get('estimated_time_finishing'), str(Progress.calculate_estimated_time_finishing(group1)))
+        self.assertEqual(json_progress.get('estimated_group_duration'), str(Progress.estimate_execution_duration(group1)))
 
     def test_all_jobs_executed_with_error(self):
         from async.slumber_operations import Progress
@@ -254,9 +254,9 @@ class TestProgress(TestCase):
         self.assertTrue(json_progress)
         self.assertEqual(json_progress.get('id'), group1.id)
         self.assertEqual(json_progress.get('created'), str(group1.created))
-        self.assertEqual(json_progress.get('last_job_completed'), str(Progress.last_job_was_executed_was_executed(group1)))
+        self.assertEqual(json_progress.get('last_job_completed'), str(Progress.latest_executed_job_time(group1)))
         self.assertEqual(json_progress.get('total_jobs'), group1.jobs.count())
         self.assertEqual(json_progress.get('total_executed_jobs'), 5)
         self.assertEqual(json_progress.get('total_unexecuted_jobs'), 0)
         self.assertEqual(json_progress.get('total_error_jobs'), 2)
-        self.assertEqual(json_progress.get('estimated_time_finishing'), str(Progress.calculate_estimated_time_finishing(group1)))
+        self.assertEqual(json_progress.get('estimated_group_duration'), str(Progress.estimate_execution_duration(group1)))
