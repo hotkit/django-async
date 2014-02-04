@@ -53,7 +53,7 @@ class Job(models.Model):
 
     added = models.DateTimeField(auto_now_add=True)
     scheduled = models.DateTimeField(null=True, blank=True,
-        help_text = "If not set, will be executed ASAP")
+        help_text="If not set, will be executed ASAP")
     started = models.DateTimeField(null=True, blank=True)
     executed = models.DateTimeField(null=True, blank=True)
 
