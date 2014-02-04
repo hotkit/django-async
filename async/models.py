@@ -32,7 +32,9 @@ class Group(models.Model):
                 group__reference=self.reference,
                 executed__isnull=True
         ).count() > 0:
-            raise ValidationError("There have group reference [%s] has unexecuted jobs." % self.reference)
+            raise ValidationError(
+                "There have group reference [%s] has unexecuted jobs." %
+                    self.reference)
         return super(Group, self).save(*args, **kwargs)
 
 
@@ -70,9 +72,10 @@ class Job(models.Model):
         if self.group and self not in self.group.jobs.all():
             # Cannot add current job to latest group that have an executed job.
             if self.group.jobs.filter(executed__isnull=False).count() > 0:
-                raise ValidationError("Cannot add job [%s] to group [%s] because this group has executed jobs." % (
-                    self.name, self.group.reference
-                ))
+                raise ValidationError(
+                    "Cannot add job [%s] to group [%s] because this group "
+                        "has executed jobs." %
+                            (self.name, self.group.reference))
         self.identity = sha1(unicode(self)).hexdigest()
         return super(Job, self).save(*a, **kw)
 
