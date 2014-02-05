@@ -11,8 +11,8 @@ from async.models import Error, Job
 from async.utils import full_name
 
 
-def schedule(function, args = None, kwargs = None,
-        priority = 5, run_after= None, meta = None):
+def schedule(function, args=None, kwargs=None,
+        priority=5, run_after=None, meta=None):
     """Schedule a tast for execution.
     """
     # Too many arguments
@@ -26,7 +26,7 @@ def schedule(function, args = None, kwargs = None,
     return job
 
 
-def deschedule(function, args = None, kwargs = None):
+def deschedule(function, args=None, kwargs=None):
     """Remove any instances of the job from the queue.
     """
     job = Job(

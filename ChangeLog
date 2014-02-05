@@ -1,3 +1,12 @@
+2014-02-03 Siraset Jirapatchandej <siraset@proteus-tech.com>
+ Added group model for grouping job, slumber operation for that model.
+
+2013-11-20  Chirapat Harigulrak  <chirapat@proteus-tech.com>
+  Added jobs limit option into flush_queue command.
+
+2013-10-01  Alexei Gousev  <numegil@gmail.com>
+ Use a filelock to ensure that only a single instance of flush_queue can run at any time.
+
 2012-07-14  Kirit Saelensminde  <kirit@felspar.com>
  When a job errors it's priority is reduced in order to make sure that it won't block other jobs.
 

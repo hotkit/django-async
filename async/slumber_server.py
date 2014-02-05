@@ -3,10 +3,15 @@
 """
 from slumber import configure
 
-from async.models import Job
-from async.slumber_operations import Schedule
+from async.models import Job, Group
+from async.slumber_operations import Schedule, Progress
 
 
 configure(Job, operations_extra=[
-    (Schedule, 'schedule')])
+    (Schedule, 'schedule')
+])
+
+configure(Group, operations_extra=[
+    (Progress, 'progress'),
+])
 

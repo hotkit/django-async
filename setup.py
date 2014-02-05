@@ -10,10 +10,10 @@ def read(fname1, fname2):
 
 setup(
     name = "django-async",
-    version = "0.4.0.9",
+    version = "0.5.4.2",
     author = "Kirit Saelensminde",
     author_email = "kirit@felspar.com",
-    url='https://github.com/KayEss/django-async',
+    url='http://www.kirit.com/Django%20Async',
     description = "Asynchronous task execution with proper database transaction management for Django",
     long_description = read('README','README.markdown'),
     license = "Boost Software License - Version 1.0 - August 17th, 2003",
@@ -26,7 +26,7 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
         "License :: OSI Approved",
     ],
-    install_requires = ['simplejson'],
+    install_requires = ['lockfile', 'simplejson', 'south'],
     packages = ['async',
         'async.tests',
         'async.management',

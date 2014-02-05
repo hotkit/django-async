@@ -9,8 +9,32 @@ try:
 except ImportError:
     from datetime import datetime as timezone
 from optparse import make_option
+from lockfile import FileLock, AlreadyLocked
 
 from async.models import Job
+
+
+def acquire_lock(lockname):
+    """Return a decorator for the given lock name
+    """
+    def decorator(handler):
+        """Decorator for lock acquisition
+        """
+        def handle(self, **options):
+            """Acquire the lock before running the method.
+            """
+            lock = FileLock(lockname)
+            try:
+                lock.acquire(timeout=-1)
+            except AlreadyLocked:
+                print 'Lock is already set, aborting.'
+                return
+            try:
+                handler(self, **options)
+            finally:
+                lock.release()
+        return handle
+    return decorator
 
 
 class Command(BaseCommand):
@@ -24,13 +48,16 @@ class Command(BaseCommand):
     )
     help = 'Does a single pass over the asynchronous queue'
 
+    @acquire_lock('async_flush_queue')
     def handle(self, **options):
         """Command implementation.
 
         This implementation is pretty ugly, but does behave in the
         right way.
         """
-        while True:
+        jobs_limit = int(options.get('jobs') or 300)
+
+        for _ in xrange(jobs_limit):
             now = timezone.now()
             by_priority = (Job.objects
                 .filter(executed=None)

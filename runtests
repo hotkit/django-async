@@ -3,6 +3,7 @@ cd `dirname $0`
 
 source virtualenvwrapper.sh
 
+# virtualenvwrapper doesn't work with "set -e
 function check_worked {
     if ! $*
     then
