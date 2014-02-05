@@ -18,7 +18,7 @@ install:
     - "pip install -r test-projects/common.pip -r test-projects/django_${DJANGO}/setup.pip"
 
 before_script:
-  - psql -c 'create database async-exec;' -U postgres
+  - psql -c 'create database "async-exec";' -U postgres
 
 script:
     - "pylint --rcfile=pylintrc --output-format=colorized async"
