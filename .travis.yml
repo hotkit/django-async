@@ -5,8 +5,14 @@ python:
 
 env:
     - DJANGO=1_3
+    - DJANGO=1_4
 
-install: "pip install -r test-projects/common.pip -r test-projects/django_${DJANGO}/setup.pip"
+matrix:
+    allow_failures:
+        - env: DJANGO=1_4
+
+install:
+    - "pip install -r test-projects/common.pip -r test-projects/django_${DJANGO}/setup.pip"
 
 script:
     - "pylint --rcfile=pylintrc --output-format=colorized async"
