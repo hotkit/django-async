@@ -189,7 +189,8 @@ class TestSchedule(TestCase):
         self.assertEqual(j1.group.created, g3.created)
 
     def test_create_job_with_group_which_has_executed_job(self):
-        """
+        """Create job by assigning group which already has executed job.
+        So it should get ValidationError.
         """
         g1 = Group.objects.create(reference='test-group')
 
@@ -225,6 +226,8 @@ class TestProgress(TestCase):
         self.user.user_permissions.add(self.permission)
 
     def test_get_work(self):
+        """Test normol get request work.
+        """
         group_name = 'test-ddrun'
         group1 = Group.objects.create(reference=group_name)
         Job.objects.create(
@@ -265,7 +268,7 @@ class TestProgress(TestCase):
         self.assertIsNone(json_progress.get('estimated_time_finishing'))
 
     def test_no_any_job_in_group(self):
-        """ Create group but no job create for that group.
+        """Create group but no job create for that group.
         """
         group_name = 'test-ddrun'
         Group.objects.create(reference=group_name)
@@ -281,6 +284,8 @@ class TestProgress(TestCase):
         self.assertTrue(json.get('progress') is None)
 
     def test_all_jobs_executed(self):
+        """Test get detail from group with all executed jobs.
+        """
         from async.slumber_operations import Progress
 
         group1 = Group.objects.create(reference='drun1')
@@ -311,6 +316,8 @@ class TestProgress(TestCase):
         self.assertEqual(json_progress.get('estimated_group_duration'), str(Progress.estimate_execution_duration(group1)))
 
     def test_all_jobs_executed_with_error(self):
+        """Test get detail from group with job errors.
+        """
         from async.slumber_operations import Progress
 
         group1 = Group.objects.create(reference='drun1')
