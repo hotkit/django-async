@@ -7,21 +7,27 @@ from datetime import datetime
 from hashlib import sha1
 from simplejson import dumps
 
-from async.models import Error, Job
+from async.models import Error, Job, Group
 from async.utils import full_name
 
 
 def schedule(function, args=None, kwargs=None,
-        priority=5, run_after=None, meta=None):
+        priority=5, run_after=None, meta=None, group=None):
     """Schedule a tast for execution.
     """
     # Too many arguments
     # pylint: disable=R0913
+    if group:
+        expected_group = Group.objects.filter(reference=group).latest('created')
+    else:
+        expected_group = None
     job = Job(
         name=full_name(function),
             args=dumps(args or []), kwargs=dumps(kwargs or {}),
         meta=dumps(meta or {}), scheduled=run_after,
-        priority=priority)
+        priority=priority,
+        group=expected_group
+        )
     job.save()
     return job
 

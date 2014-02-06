@@ -5,6 +5,7 @@ from datetime import datetime
 from django.contrib.auth.models import User, Permission
 from django.test import TestCase
 from simplejson import dumps, loads
+from django.core.exceptions import ValidationError
 
 from async.models import Job, Group, Error
 
@@ -125,6 +126,90 @@ class TestSchedule(TestCase):
         self.assertEqual(json, dict(
             job=dict(id=job.id),
             _meta={'message': 'OK', 'status': 200, 'username': 'test'}))
+
+    def test_create_job_with_group(self):
+        """Create job with group reference.
+        """
+        group = Group.objects.create(
+                reference='test-group-1',
+                description='info'
+            )
+        response = self.client.post(self.URL, dict(
+                name='test-job-1',
+                run_after='2011-04-12 14:12:23',
+                group=group.reference
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        job = Job.objects.get(name='test-job-1')
+        self.assertEqual(job.group.reference, group.reference)
+
+    def test_create_job_with_non_exist_group(self):
+        """Create job with non exist group
+        """
+        response = self.client.post(self.URL, dict(
+                name='test-job-1',
+                run_after='2011-04-12 14:12:23',
+                group='non-exist-group'
+            )
+        )
+        self.assertEqual(response.status_code, 404)
+        json = loads(response.content)
+        self.assertEqual(json, dict(
+                _meta={
+                    'status': 404,
+                    'username': 'test',
+                    'message': 'Not Found'
+                },
+                error='Group matching query does not exist.'
+            )
+        )
+
+    def test_create_job_with_multiple_group_same_reference(self):
+        """Create job by assiging multiple group
+        current job should has been assign by latest group
+        """
+        g1 = Group.objects.create(reference='multiple-group')
+        g2 = Group.objects.create(reference='multiple-group')
+        g3 = Group.objects.create(reference='multiple-group')
+        response = self.client.post(self.URL, dict(
+            name='test-job-1',
+            run_after='2011-04-12 14:12:23',
+            group='multiple-group'
+        )
+        )
+        self.assertEqual(response.status_code, 200)
+        j1 = Job.objects.get(name='test-job-1')
+        self.assertEqual(Group.objects.filter(
+            reference='multiple-group').count(), 3
+        )
+        self.assertEqual(j1.group.reference, g3.reference)
+        self.assertNotEqual(j1.group.created, g1.created)
+        self.assertNotEqual(j1.group.created, g2.created)
+        self.assertEqual(j1.group.created, g3.created)
+
+    def test_create_job_with_group_which_has_executed_job(self):
+        """
+        """
+        g1 = Group.objects.create(reference='test-group')
+
+        j1 = Job.objects.create(
+            name='test-job-1',
+            args='[]',
+            kwargs='{}',
+            meta='{}',
+            priority=5,
+            group=g1
+        )
+        j1.executed = datetime(2014, 1, 1)
+        j1.save()
+        with self.assertRaises(ValidationError) as e:
+            response = self.client.post(self.URL, dict(
+                name='test-job-2',
+                run_after='2011-04-12 14:12:23',
+                group='test-group'
+            )
+            )
 
 
 class TestProgress(TestCase):
