@@ -12,7 +12,7 @@ from async.utils import full_name
 
 
 def schedule(function, args=None, kwargs=None,
-        priority=5, run_after=None, meta=None, group=None):
+        priority=5, run_after=None, group=None, meta=None):
     """Schedule a tast for execution.
     """
     # Too many arguments

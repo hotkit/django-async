@@ -8,6 +8,7 @@ from simplejson import dumps, loads
 from django.core.exceptions import ValidationError
 
 from async.models import Job, Group, Error
+from mock import patch
 
 
 # Instance of 'WSGIRequest' has no 'status_code' member
@@ -283,6 +284,14 @@ class TestProgress(TestCase):
         )
         self.assertTrue(json.get('progress') is None)
 
+    def test_no_group_valid_for_get_request(self):
+        """ Do get request to non exist group.
+        """
+        #TODO need to catch more specific exception
+        # now it just thrown TemplateDoesNotExist
+        with self.assertRaises(Exception) as e:
+            response = self.client.get(self.URL + 'fake-group/')
+
     def test_all_jobs_executed(self):
         """Test get detail from group with all executed jobs.
         """
@@ -290,9 +299,10 @@ class TestProgress(TestCase):
 
         group1 = Group.objects.create(reference='drun1')
         for i in range(5):
-            Job.objects.create(name='j-%s' % i, args='[]', kwargs='{}', meta='{}', priority=3, group=group1)
+            Job.objects.create(name='j-%s' % i, args='[]', kwargs='{}',
+                               meta='{}', priority=3, group=group1)
         for job in group1.jobs.all():
-            job.executed=datetime(2014,1,1)
+            job.executed = datetime(2014, 1, 1)
             job.save()
 
         test_url = self.URL + 'drun1/'
@@ -301,19 +311,21 @@ class TestProgress(TestCase):
 
         json = loads(response.content)
         self.assertEqual(json['_meta'],
-            {'message': 'OK', 'status': 200, 'username': 'test'}
+                         {'message': 'OK', 'status': 200, 'username': 'test'}
         )
 
         json_progress = json.get('progress')
         self.assertTrue(json_progress)
         self.assertEqual(json_progress.get('id'), group1.id)
         self.assertEqual(json_progress.get('created'), str(group1.created))
-        self.assertEqual(json_progress.get('last_job_completed'), str(Progress.latest_executed_job_time(group1)))
+        self.assertEqual(json_progress.get('last_job_completed'),
+                         str(Progress.latest_executed_job_time(group1)))
         self.assertEqual(json_progress.get('total_jobs'), group1.jobs.count())
         self.assertEqual(json_progress.get('total_executed_jobs'), 5)
         self.assertEqual(json_progress.get('total_unexecuted_jobs'), 0)
         self.assertEqual(json_progress.get('total_error_jobs'), 0)
-        self.assertEqual(json_progress.get('estimated_group_duration'), str(Progress.estimate_execution_duration(group1)))
+        self.assertEqual(json_progress.get('estimated_group_duration'),
+                         str(Progress.estimate_execution_duration(group1)))
 
     def test_all_jobs_executed_with_error(self):
         """Test get detail from group with job errors.
@@ -322,9 +334,10 @@ class TestProgress(TestCase):
 
         group1 = Group.objects.create(reference='drun1')
         for i in range(5):
-            Job.objects.create(name='j-%s' % i, args='[]', kwargs='{}', meta='{}', priority=3, group=group1)
+            Job.objects.create(name='j-%s' % i, args='[]', kwargs='{}',
+                               meta='{}', priority=3, group=group1)
         for job in group1.jobs.all():
-            job.executed=datetime(2014,1,1)
+            job.executed = datetime(2014, 1, 1)
             job.save()
 
         j1 = Job.objects.all()[0]
@@ -339,16 +352,65 @@ class TestProgress(TestCase):
 
         json = loads(response.content)
         self.assertEqual(json['_meta'],
-            {'message': 'OK', 'status': 200, 'username': 'test'}
+                         {'message': 'OK', 'status': 200, 'username': 'test'}
         )
 
         json_progress = json.get('progress')
         self.assertTrue(json_progress)
         self.assertEqual(json_progress.get('id'), group1.id)
         self.assertEqual(json_progress.get('created'), str(group1.created))
-        self.assertEqual(json_progress.get('last_job_completed'), str(Progress.latest_executed_job_time(group1)))
+        self.assertEqual(json_progress.get('last_job_completed'),
+                         str(Progress.latest_executed_job_time(group1)))
         self.assertEqual(json_progress.get('total_jobs'), group1.jobs.count())
         self.assertEqual(json_progress.get('total_executed_jobs'), 5)
         self.assertEqual(json_progress.get('total_unexecuted_jobs'), 0)
         self.assertEqual(json_progress.get('total_error_jobs'), 2)
-        self.assertEqual(json_progress.get('estimated_group_duration'), str(Progress.estimate_execution_duration(group1)))
+        self.assertEqual(json_progress.get('estimated_group_duration'),
+                         str(Progress.estimate_execution_duration(group1)))
+
+    def test_estimate_execution_duration_can_produce_result(self):
+        """Just to test if estimate function produce result,
+        not checking the result.
+        """
+        from datetime import datetime, timedelta
+        from async.slumber_operations import Progress
+
+        g1 = Group.objects.create(reference='test-group')
+        g1.created = datetime(2010,1,1)
+        g1.save()
+
+        def create_job_series(id):
+            j = Job.objects.create(
+                name='job-%s' % id,
+                args='[]',
+                kwargs='{}',
+                meta='{}',
+                priority=5,
+                group=g1
+            )
+            j.save()
+            j.added = datetime(2010 ,1 ,1)
+            j.save()
+            return j
+
+        j1, j2, j3, j4, j5, j6 = map(create_job_series, range(0, 6))
+        j1.executed = j1.added + timedelta(days=10)
+        j1.save()
+        j2.executed = j2.added + timedelta(days=10)
+        j2.save()
+
+        result = Progress.estimate_execution_duration(g1)
+
+        self.assertTrue(isinstance(result, timedelta))
+
+    def test_estimate_execution_duration_with_no_job_valid(self):
+        """Calculate function return None if no data for process.
+        """
+        from datetime import datetime
+        from async.slumber_operations import Progress
+        g1 = Group.objects.create(reference='test-group')
+        g1.created = datetime(2010, 1, 1)
+        g1.save()
+
+        result = Progress.estimate_execution_duration(g1)
+        self.assertIsNone(result)
