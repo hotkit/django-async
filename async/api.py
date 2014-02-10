@@ -52,9 +52,9 @@ def deschedule(function, args=None, kwargs=None):
     job = Job(
         name=full_name(function),
             args=dumps(args or []), kwargs=dumps(kwargs or {}))
-    mark_executed = Job.objects.filter(executed=None,
+    mark_cancelled = Job.objects.filter(executed=None,
         identity=sha1(unicode(job)).hexdigest())
-    mark_executed.update(executed=_get_today_dt())
+    mark_cancelled.update(cancelled=_get_today_dt())
 
 
 def health():

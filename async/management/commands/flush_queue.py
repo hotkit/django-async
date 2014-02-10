@@ -55,7 +55,7 @@ class Command(BaseCommand):
         for _ in xrange(jobs_limit):
             now = datetime.now()
             by_priority = (Job.objects
-                .filter(executed=None)
+                .filter(executed=None, cancelled=None)
                 .exclude(scheduled__gt=now)
                 .order_by('-priority'))
             number = by_priority.count()
