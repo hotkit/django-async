@@ -10,7 +10,7 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding field 'Job.cancelled'
         db.add_column('async_job', 'cancelled',
-                      self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True),
+                      self.gf('django.db.models.fields.DateTimeField')(default=None, null=True, blank=True),
                       keep_default=False)
 
 
@@ -39,7 +39,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Job'},
             'added': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'args': ('django.db.models.fields.TextField', [], {}),
-            'cancelled': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
+            'cancelled': ('django.db.models.fields.DateTimeField', [], {'default': 'None', 'null': 'True', 'blank': 'True'}),
             'executed': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'group': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'jobs'", 'null': 'True', 'to': "orm['async.Group']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),

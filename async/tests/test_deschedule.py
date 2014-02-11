@@ -36,7 +36,7 @@ class TestDeschedule(TestCase):
         self.assertEqual(job.name, 'async.tests.test_deschedule._example')
         deschedule('async.tests.test_deschedule._example')
         job = Job.objects.get(pk=job.pk)
-        self.assertIsNotNone(job.executed)
+        self.assertIsNotNone(job.cancelled)
 
     def test_deschedule_by_function(self):
         """We must be able to schedule a job by giving a function.
@@ -47,4 +47,4 @@ class TestDeschedule(TestCase):
             'async.tests.test_deschedule._example'))
         deschedule(_example)
         job = Job.objects.get(pk=job.pk)
-        self.assertIsNotNone(job.executed)
+        self.assertIsNotNone(job.cancelled)
