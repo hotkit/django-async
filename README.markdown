@@ -2,6 +2,8 @@ Django Async is an asynchronous execution queue for Django with proper database 
 
 Building a database backed task queue is a fairly trivial thing, but getting the database transactions exactly right is no simple matter.
 
+[![Build Status](https://travis-ci.org/KayEss/django-async.png?branch=develop)](https://travis-ci.org/KayEss/django-async)
+
 
 # Usage and documentation #
 

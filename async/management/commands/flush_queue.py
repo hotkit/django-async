@@ -20,7 +20,7 @@ def acquire_lock(lockname):
             """
             lock = FileLock(lockname)
             try:
-                lock.acquire(timeout = -1)
+                lock.acquire(timeout=-1)
             except AlreadyLocked:
                 print 'Lock is already set, aborting.'
                 return
@@ -50,7 +50,7 @@ class Command(BaseCommand):
         This implementation is pretty ugly, but does behave in the
         right way.
         """
-        jobs_limit = int(options.get('jobs') or 300 )
+        jobs_limit = int(options.get('jobs') or 300)
 
         for _ in xrange(jobs_limit):
             now = datetime.now()

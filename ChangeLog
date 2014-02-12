@@ -1,3 +1,9 @@
+2014-02-06 Siraset Jirapatchandej
+ Modified api to accept target group parameter.
+
+2014-02-03 Siraset Jirapatchandej <siraset@proteus-tech.com>
+ Added group model for grouping job, slumber operation for that model.
+
 2013-11-20  Chirapat Harigulrak  <chirapat@proteus-tech.com>
   Added jobs limit option into flush_queue command.
 
