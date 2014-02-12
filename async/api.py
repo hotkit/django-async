@@ -56,7 +56,11 @@ def health():
     return output
 
 
-def remove_old_jobs(remove_jobs_before_days):
+def get_today_dt():
+    return datetime.today()
+
+
+def remove_old_jobs(remove_jobs_before_days=None):
     """Remove old jobs start from these conditions
     - Job executed dt is elder that remove_jobs_before_days and
       it is not in any group.
@@ -65,19 +69,19 @@ def remove_old_jobs(remove_jobs_before_days):
     """
     if remove_jobs_before_days is None or not remove_jobs_before_days:
         remove_jobs_before_days = 30
-    start_remove_jobs_before_date = datetime.today().date() - timedelta(
+
+    start_remove_jobs_before_dt = get_today_dt() - timedelta(
         days=remove_jobs_before_days)
 
     jobs_does_not_belong_to_any_group = Q(group__isnull=True)
     jobs_all_executed_in_group = Q(group__jobs__executed__isnull=False)
     jobs_executed_before_this_day = Q(
-        executed__lt=start_remove_jobs_before_date)
+        executed__lt=start_remove_jobs_before_dt)
     conditions = jobs_does_not_belong_to_any_group | jobs_all_executed_in_group
-
     Job.objects.filter(conditions, jobs_executed_before_this_day).delete()
 
     def get_next_round():
-        return datetime.today() + timedelta(hours=8)
+        return get_today_dt() + timedelta(hours=8)
 
     schedule('async.api.remove_old_jobs', args=[remove_jobs_before_days],
              run_after=get_next_round())
