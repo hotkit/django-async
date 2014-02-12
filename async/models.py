@@ -57,7 +57,13 @@ class Job(models.Model):
     started = models.DateTimeField(null=True, blank=True)
     executed = models.DateTimeField(null=True, blank=True)
 
-    group = models.ForeignKey(Group, related_name='jobs', null=True, blank=True)
+    group = models.ForeignKey(
+        Group,
+        related_name='jobs',
+        null=True,
+        blank=True,
+        default=None
+    )
 
     def __unicode__(self):
         # __unicode__: Instance of 'bool' has no 'items' member
