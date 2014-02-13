@@ -61,8 +61,7 @@ class Job(models.Model):
         Group,
         related_name='jobs',
         null=True,
-        blank=True,
-        default=None
+        blank=True
     )
 
     def __unicode__(self):
