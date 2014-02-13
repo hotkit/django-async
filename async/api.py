@@ -77,7 +77,7 @@ def remove_old_jobs(remove_jobs_before_days=None):
 
     # jobs_does_not_belong_to_any_group = Q(group__isnull=True)
     # jobs_all_executed_in_group = Q(group__jobs__executed__isnull=False)
-    # conditions = jobs_does_not_belong_to_any_group | jobs_all_executed_in_group
+    # conditions = jobs_does_not_belong_to_any_group|jobs_all_executed_in_group
     #
     # jobs_executed_before_this_day = Q(
     #     executed__lt=start_remove_jobs_before_dt)
