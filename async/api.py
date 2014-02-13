@@ -88,15 +88,6 @@ def remove_old_jobs(remove_jobs_before_days=None):
         jobs_must_complete,
         jobs_executed_before_this_day
     )
-
-    print ''
-    print 'TODAY ', get_today_dt()
-    print 'STARTER DATE ', start_remove_jobs_before_dt
-    print 'All JOBS ', Job.objects.all().values('id', 'added', 'scheduled',
-                                                'executed')
-    print 'CANDIDATE ', candidates.values('id', 'added', 'scheduled',
-                                          'executed')
-    print ''
     candidates.delete()
 
     def get_next_round():

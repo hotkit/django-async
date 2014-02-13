@@ -156,3 +156,30 @@ class TestRemoveOldJobs(TestCase):
 
         self.assertEqual(
             Job.objects.filter(name__in=['job-1', 'job-2']).count(), 0)
+
+    @patch('async.api.get_today_dt')
+    def test_remove_old_job_with_no_param_sent(self, mock_get_today_dt):
+        """Test in case of no parameter sent to remove_old_jobs
+        """
+        test_base_dt = datetime.datetime(2014, 1, 31)
+        mock_get_today_dt.return_value = test_base_dt
+
+        j1, j2 = map(self.create_job, range(2))
+        j1.executed = test_base_dt - datetime.timedelta(days=31)
+        j1.save()
+
+        j2.executed = test_base_dt - datetime.timedelta(days=20)
+        j2.save()
+
+        api.remove_old_jobs()
+
+        # Should get remove_old_jobs for next round and j2
+        # j1 should gone now
+
+        self.assertEqual(Job.objects.all().count(), 2)
+        self.assertIsNotNone(Job.objects.filter(name=j2.name))
+
+    def test_get_today_dt(self):
+        result = api.get_today_dt()
+        self.assertIsNotNone(result)
+        self.assertTrue(isinstance(result, datetime.datetime))
