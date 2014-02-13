@@ -83,12 +83,11 @@ def remove_old_jobs(remove_jobs_before_days=None):
         executed__lt=start_remove_jobs_before_dt)
     jobs_must_complete = Q(executed__isnull=False)
 
-    candidates = Job.objects.filter(
+    Job.objects.filter(
         conditions,
         jobs_must_complete,
         jobs_executed_before_this_day
-    )
-    candidates.delete()
+    ).delete()
 
     def get_next_round():
         """Get new schedule time.
