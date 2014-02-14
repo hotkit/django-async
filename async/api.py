@@ -76,14 +76,11 @@ def remove_old_jobs(remove_jobs_before_days=30, resched_hours=8):
     start_remove_jobs_before_dt = get_today_dt() - timedelta(
         days=remove_jobs_before_days)
 
-    Job.objects.filter(
-        Q(group__isnull=True) | Q(group__jobs__executed__isnull=False),
-        Q(executed__isnull=False),
-        Q(executed__lt=start_remove_jobs_before_dt)
-    ).delete()
+    Job.objects.filter(Q(group__isnull=True), Q(executed__isnull=False),
+        Q(executed__lt=start_remove_jobs_before_dt)).delete()
 
     next_exec = get_today_dt() + timedelta(hours=resched_hours)
 
     schedule(remove_old_jobs,
-             args=[remove_jobs_before_days, resched_hours],
-             run_after=next_exec)
+        args=[remove_jobs_before_days, resched_hours],
+        run_after=next_exec)
