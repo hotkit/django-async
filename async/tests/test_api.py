@@ -26,8 +26,8 @@ class TestRemoveOldJobs(TestCase):
     """Tests removing old jobs.
     """
     @staticmethod
-    def create_job(jid):
-        return api.schedule('job-%s' % jid)
+    def create_job(jid, group=None):
+        return api.schedule('job-%s' % jid, group=group)
 
     @patch('async.api._get_today_dt')
     def test_job_reschedule_duration(self, mock_get_today_dt):
@@ -179,9 +179,7 @@ class TestRemoveOldJobs(TestCase):
     def test_groups__with_unexecuted_are_not_removed(self):
         test_base_dt = get_today_dt()
         group = Group.objects.create(reference='no-rm-group')
-        job = self.create_job('no-rm-group')
-        job.group = group
-        job.save()
+        job = self.create_job('no-rm-group', group)
 
         api.remove_old_jobs()
 
@@ -191,8 +189,7 @@ class TestRemoveOldJobs(TestCase):
     def test_groups_are_removed(self):
         test_base_dt = get_today_dt()
         group = Group.objects.create(reference='rm-group')
-        job = self.create_job('rm-group')
-        job.group = group
+        job = self.create_job('rm-group', group)
         job.executed = test_base_dt - datetime.timedelta(days=31)
         job.save()
 
@@ -205,8 +202,7 @@ class TestRemoveOldJobs(TestCase):
     def test_groups__with_young_jobs_are_not_removed(self):
         test_base_dt = get_today_dt()
         group = Group.objects.create(reference='not_rm-young-group')
-        job = self.create_job('not_rm-young-group')
-        job.group = group
+        job = self.create_job('not_rm-young-group', group)
         job.executed = test_base_dt - datetime.timedelta(days=16)
         job.save()
 
@@ -218,12 +214,8 @@ class TestRemoveOldJobs(TestCase):
     def test_groups__with_young_and_old_jobs_are_not_removed(self):
         test_base_dt = get_today_dt()
         group = Group.objects.create(reference='not_rm-mixed-group')
-        job1 = self.create_job('not_rm-mixed-group')
-        job1.group = group
-        job1.save()
-        job2 = self.create_job('not_rm-mixed-group')
-        job2.group = group
-        job2.save()
+        job1 = self.create_job('not_rm-mixed-group', group)
+        job2 = self.create_job('not_rm-mixed-group', group)
 
         job1.executed = test_base_dt - datetime.timedelta(days=45)
         job1.save()
