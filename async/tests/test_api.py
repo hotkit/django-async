@@ -208,3 +208,16 @@ class TestRemoveOldJobs(TestCase):
         self.assertEqual(Job.objects.all()[0].name, 'async.api.remove_old_jobs')
         self.assertEqual(Group.objects.all().count(), 0, Group.objects.all())
 
+    def test_groups__with_young_jobs_are_not_removed(self):
+        test_base_dt = get_today_dt()
+        group = Group.objects.create(reference='not_rm-young-group')
+        job = self.create_job('not_rm-young-group')
+        job.group = group
+        job.executed = test_base_dt - datetime.timedelta(days=16)
+        job.save()
+
+        api.remove_old_jobs()
+
+        self.assertEqual(Job.objects.all().count(), 2, Job.objects.all())
+        self.assertEqual(Group.objects.all().count(), 1, Group.objects.all())
+
