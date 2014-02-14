@@ -221,3 +221,23 @@ class TestRemoveOldJobs(TestCase):
         self.assertEqual(Job.objects.all().count(), 2, Job.objects.all())
         self.assertEqual(Group.objects.all().count(), 1, Group.objects.all())
 
+    def test_groups__with_young_and_old_jobs_are_not_removed(self):
+        test_base_dt = get_today_dt()
+        group = Group.objects.create(reference='not_rm-mixed-group')
+        job1 = self.create_job('not_rm-mixed-group')
+        job1.group = group
+        job1.save()
+        job2 = self.create_job('not_rm-mixed-group')
+        job2.group = group
+        job2.save()
+
+        job1.executed = test_base_dt - datetime.timedelta(days=45)
+        job1.save()
+        job2.executed = test_base_dt - datetime.timedelta(days=16)
+        job2.save()
+
+        api.remove_old_jobs()
+
+        self.assertEqual(Job.objects.all().count(), 3, Job.objects.all())
+        self.assertEqual(Group.objects.all().count(), 1, Group.objects.all())
+
