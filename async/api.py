@@ -62,16 +62,13 @@ def get_today_dt():
     return datetime.today()
 
 
-def remove_old_jobs(remove_jobs_before_days=None):
+def remove_old_jobs(remove_jobs_before_days=30, resched_hours=8):
     """Remove old jobs start from these conditions
     - Job executed dt is older than remove_jobs_before_days ago and
         it is not in any group.
     - Job executed dt is elder that start_date and
         is in group that all jobs (in that group) are executed.
     """
-    if remove_jobs_before_days is None or not remove_jobs_before_days:
-        remove_jobs_before_days = 30
-
     start_remove_jobs_before_dt = get_today_dt() - timedelta(
         days=remove_jobs_before_days)
 
@@ -81,10 +78,8 @@ def remove_old_jobs(remove_jobs_before_days=None):
         Q(executed__lt=start_remove_jobs_before_dt)
     ).delete()
 
-    def get_next_round():
-        """Get new schedule time.
-        """
-        return get_today_dt() + timedelta(hours=8)
+    next_exec = get_today_dt() + timedelta(hours=resched_hours)
 
-    schedule('async.api.remove_old_jobs', args=[remove_jobs_before_days],
-             run_after=get_next_round())
+    schedule(remove_old_jobs,
+             args=[remove_jobs_before_days, resched_hours],
+             run_after=next_exec)
