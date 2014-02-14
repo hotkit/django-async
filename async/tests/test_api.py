@@ -11,7 +11,7 @@ from mock import patch, Mock
 
 
 def get_today_dt():
-    return datetime.datetime.today()
+    return datetime.datetime.now()
 
 
 def get_d_before_today_by_days(d):
@@ -25,17 +25,15 @@ def get_d_before_dt_by_days(base_dt, d):
 class TestRemoveOldJobs(TestCase):
     """Tests removing old jobs.
     """
-    def setUp(self):
-        def create_test_job(jid):
-            return Job.objects.create(
-                name='job-%s' % jid,
-                args='[]',
-                kwargs='{}',
-                meta='{}',
-                priority=5
-            )
-
-        self.create_job = create_test_job
+    @staticmethod
+    def create_job(jid):
+        return Job.objects.create(
+            name='job-%s' % jid,
+            args='[]',
+            kwargs='{}',
+            meta='{}',
+            priority=5
+        )
 
     @patch('async.api._get_today_dt')
     def test_job_reschedule_duration(self, mock_get_today_dt):
@@ -183,3 +181,30 @@ class TestRemoveOldJobs(TestCase):
         result = api._get_today_dt()
         self.assertIsNotNone(result)
         self.assertTrue(isinstance(result, datetime.datetime))
+
+    def test_groups__with_unexecuted_are_not_removed(self):
+        test_base_dt = get_today_dt()
+        group = Group.objects.create(reference='no-rm-group')
+        job = self.create_job('no-rm-group')
+        job.group = group
+        job.save()
+
+        api.remove_old_jobs()
+
+        self.assertEqual(Job.objects.all().count(), 2, Job.objects.all())
+        self.assertEqual(Group.objects.all().count(), 1, Group.objects.all())
+
+    def test_groups_are_removed(self):
+        test_base_dt = get_today_dt()
+        group = Group.objects.create(reference='rm-group')
+        job = self.create_job('rm-group')
+        job.group = group
+        job.executed = test_base_dt - datetime.timedelta(days=31)
+        job.save()
+
+        api.remove_old_jobs()
+
+        self.assertEqual(Job.objects.all().count(), 1, Job.objects.all())
+        self.assertEqual(Job.objects.all()[0].name, 'async.api.remove_old_jobs')
+        self.assertEqual(Group.objects.all().count(), 0, Group.objects.all())
+

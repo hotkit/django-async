@@ -85,6 +85,10 @@ def remove_old_jobs(remove_jobs_before_days=30, resched_hours=8):
 
     Job.objects.filter(Q(group__isnull=True), Q(executed__isnull=False),
         Q(executed__lt=start_remove_jobs_before_dt)).delete()
+    groups = Group.objects.filter(Q(jobs__executed__isnull=False))
+    for group in groups.iterator():
+        group.jobs.all().delete()
+        group.delete()
 
     next_exec = _get_today_dt() + timedelta(hours=resched_hours)
 
