@@ -1,7 +1,10 @@
-2014-02-06 Siraset Jirapatchandej
+2014-02-12 Siraset Jirapatchandej  <siraset@proteus-tech.com>
+ Add a function that can be placed into the async queue for clearing out old jobs.
+
+2014-02-06 Siraset Jirapatchandej  <siraset@proteus-tech.com>
  Modified api to accept target group parameter.
 
-2014-02-03 Siraset Jirapatchandej <siraset@proteus-tech.com>
+2014-02-03 Siraset Jirapatchandej  <siraset@proteus-tech.com>
  Added group model for grouping job, slumber operation for that model.
 
 2013-11-20  Chirapat Harigulrak  <chirapat@proteus-tech.com>
