@@ -27,13 +27,7 @@ class TestRemoveOldJobs(TestCase):
     """
     @staticmethod
     def create_job(jid):
-        return Job.objects.create(
-            name='job-%s' % jid,
-            args='[]',
-            kwargs='{}',
-            meta='{}',
-            priority=5
-        )
+        return api.schedule('job-%s' % jid)
 
     @patch('async.api._get_today_dt')
     def test_job_reschedule_duration(self, mock_get_today_dt):
