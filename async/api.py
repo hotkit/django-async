@@ -64,10 +64,10 @@ def get_today_dt():
 
 def remove_old_jobs(remove_jobs_before_days=None):
     """Remove old jobs start from these conditions
-    - Job executed dt is elder that remove_jobs_before_days and
-      it is not in any group.
+    - Job executed dt is older than remove_jobs_before_days ago and
+        it is not in any group.
     - Job executed dt is elder that start_date and
-      is in group that all jobs (in that group) are executed.
+        is in group that all jobs (in that group) are executed.
     """
     if remove_jobs_before_days is None or not remove_jobs_before_days:
         remove_jobs_before_days = 30
