@@ -64,10 +64,14 @@ def get_today_dt():
 
 def remove_old_jobs(remove_jobs_before_days=30, resched_hours=8):
     """Remove old jobs start from these conditions
-    - Job executed dt is older than remove_jobs_before_days ago and
-        it is not in any group.
-    - Job executed dt is elder that start_date and
-        is in group that all jobs (in that group) are executed.
+
+    Removal date for jobs is `remove_jobs_before_days` days earlier
+    than when this is executed.
+
+    It will delete jobs and groups that meet the following:
+    - Jobs execute before the removal date and which are not in any group.
+    - Groups (and their jobs) where all jobs have executed before the removal
+        date.
     """
     start_remove_jobs_before_dt = get_today_dt() - timedelta(
         days=remove_jobs_before_days)
