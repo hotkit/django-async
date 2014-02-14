@@ -21,7 +21,6 @@ check_worked pylint --rcfile=pylintrc --output-format=colorized async
 
 workon async_1.4
 cd test-projects/django_1_4
-export REUSE_DB=1
 echo "Django 1.4 (USE_TZ=False)"
 check_worked python manage.py test async
 echo "Django 1.4 (USE_TZ=True)"
