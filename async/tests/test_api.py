@@ -37,7 +37,7 @@ class TestRemoveOldJobs(TestCase):
 
         self.create_job = create_test_job
 
-    @patch('async.api.get_today_dt')
+    @patch('async.api._get_today_dt')
     def test_job_reschedule_duration(self, mock_get_today_dt):
         """Test if next schedule with run in 8 hrs
         """
@@ -62,7 +62,7 @@ class TestRemoveOldJobs(TestCase):
                ).total_seconds()/3600.
         self.assertTrue(diff == 8.0)
 
-    @patch('async.api.get_today_dt')
+    @patch('async.api._get_today_dt')
     def test_job_reschedule(self, mock_get_today_dt):
         """Test deal with only remove_old_jobs job
         - it should remove old remove_old_jobs job
@@ -126,7 +126,7 @@ class TestRemoveOldJobs(TestCase):
         self.assertEqual(
             Job.objects.filter(name=job_name, executed__isnull=True).count(), 1)
 
-    @patch('async.api.get_today_dt')
+    @patch('async.api._get_today_dt')
     def test_remove_jobs(self, mock_get_today_dt):
         """ job name job-0 must be removed after flush_queue run.
         """
@@ -157,7 +157,7 @@ class TestRemoveOldJobs(TestCase):
         self.assertEqual(
             Job.objects.filter(name__in=['job-1', 'job-2']).count(), 0)
 
-    @patch('async.api.get_today_dt')
+    @patch('async.api._get_today_dt')
     def test_remove_old_job_with_no_param_sent(self, mock_get_today_dt):
         """Test in case of no parameter sent to remove_old_jobs
         """
@@ -180,6 +180,6 @@ class TestRemoveOldJobs(TestCase):
         self.assertIsNotNone(Job.objects.filter(name=j2.name))
 
     def test_get_today_dt(self):
-        result = api.get_today_dt()
+        result = api._get_today_dt()
         self.assertIsNotNone(result)
         self.assertTrue(isinstance(result, datetime.datetime))
