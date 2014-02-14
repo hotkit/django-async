@@ -6,7 +6,7 @@ from django.core import management
 
 import datetime
 from async import api
-from async.models import Job, Group
+from async.models import Job, Group, Error
 from mock import patch, Mock
 
 
@@ -27,7 +27,9 @@ class TestRemoveOldJobs(TestCase):
     """
     @staticmethod
     def create_job(jid, group=None):
-        return api.schedule('job-%s' % jid, group=group)
+        job = api.schedule('job-%s' % jid, group=group)
+        Error.objects.create(job=job, exception='Error', traceback='code stack')
+        return job
 
     @patch('async.api._get_today_dt')
     def test_job_reschedule_duration(self, mock_get_today_dt):
@@ -163,6 +165,8 @@ class TestRemoveOldJobs(TestCase):
         j2.executed = test_base_dt - datetime.timedelta(days=20)
         j2.save()
 
+        self.assertEqual(Error.objects.all().count(), 2)
+
         api.remove_old_jobs()
 
         # Should get remove_old_jobs for next round and j2
@@ -170,6 +174,7 @@ class TestRemoveOldJobs(TestCase):
 
         self.assertEqual(Job.objects.all().count(), 2)
         self.assertIsNotNone(Job.objects.filter(name=j2.name))
+        self.assertEqual(Error.objects.all().count(), 1, Error.objects.all())
 
     def test_get_today_dt(self):
         result = api._get_today_dt()
@@ -185,6 +190,7 @@ class TestRemoveOldJobs(TestCase):
 
         self.assertEqual(Job.objects.all().count(), 2, Job.objects.all())
         self.assertEqual(Group.objects.all().count(), 1, Group.objects.all())
+        self.assertEqual(Error.objects.all().count(), 1, Error.objects.all())
 
     def test_groups_are_removed(self):
         test_base_dt = get_today_dt()
@@ -198,6 +204,7 @@ class TestRemoveOldJobs(TestCase):
         self.assertEqual(Job.objects.all().count(), 1, Job.objects.all())
         self.assertEqual(Job.objects.all()[0].name, 'async.api.remove_old_jobs')
         self.assertEqual(Group.objects.all().count(), 0, Group.objects.all())
+        self.assertEqual(Error.objects.all().count(), 0, Error.objects.all())
 
     def test_groups__with_young_jobs_are_not_removed(self):
         test_base_dt = get_today_dt()
@@ -210,6 +217,7 @@ class TestRemoveOldJobs(TestCase):
 
         self.assertEqual(Job.objects.all().count(), 2, Job.objects.all())
         self.assertEqual(Group.objects.all().count(), 1, Group.objects.all())
+        self.assertEqual(Error.objects.all().count(), 1, Error.objects.all())
 
     def test_groups__with_young_and_old_jobs_are_not_removed(self):
         test_base_dt = get_today_dt()
@@ -226,4 +234,5 @@ class TestRemoveOldJobs(TestCase):
 
         self.assertEqual(Job.objects.all().count(), 3, Job.objects.all())
         self.assertEqual(Group.objects.all().count(), 1, Group.objects.all())
+        self.assertEqual(Error.objects.all().count(), 2, Error.objects.all())
 
