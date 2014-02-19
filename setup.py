@@ -30,5 +30,7 @@ setup(
     packages = ['async',
         'async.tests',
         'async.management',
-        'async.management.commands'],
+        'async.management.commands',
+        'async.migrations',
+    ],
 )
