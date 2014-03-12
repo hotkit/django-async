@@ -26,7 +26,7 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
         "License :: OSI Approved",
     ],
-    install_requires = ['lockfile', 'simplejson', 'south'],
+    install_requires = ['lockfile', 'simplejson'],
     packages = ['async',
         'async.tests',
         'async.management',
