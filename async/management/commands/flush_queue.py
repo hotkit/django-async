@@ -92,5 +92,6 @@ class Command(BaseCommand):
         which = int(options.get('which') or 0)
         outof = int(options.get('outof') or 1)
 
-        acquire_lock('async_flush_queue')(run_queue)(which, outof, jobs_limit)
+        acquire_lock('async_flush_queue%s' % which)(
+            run_queue)(which, outof, jobs_limit)
 
