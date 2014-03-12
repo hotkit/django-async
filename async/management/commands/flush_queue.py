@@ -32,7 +32,7 @@ def acquire_lock(lockname):
     return decorator
 
 
-def run_queue(_which, _outof, limit):
+def run_queue(which, outof, limit):
     """
         Code that actually executes the jobs in the queue.
 
@@ -53,9 +53,10 @@ def run_queue(_which, _outof, limit):
             """Run the jobs handed to it
             """
             for job in jobs.iterator():
-                print "%s: %s" % (job.id, unicode(job))
-                job.execute()
-                return False
+                if job.id % outof == which % outof:
+                    print "%s: %s" % (job.id, unicode(job))
+                    job.execute()
+                    return False
             return True
         priority = by_priority[0].priority
         if run(Job.objects
@@ -76,6 +77,10 @@ class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--jobs', '-j', dest='jobs',
             help='The maximum number of jobs to run'),
+        make_option('--which', '-j', dest='which',
+            help='The worker ID number'),
+        make_option('--outof', '-j', dest='outof',
+            help='How many workers there are'),
     )
     help = 'Does a single pass over the asynchronous queue'
 
@@ -84,6 +89,8 @@ class Command(BaseCommand):
             Command implementation.
         """
         jobs_limit = int(options.get('jobs') or 300)
+        which = int(options.get('which') or 0)
+        outof = int(options.get('outof') or 1)
 
-        acquire_lock('async_flush_queue')(run_queue)(0, 1, jobs_limit)
+        acquire_lock('async_flush_queue')(run_queue)(which, outof, jobs_limit)
 
