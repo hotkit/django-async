@@ -1,3 +1,6 @@
+2014-03-12 Kirit Saelensminde  <kirit@felspar.com>
+ Add the ability to have multiple workers so that throughput and latency can be improved.
+
 2014-02-12 Siraset Jirapatchandej  <siraset@proteus-tech.com>
  Add a function that can be placed into the async queue for clearing out old jobs.
 
