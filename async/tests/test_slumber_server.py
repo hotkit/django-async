@@ -227,7 +227,7 @@ class TestProgress(TestCase):
         self.user.user_permissions.add(self.permission)
 
     def test_get_work(self):
-        """Test normol get request work.
+        """Test normal get request work.
         """
         group_name = 'test-ddrun'
         group1 = Group.objects.create(reference=group_name)
