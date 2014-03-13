@@ -24,7 +24,6 @@ class TestSlumber(TestCase):
     def test_slumber_root(self):
         """Make sure Slumber is properly wired in.
         """
-
         response = self.client.get('/slumber/')
         self.assertEqual(response.status_code, 200)
         json = loads(response.content)
@@ -212,8 +211,7 @@ class TestSchedule(WithUser, TestCase):
             response = self.client.post(self.URL, dict(
                 name='test-job-2',
                 run_after='2011-04-12 14:12:23',
-                group='test-group'
-            )
+                group='test-group')
             )
 
 
@@ -305,8 +303,7 @@ class TestProgress(WithUser, TestCase):
 
         json = loads(response.content)
         self.assertEqual(json['_meta'],
-                         {'message': 'OK', 'status': 200, 'username': 'test'}
-        )
+            {'message': 'OK', 'status': 200, 'username': 'test'})
 
         json_progress = json.get('progress')
         self.assertTrue(json_progress)
@@ -346,8 +343,7 @@ class TestProgress(WithUser, TestCase):
 
         json = loads(response.content)
         self.assertEqual(json['_meta'],
-                         {'message': 'OK', 'status': 200, 'username': 'test'}
-        )
+            {'message': 'OK', 'status': 200, 'username': 'test'})
 
         json_progress = json.get('progress')
         self.assertTrue(json_progress)
