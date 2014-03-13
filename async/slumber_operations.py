@@ -2,7 +2,7 @@
     Implementation of the Slumber operations.
 """
 from slumber.operations import ModelOperation, InstanceOperation
-from slumber.server.http import require_permission
+from slumber.server.http import require_user, require_permission
 
 from django.shortcuts import Http404
 from django.db.models import Count
@@ -80,6 +80,7 @@ class Progress(InstanceOperation):
         if not group.jobs.filter(executed__isnull=True):
             return group.jobs.latest('executed').executed
 
+    @require_user
     def get(self, _request, response, _app, _models, group_reference_name):
         """The current progress and estimated completion time of the job.
         """
