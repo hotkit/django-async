@@ -47,18 +47,21 @@ class TestSlumber(TestCase):
             _meta={'message': 'OK', 'status': 200}))
 
 
-class TestSchedule(TestCase):
-    """Make sure the schedule API wrapper works.
-    """
-    URL = '/slumber/async/Job/schedule/'
+class WithUser(object):
     def setUp(self):
-        super(TestSchedule, self).setUp()
+        super(WithUser, self).setUp()
         self.user = User.objects.create(username='test')
         self.user.set_password('password')
         self.user.save()
         self.client.login(username='test', password='password')
         self.permission = Permission.objects.get(codename='add_job')
         self.user.user_permissions.add(self.permission)
+
+
+class TestSchedule(WithUser, TestCase):
+    """Make sure the schedule API wrapper works.
+    """
+    URL = '/slumber/async/Job/schedule/'
 
     def test_get_works(self):
         """Make sure the operation is wired in. Don't expect any output yet.
@@ -214,17 +217,8 @@ class TestSchedule(TestCase):
             )
 
 
-class TestProgress(TestCase):
+class TestProgress(WithUser, TestCase):
     URL = '/slumber/async/Group/progress/'
-
-    def setUp(self):
-        super(TestProgress, self).setUp()
-        self.user = User.objects.create(username='test')
-        self.user.set_password('password')
-        self.user.save()
-        self.client.login(username='test', password='password')
-        self.permission = Permission.objects.get(codename='add_job')
-        self.user.user_permissions.add(self.permission)
 
     def test_get_work(self):
         """Test normal get request work.
