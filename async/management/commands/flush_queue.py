@@ -77,9 +77,9 @@ class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--jobs', '-j', dest='jobs',
             help='The maximum number of jobs to run'),
-        make_option('--which', '-j', dest='which',
+        make_option('--which', '-w', dest='which',
             help='The worker ID number'),
-        make_option('--outof', '-j', dest='outof',
+        make_option('--outof', '-o', dest='outof',
             help='How many workers there are'),
     )
     help = 'Does a single pass over the asynchronous queue'
