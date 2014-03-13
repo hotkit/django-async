@@ -24,7 +24,6 @@ class TestSlumber(TestCase):
     def test_slumber_root(self):
         """Make sure Slumber is properly wired in.
         """
-
         response = self.client.get('/slumber/')
         self.assertEqual(response.status_code, 200)
         json = loads(response.content)
@@ -47,18 +46,21 @@ class TestSlumber(TestCase):
             _meta={'message': 'OK', 'status': 200}))
 
 
-class TestSchedule(TestCase):
-    """Make sure the schedule API wrapper works.
-    """
-    URL = '/slumber/async/Job/schedule/'
+class WithUser(object):
     def setUp(self):
-        super(TestSchedule, self).setUp()
+        super(WithUser, self).setUp()
         self.user = User.objects.create(username='test')
         self.user.set_password('password')
         self.user.save()
         self.client.login(username='test', password='password')
         self.permission = Permission.objects.get(codename='add_job')
         self.user.user_permissions.add(self.permission)
+
+
+class TestSchedule(WithUser, TestCase):
+    """Make sure the schedule API wrapper works.
+    """
+    URL = '/slumber/async/Job/schedule/'
 
     def test_get_works(self):
         """Make sure the operation is wired in. Don't expect any output yet.
@@ -209,25 +211,15 @@ class TestSchedule(TestCase):
             response = self.client.post(self.URL, dict(
                 name='test-job-2',
                 run_after='2011-04-12 14:12:23',
-                group='test-group'
-            )
+                group='test-group')
             )
 
 
-class TestProgress(TestCase):
+class TestProgress(WithUser, TestCase):
     URL = '/slumber/async/Group/progress/'
 
-    def setUp(self):
-        super(TestProgress, self).setUp()
-        self.user = User.objects.create(username='test')
-        self.user.set_password('password')
-        self.user.save()
-        self.client.login(username='test', password='password')
-        self.permission = Permission.objects.get(codename='add_job')
-        self.user.user_permissions.add(self.permission)
-
     def test_get_work(self):
-        """Test normol get request work.
+        """Test normal get request work.
         """
         group_name = 'test-ddrun'
         group1 = Group.objects.create(reference=group_name)
@@ -266,7 +258,8 @@ class TestProgress(TestCase):
         self.assertEqual(json_progress.get('total_executed_jobs'), 0)
         self.assertEqual(json_progress.get('total_unexecuted_jobs'), 2)
         self.assertEqual(json_progress.get('total_error_jobs'), 0)
-        self.assertIsNone(json_progress.get('estimated_time_finishing'))
+        self.assertIsNone(json_progress.get('estimated_total_time'))
+        self.assertIsNone(json_progress.get('remaining_seconds'))
 
     def test_no_any_job_in_group(self):
         """Create group but no job create for that group.
@@ -311,8 +304,7 @@ class TestProgress(TestCase):
 
         json = loads(response.content)
         self.assertEqual(json['_meta'],
-                         {'message': 'OK', 'status': 200, 'username': 'test'}
-        )
+            {'message': 'OK', 'status': 200, 'username': 'test'})
 
         json_progress = json.get('progress')
         self.assertTrue(json_progress)
@@ -324,8 +316,8 @@ class TestProgress(TestCase):
         self.assertEqual(json_progress.get('total_executed_jobs'), 5)
         self.assertEqual(json_progress.get('total_unexecuted_jobs'), 0)
         self.assertEqual(json_progress.get('total_error_jobs'), 0)
-        self.assertEqual(json_progress.get('estimated_group_duration'),
-                         str(Progress.estimate_execution_duration(group1)))
+        self.assertEqual(json_progress.get('estimated_total_time'),
+                         str(Progress.estimate_execution_duration(group1)[0]))
 
     def test_all_jobs_executed_with_error(self):
         """Test get detail from group with job errors.
@@ -352,8 +344,7 @@ class TestProgress(TestCase):
 
         json = loads(response.content)
         self.assertEqual(json['_meta'],
-                         {'message': 'OK', 'status': 200, 'username': 'test'}
-        )
+            {'message': 'OK', 'status': 200, 'username': 'test'})
 
         json_progress = json.get('progress')
         self.assertTrue(json_progress)
@@ -365,8 +356,8 @@ class TestProgress(TestCase):
         self.assertEqual(json_progress.get('total_executed_jobs'), 5)
         self.assertEqual(json_progress.get('total_unexecuted_jobs'), 0)
         self.assertEqual(json_progress.get('total_error_jobs'), 2)
-        self.assertEqual(json_progress.get('estimated_group_duration'),
-                         str(Progress.estimate_execution_duration(group1)))
+        self.assertEqual(json_progress.get('estimated_total_time'),
+                         str(Progress.estimate_execution_duration(group1)[0]))
 
     def test_estimate_execution_duration_can_produce_result(self):
         """Just to test if estimate function produce result,
@@ -399,9 +390,10 @@ class TestProgress(TestCase):
         j2.executed = j2.added + timedelta(days=10)
         j2.save()
 
-        result = Progress.estimate_execution_duration(g1)
+        total, remaining = Progress.estimate_execution_duration(g1)
+        self.assertTrue(isinstance(total, timedelta))
+        self.assertTrue(isinstance(remaining, timedelta))
 
-        self.assertTrue(isinstance(result, timedelta))
 
     def test_estimate_execution_duration_with_no_job_valid(self):
         """Calculate function return None if no data for process.
@@ -412,5 +404,7 @@ class TestProgress(TestCase):
         g1.created = datetime(2010, 1, 1)
         g1.save()
 
-        result = Progress.estimate_execution_duration(g1)
-        self.assertIsNone(result)
+        total, remaining = Progress.estimate_execution_duration(g1)
+        self.assertIsNone(total)
+        self.assertIsNone(remaining)
+
