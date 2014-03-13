@@ -391,7 +391,6 @@ class TestProgress(WithUser, TestCase):
         j2.save()
 
         total, remaining = Progress.estimate_execution_duration(g1)
-
         self.assertTrue(isinstance(total, timedelta))
         self.assertTrue(isinstance(remaining, timedelta))
 

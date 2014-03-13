@@ -97,7 +97,8 @@ class Progress(InstanceOperation):
             if total_jobs > 0:
                 total_unexecuted_jobs = total_jobs - total_executed_jobs
 
-                total, remaining = self.estimate_execution_duration(latest_group)
+                total, remaining = \
+                    self.estimate_execution_duration(latest_group)
                 response['progress'] = {
                     'id': latest_group.id,
                     'reference': latest_group.reference,
@@ -111,7 +112,8 @@ class Progress(InstanceOperation):
                         latest_group.jobs.filter(errors__isnull=False)
                             .distinct().count(),
                     'estimated_total_time': total,
-                    'remaining_seconds': remaining
+                    'remaining_seconds':
+                        remaining.seconds if remaining else None
                 }
         else:
             raise Http404("Cannot find group with reference [%s]." %
