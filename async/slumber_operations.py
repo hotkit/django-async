@@ -89,7 +89,6 @@ class Progress(InstanceOperation):
         groups = Group.objects.filter(reference=group_reference_name)
         if groups:
             latest_group = groups.latest('created')
-            print latest_group
             result = latest_group.jobs.aggregate(
                 job_count=Count('id'), executed_job_count=Count('executed'))
             total_jobs = result['job_count']
