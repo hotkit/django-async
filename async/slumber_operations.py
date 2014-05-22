@@ -2,7 +2,7 @@
     Implementation of the Slumber operations.
 """
 from slumber.operations import ModelOperation, InstanceOperation
-from slumber.server.http import require_permission
+from slumber.server.http import require_user, require_permission
 
 from django.shortcuts import Http404
 from django.db.models import Count
@@ -58,20 +58,22 @@ class Progress(InstanceOperation):
         if total_jobs > 0:
             # Don't allow to calculate if executed jobs are not valid.
             if total_executed_jobs == 0:
-                return None
+                return None, None
             if group.jobs.filter(executed__isnull=True):
                 # Some jobs are unexecuted.
-                time_consumed = datetime.datetime.today() - group.created
-                estimated_time = ((
+                time_consumed = datetime.datetime.now() - group.created
+                estimated_time = datetime.timedelta(seconds=(
                     time_consumed.seconds/float(total_executed_jobs))
                         * total_jobs)
+                remaining = estimated_time - time_consumed
             else:
                 # All jobs in group are executed.
                 estimated_time = (Progress.latest_executed_job_time(group)
-                    - group.created).seconds
-            return datetime.timedelta(seconds=estimated_time)
+                    - group.created)
+                remaining = datetime.timedelta(seconds=0)
+            return estimated_time, remaining
         else:
-            return None
+            return None, None
 
     @staticmethod
     def latest_executed_job_time(group):
@@ -80,13 +82,13 @@ class Progress(InstanceOperation):
         if not group.jobs.filter(executed__isnull=True):
             return group.jobs.latest('executed').executed
 
+    @require_user
     def get(self, _request, response, _app, _models, group_reference_name):
         """The current progress and estimated completion time of the job.
         """
         groups = Group.objects.filter(reference=group_reference_name)
         if groups:
             latest_group = groups.latest('created')
-            print latest_group
             result = latest_group.jobs.aggregate(
                 job_count=Count('id'), executed_job_count=Count('executed'))
             total_jobs = result['job_count']
@@ -94,6 +96,8 @@ class Progress(InstanceOperation):
             if total_jobs > 0:
                 total_unexecuted_jobs = total_jobs - total_executed_jobs
 
+                total, remaining = \
+                    self.estimate_execution_duration(latest_group)
                 response['progress'] = {
                     'id': latest_group.id,
                     'reference': latest_group.reference,
@@ -106,8 +110,9 @@ class Progress(InstanceOperation):
                     'total_error_jobs':
                         latest_group.jobs.filter(errors__isnull=False)
                             .distinct().count(),
-                    'estimated_group_duration':
-                        self.estimate_execution_duration(latest_group)
+                    'estimated_total_time': total,
+                    'remaining_seconds':
+                        remaining.seconds if remaining else None
                 }
         else:
             raise Http404("Cannot find group with reference [%s]." %

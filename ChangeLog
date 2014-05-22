@@ -2,6 +2,12 @@
  Add field cancelled to job
  Make remove old job function include cancelled jobs
 
+2014-03-13 Kirit Saelensminde  <kirit@felspar.com>
+ Changed the progress `estimated_group_duration` to `estimated_total_time` and added in `remaining_seconds` to the Slumber progress operation.
+
+2014-03-12 Kirit Saelensminde  <kirit@felspar.com>
+ Add the ability to have multiple workers so that throughput and latency can be improved.
+
 2014-02-12 Siraset Jirapatchandej  <siraset@proteus-tech.com>
  Add a function that can be placed into the async queue for clearing out old jobs.
 
