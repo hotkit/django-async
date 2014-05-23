@@ -3,23 +3,26 @@
 """
 from django.test import TestCase
 from django.core import management
+try:
+    # No name 'timezone' in module 'django.utils'
+    # pylint: disable=E0611
+    from django.utils import timezone
+except ImportError:
+    from datetime import datetime as timezone
 
 import datetime
+
 from async import api
 from async.models import Job, Group, Error
 from mock import patch, Mock
 
 
-def get_today_dt():
-    return datetime.datetime.now()
-
-
-def get_d_before_today_by_days(d):
-    return get_today_dt().date() - datetime.timedelta(days=d)
+def get_now():
+    return timezone.now()
 
 
 def get_d_before_dt_by_days(base_dt, d):
-    return base_dt.date() - datetime.timedelta(days=d)
+    return base_dt - datetime.timedelta(days=d)
 
 
 class TestRemoveOldJobs(TestCase):
@@ -31,12 +34,12 @@ class TestRemoveOldJobs(TestCase):
         Error.objects.create(job=job, exception='Error', traceback='code stack')
         return job
 
-    @patch('async.api._get_today_dt')
+    @patch('async.api._get_now')
     def test_job_reschedule_duration(self, mock_get_today_dt):
         """Test if next schedule with run in 8 hrs
         """
 
-        today_dt = datetime.datetime.today()
+        today_dt = timezone.now()
         mock_get_today_dt.return_value = today_dt
         job_name = 'async.api.remove_old_jobs'
 
@@ -51,19 +54,17 @@ class TestRemoveOldJobs(TestCase):
 
         # Check scheduled time of new job instance (which same name)
         # is more than current time = 8.0.
-        diff = (
-                   expected_job.scheduled - today_dt
-               ).total_seconds()/3600.
+        diff = (expected_job.scheduled - today_dt).total_seconds()/3600.
         self.assertTrue(diff == 8.0)
 
-    @patch('async.api._get_today_dt')
+    @patch('async.api._get_now')
     def test_job_reschedule(self, mock_get_today_dt):
         """Test deal with only remove_old_jobs job
         - it should remove old remove_old_jobs job
         - it should get new reschedule remove_old_jobs job
         """
 
-        today_dt = datetime.datetime.today()
+        today_dt = timezone.now()
         mock_get_today_dt.return_value = today_dt
         job_name = 'async.api.remove_old_jobs'
 
@@ -120,24 +121,23 @@ class TestRemoveOldJobs(TestCase):
         self.assertEqual(
             Job.objects.filter(name=job_name, executed__isnull=True).count(), 1)
 
-    @patch('async.api._get_today_dt')
+    @patch('async.api._get_now')
     def test_remove_jobs(self, mock_get_today_dt):
         """ job name job-0 must be removed after flush_queue run.
         """
-        mock_get_today_dt.return_value = datetime.datetime(2014, 1, 31)
+        mock_get_today_dt.return_value = (
+            get_now() - datetime.timedelta(days=60))
 
         j1, j2, j3 = map(self.create_job, range(3))
 
-        j1.executed = get_d_before_dt_by_days(datetime.datetime(2014, 1, 31),
-                                              30)
+        j1.executed = get_d_before_dt_by_days(
+            mock_get_today_dt.return_value, 30)
         j1.save()
-
-        j2.executed = get_d_before_dt_by_days(datetime.datetime(2014, 1, 31),
-                                              15)
+        j2.executed = get_d_before_dt_by_days(
+            mock_get_today_dt.return_value, 15)
         j2.save()
-
-        j3.executed = get_d_before_dt_by_days(datetime.datetime(2014, 1, 31),
-                                              15)
+        j3.executed = get_d_before_dt_by_days(
+            mock_get_today_dt.return_value, 15)
         j3.save()
 
         api.remove_old_jobs(20)
@@ -145,17 +145,17 @@ class TestRemoveOldJobs(TestCase):
         self.assertEqual(
             Job.objects.filter(name__in=['job-1', 'job-2']).count(), 2)
 
-        mock_get_today_dt.return_value = datetime.datetime(2014, 4, 1)
+        mock_get_today_dt.return_value = get_now()
         management.call_command('flush_queue')
 
         self.assertEqual(
             Job.objects.filter(name__in=['job-1', 'job-2']).count(), 0)
 
-    @patch('async.api._get_today_dt')
+    @patch('async.api._get_now')
     def test_remove_old_job_with_no_param_sent(self, mock_get_today_dt):
         """Test in case of no parameter sent to remove_old_jobs
         """
-        test_base_dt = datetime.datetime(2014, 1, 31)
+        test_base_dt = get_now() - datetime.timedelta(days=60)
         mock_get_today_dt.return_value = test_base_dt
 
         j1, j2 = map(self.create_job, range(2))
@@ -176,13 +176,13 @@ class TestRemoveOldJobs(TestCase):
         self.assertIsNotNone(Job.objects.filter(name=j2.name))
         self.assertEqual(Error.objects.all().count(), 1, Error.objects.all())
 
-    def test_get_today_dt(self):
-        result = api._get_today_dt()
+    def test_get_now(self):
+        result = api._get_now()
         self.assertIsNotNone(result)
         self.assertTrue(isinstance(result, datetime.datetime))
 
     def test_groups__with_unexecuted_are_not_removed(self):
-        test_base_dt = get_today_dt()
+        test_base_dt = get_now()
         group = Group.objects.create(reference='no-rm-group')
         job = self.create_job('no-rm-group', group)
 
@@ -193,7 +193,7 @@ class TestRemoveOldJobs(TestCase):
         self.assertEqual(Error.objects.all().count(), 1, Error.objects.all())
 
     def test_groups_are_removed(self):
-        test_base_dt = get_today_dt()
+        test_base_dt = get_now()
         group = Group.objects.create(reference='rm-group')
         job = self.create_job('rm-group', group)
         job.executed = test_base_dt - datetime.timedelta(days=31)
@@ -207,7 +207,7 @@ class TestRemoveOldJobs(TestCase):
         self.assertEqual(Error.objects.all().count(), 0, Error.objects.all())
 
     def test_groups__with_young_jobs_are_not_removed(self):
-        test_base_dt = get_today_dt()
+        test_base_dt = get_now()
         group = Group.objects.create(reference='not_rm-young-group')
         job = self.create_job('not_rm-young-group', group)
         job.executed = test_base_dt - datetime.timedelta(days=16)
@@ -220,7 +220,7 @@ class TestRemoveOldJobs(TestCase):
         self.assertEqual(Error.objects.all().count(), 1, Error.objects.all())
 
     def test_groups__with_young_and_old_jobs_are_not_removed(self):
-        test_base_dt = get_today_dt()
+        test_base_dt = get_now()
         group = Group.objects.create(reference='not_rm-mixed-group')
         job1 = self.create_job('not_rm-mixed-group', group)
         job2 = self.create_job('not_rm-mixed-group', group)

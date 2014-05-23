@@ -6,6 +6,12 @@ from slumber.server.http import require_user, require_permission
 
 from django.shortcuts import Http404
 from django.db.models import Count
+try:
+    # No name 'timezone' in module 'django.utils'
+    # pylint: disable=E0611
+    from django.utils import timezone
+except ImportError:
+    from datetime import datetime as timezone
 
 from async import schedule
 from async.models import Group
@@ -61,7 +67,7 @@ class Progress(InstanceOperation):
                 return None, None, None
             if group.jobs.filter(executed__isnull=True):
                 # Some jobs are unexecuted.
-                time_consumed = datetime.datetime.now() - group.created
+                time_consumed = timezone.now() - group.created
                 estimated_time = datetime.timedelta(seconds=(
                     time_consumed.seconds/float(total_executed_jobs))
                         * total_jobs)

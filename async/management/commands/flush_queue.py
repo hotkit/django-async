@@ -1,8 +1,13 @@
 """
     Django Async management commands.
 """
-from datetime import datetime
 from django.core.management.base import BaseCommand
+try:
+    # No name 'timezone' in module 'django.utils'
+    # pylint: disable=E0611
+    from django.utils import timezone
+except ImportError:
+    from datetime import datetime as timezone
 from optparse import make_option
 from lockfile import FileLock, AlreadyLocked
 
@@ -40,7 +45,7 @@ def run_queue(which, outof, limit):
         right way.
     """
     for _ in xrange(limit):
-        now = datetime.now()
+        now = timezone.now()
         by_priority = (Job.objects
             .filter(executed=None)
             .exclude(scheduled__gt=now)
@@ -94,4 +99,3 @@ class Command(BaseCommand):
 
         acquire_lock('async_flush_queue%s' % which)(
             run_queue)(which, outof, jobs_limit)
-

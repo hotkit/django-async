@@ -1,12 +1,24 @@
 language: python
 
+services:
+    - postgresql
+
 python:
     - "2.7"
 
 env:
     - DJANGO=1_3
+    - DJANGO=1_4
 
-install: "pip install -r test-projects/common.pip -r test-projects/django_${DJANGO}/setup.pip"
+matrix:
+    allow_failures:
+        - env: DJANGO=1_4
+
+install:
+    - "pip install -r test-projects/common.pip -r test-projects/django_${DJANGO}/setup.pip"
+
+before_script:
+  - psql -c 'create database "async-exec";' -U postgres
 
 script:
     - "pylint --rcfile=pylintrc --output-format=colorized async"

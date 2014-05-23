@@ -1,9 +1,14 @@
 """
     Tests for the Django management commands.
 """
-from datetime import datetime
 from django.core import management
 from django.test import TestCase
+try:
+    # No name 'timezone' in module 'django.utils'
+    # pylint: disable=E0611
+    from django.utils import timezone as datetime
+except ImportError:
+    from datetime import datetime
 from mock import patch
 
 from async import schedule

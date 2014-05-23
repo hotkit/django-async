@@ -1,14 +1,22 @@
 """
     Tests for the Slumber operations.
 """
-from datetime import datetime
+from datetime import timedelta
+from simplejson import dumps, loads
+from mock import patch
+
 from django.contrib.auth.models import User, Permission
 from django.test import TestCase
-from simplejson import dumps, loads
 from django.core.exceptions import ValidationError
+try:
+    # No name 'timezone' in module 'django.utils'
+    # pylint: disable=E0611
+    from django.utils import timezone
+except ImportError:
+    from datetime import datetime as timezone
 
 from async.models import Job, Group, Error
-from mock import patch
+from async.slumber_operations import Progress
 
 
 # Instance of 'WSGIRequest' has no 'status_code' member
@@ -43,7 +51,7 @@ class TestSlumber(TestCase):
                     '/slumber/django/contrib/staticfiles/',
                 'django_nose': '/slumber/django_nose/',
                 'south': '/slumber/south/'},
-            _meta={'message': 'OK', 'status': 200}))
+            _meta={'message': 'OK', 'status': 200}), json)
 
 
 class WithUser(object):
@@ -119,12 +127,13 @@ class TestSchedule(WithUser, TestCase):
     def test_run_at(self):
         """Make sure that the run at time is properly handled.
         """
+        scheduled = timezone.now() + timedelta(days=1)
         response = self.client.post(self.URL, dict(
-            name='test-job-1', run_after='2011-04-12 14:12:43'))
+            name='test-job-1', run_after=scheduled))
         self.assertEqual(response.status_code, 200)
         job = Job.objects.get(name='test-job-1')
         self.assertEqual(job.args, '[]')
-        self.assertEqual(job.scheduled, datetime(2011, 4, 12, 14, 12, 43))
+        self.assertEqual(job.scheduled, scheduled)
         json = loads(response.content)
         self.assertEqual(json, dict(
             job=dict(id=job.id),
@@ -133,16 +142,14 @@ class TestSchedule(WithUser, TestCase):
     def test_create_job_with_group(self):
         """Create job with group reference.
         """
+        scheduled = timezone.now() + timedelta(days=1)
         group = Group.objects.create(
                 reference='test-group-1',
-                description='info'
-            )
+                description='info')
         response = self.client.post(self.URL, dict(
                 name='test-job-1',
-                run_after='2011-04-12 14:12:23',
-                group=group.reference
-            )
-        )
+                run_after=scheduled,
+                group=group.reference))
         self.assertEqual(response.status_code, 200)
         job = Job.objects.get(name='test-job-1')
         self.assertEqual(job.group.reference, group.reference)
@@ -150,12 +157,11 @@ class TestSchedule(WithUser, TestCase):
     def test_create_job_with_non_exist_group(self):
         """Create job with non exist group
         """
+        scheduled = timezone.now() + timedelta(days=1)
         response = self.client.post(self.URL, dict(
                 name='test-job-1',
-                run_after='2011-04-12 14:12:23',
-                group='non-exist-group'
-            )
-        )
+                run_after=scheduled,
+                group='non-exist-group'))
         self.assertEqual(response.status_code, 404)
         json = loads(response.content)
         self.assertEqual(json, dict(
@@ -164,23 +170,20 @@ class TestSchedule(WithUser, TestCase):
                     'username': 'test',
                     'message': 'Not Found'
                 },
-                error='Group matching query does not exist.'
-            )
-        )
+                error='Group matching query does not exist.'))
 
     def test_create_job_with_multiple_group_same_reference(self):
         """Create job by assiging multiple group
         current job should has been assign by latest group
         """
+        scheduled = timezone.now() + timedelta(days=1)
         g1 = Group.objects.create(reference='multiple-group')
         g2 = Group.objects.create(reference='multiple-group')
         g3 = Group.objects.create(reference='multiple-group')
         response = self.client.post(self.URL, dict(
             name='test-job-1',
-            run_after='2011-04-12 14:12:23',
-            group='multiple-group'
-        )
-        )
+            run_after=scheduled,
+            group='multiple-group'))
         self.assertEqual(response.status_code, 200)
         j1 = Job.objects.get(name='test-job-1')
         self.assertEqual(Group.objects.filter(
@@ -195,6 +198,7 @@ class TestSchedule(WithUser, TestCase):
         """Create job by assigning group which already has executed job.
         So it should get ValidationError.
         """
+        scheduled = timezone.now() + timedelta(days=1)
         g1 = Group.objects.create(reference='test-group')
 
         j1 = Job.objects.create(
@@ -205,14 +209,13 @@ class TestSchedule(WithUser, TestCase):
             priority=5,
             group=g1
         )
-        j1.executed = datetime(2014, 1, 1)
+        j1.executed = timezone.now() - timedelta(days=30)
         j1.save()
         with self.assertRaises(ValidationError) as e:
             response = self.client.post(self.URL, dict(
                 name='test-job-2',
-                run_after='2011-04-12 14:12:23',
-                group='test-group')
-            )
+                run_after=scheduled,
+                group='test-group'))
 
 
 class TestProgress(WithUser, TestCase):
@@ -288,14 +291,12 @@ class TestProgress(WithUser, TestCase):
     def test_all_jobs_executed(self):
         """Test get detail from group with all executed jobs.
         """
-        from async.slumber_operations import Progress
-
         group1 = Group.objects.create(reference='drun1')
         for i in range(5):
             Job.objects.create(name='j-%s' % i, args='[]', kwargs='{}',
                                meta='{}', priority=3, group=group1)
         for job in group1.jobs.all():
-            job.executed = datetime(2014, 1, 1)
+            job.executed = timezone.now()
             job.save()
 
         test_url = self.URL + 'drun1/'
@@ -322,14 +323,12 @@ class TestProgress(WithUser, TestCase):
     def test_all_jobs_executed_with_error(self):
         """Test get detail from group with job errors.
         """
-        from async.slumber_operations import Progress
-
         group1 = Group.objects.create(reference='drun1')
         for i in range(5):
             Job.objects.create(name='j-%s' % i, args='[]', kwargs='{}',
                                meta='{}', priority=3, group=group1)
         for job in group1.jobs.all():
-            job.executed = datetime(2014, 1, 1)
+            job.executed = timezone.now() - timedelta(days=60)
             job.save()
 
         j1 = Job.objects.all()[0]
@@ -363,11 +362,9 @@ class TestProgress(WithUser, TestCase):
         """Just to test if estimate function produce result,
         not checking the result.
         """
-        from datetime import datetime, timedelta
-        from async.slumber_operations import Progress
 
         g1 = Group.objects.create(reference='test-group')
-        g1.created = datetime(2010,1,1)
+        g1.created = timezone.now() - timedelta(days=5000)
         g1.save()
 
         def create_job_series(id):
@@ -380,7 +377,7 @@ class TestProgress(WithUser, TestCase):
                 group=g1
             )
             j.save()
-            j.added = datetime(2010 ,1 ,1)
+            j.added = timezone.now() - timedelta(days=5000)
             j.save()
             return j
 
@@ -399,10 +396,8 @@ class TestProgress(WithUser, TestCase):
     def test_estimate_execution_duration_with_no_job_valid(self):
         """Calculate function return None if no data for process.
         """
-        from datetime import datetime
-        from async.slumber_operations import Progress
         g1 = Group.objects.create(reference='test-group')
-        g1.created = datetime(2010, 1, 1)
+        g1.created = timezone.now() - timedelta(days=5000)
         g1.save()
 
         total, remaining, consumed = Progress.estimate_execution_duration(g1)
