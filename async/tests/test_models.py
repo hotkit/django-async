@@ -1,12 +1,19 @@
 """
     Testing that models work properly.
 """
+import datetime
+
 from django.test import TestCase, TransactionTestCase
 from django.core.exceptions import ValidationError
+try:
+    # No name 'timezone' in module 'django.utils'
+    # pylint: disable=E0611
+    from django.utils import timezone
+except ImportError:
+    from datetime import datetime as timezone
 
 from async import schedule
 from async.models import Error, Job, Group
-import datetime
 
 def _fn(*_a, **_kw):
     """Test function.
@@ -154,7 +161,7 @@ class TestGroup(TestCase):
             one job and already executed. Creating should success.
         """
         self.j1.group = self.g1
-        self.j1.executed = datetime.datetime(2014,1,1)
+        self.j1.executed = timezone.now()
         self.j1.save()
 
         g2 = Group.objects.create(reference=self.g1.reference)
@@ -176,10 +183,10 @@ class TestGroup(TestCase):
         self.j3.save()
 
         # Mark executed for j1, j2
-        self.j1.executed = datetime.datetime(2014,1,1)
+        self.j1.executed = timezone.now()
         self.j1.save()
 
-        self.j2.executed = datetime.datetime(2014,1,1)
+        self.j2.executed = timezone.now()
         self.j2.save()
 
         with self.assertRaises(ValidationError) as e:
@@ -191,7 +198,7 @@ class TestGroup(TestCase):
         """ Add job to group which have one executed job.
         """
         self.j1.group = self.g1
-        self.j1.executed = datetime.datetime.today()
+        self.j1.executed = timezone.now()
         self.j1.save()
 
         with self.assertRaises(ValidationError) as e:

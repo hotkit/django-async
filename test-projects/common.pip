@@ -1,5 +1,5 @@
 simplejson
-psycopg2==2.4.1
+psycopg2
 lockfile
 south
 
