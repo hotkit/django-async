@@ -1,6 +1,7 @@
 2014-05-23 Kirit Saelensminde  <kirit@felspar.com>
  Include the time consumed in the progress report and switch to ISO formatted dates.
  Fix pylint 1.2.1 issues.
+ Brought in time zone support in Django 1.4. Thanks to Peter Brooks for initiating the effort.
 
 2014-03-13 Kirit Saelensminde  <kirit@felspar.com>
  Changed the progress `estimated_group_duration` to `estimated_total_time` and added in `remaining_seconds` to the Slumber progress operation.
