@@ -6,13 +6,12 @@ services:
 python:
     - "2.7"
 
-env:
-    - DJANGO=1_3
-    - DJANGO=1_4
-
 matrix:
-    allow_failures:
+    include:
+        - env: DJANGO=1_3
         - env: DJANGO=1_4
+        - env: DJANGO=!_4
+          env: OPTS=--settings=django_1_4.settings.usetz
 
 install:
     - "pip install -r test-projects/common.pip -r test-projects/django_${DJANGO}/setup.pip"
@@ -22,4 +21,4 @@ before_script:
 
 script:
     - "pylint --rcfile=pylintrc --output-format=colorized async"
-    - "cd test-projects/django_${DJANGO} && python -tt manage.py test async"
+    - "cd test-projects/django_${DJANGO} && python -tt manage.py test ${OPTS} async"
