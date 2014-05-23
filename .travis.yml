@@ -6,12 +6,10 @@ services:
 python:
     - "2.7"
 
-matrix:
-    include:
-        - env: DJANGO=1_3
-        - env: DJANGO=1_4
-        - env: DJANGO=!_4
-          env: OPTS=--settings=django_1_4.settings.usetz
+env:
+    - DJANGO=1_3
+    - DJANGO=1_4
+    - DJANGO=1_4 OPTS=--settings=django_1_4.settings.usetz
 
 install:
     - "pip install -r test-projects/common.pip -r test-projects/django_${DJANGO}/setup.pip"
