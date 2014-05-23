@@ -9,8 +9,9 @@ from hashlib import sha1
 from simplejson import dumps, loads
 from traceback import format_exc
 
-from async import _logger
+from async.logger import _logger
 from async.utils import object_at_end_of_path, non_unicode_kwarg_keys
+
 from django.core.exceptions import ValidationError
 
 

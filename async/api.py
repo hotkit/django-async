@@ -40,8 +40,7 @@ def schedule(function, args=None, kwargs=None,
             args=dumps(args or []), kwargs=dumps(kwargs or {}),
         meta=dumps(meta or {}), scheduled=run_after,
         priority=priority,
-        group=expected_group
-        )
+        group=expected_group)
     job.save()
     return job
 

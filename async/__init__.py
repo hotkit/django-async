@@ -1,7 +1,6 @@
 """
     Django Async implementation.
 """
-import logging as _logger
 
 
 def schedule(*a, **kw):
@@ -11,3 +10,4 @@ def schedule(*a, **kw):
     # pylint: disable=W0621
     from async.api import schedule
     return schedule(*a, **kw)
+
