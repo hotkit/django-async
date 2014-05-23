@@ -252,7 +252,7 @@ class TestProgress(WithUser, TestCase):
         json_progress = json.get('progress')
         self.assertTrue(json_progress)
         self.assertEqual(json_progress.get('id'), group1.id)
-        self.assertEqual(json_progress.get('created'), str(group1.created))
+        self.assertEqual(json_progress.get('created'), group1.created.isoformat())
         self.assertIsNone(json_progress.get('last_job_completed'))
         self.assertEqual(json_progress.get('total_jobs'), group1.jobs.count())
         self.assertEqual(json_progress.get('total_executed_jobs'), 0)
@@ -309,9 +309,9 @@ class TestProgress(WithUser, TestCase):
         json_progress = json.get('progress')
         self.assertTrue(json_progress)
         self.assertEqual(json_progress.get('id'), group1.id)
-        self.assertEqual(json_progress.get('created'), str(group1.created))
+        self.assertEqual(json_progress.get('created'), group1.created.isoformat())
         self.assertEqual(json_progress.get('last_job_completed'),
-                         str(Progress.latest_executed_job_time(group1)))
+                         Progress.latest_executed_job_time(group1).isoformat())
         self.assertEqual(json_progress.get('total_jobs'), group1.jobs.count())
         self.assertEqual(json_progress.get('total_executed_jobs'), 5)
         self.assertEqual(json_progress.get('total_unexecuted_jobs'), 0)
@@ -349,9 +349,9 @@ class TestProgress(WithUser, TestCase):
         json_progress = json.get('progress')
         self.assertTrue(json_progress)
         self.assertEqual(json_progress.get('id'), group1.id)
-        self.assertEqual(json_progress.get('created'), str(group1.created))
+        self.assertEqual(json_progress.get('created'), group1.created.isoformat())
         self.assertEqual(json_progress.get('last_job_completed'),
-                         str(Progress.latest_executed_job_time(group1)))
+                         Progress.latest_executed_job_time(group1).isoformat())
         self.assertEqual(json_progress.get('total_jobs'), group1.jobs.count())
         self.assertEqual(json_progress.get('total_executed_jobs'), 5)
         self.assertEqual(json_progress.get('total_unexecuted_jobs'), 0)
@@ -390,9 +390,10 @@ class TestProgress(WithUser, TestCase):
         j2.executed = j2.added + timedelta(days=10)
         j2.save()
 
-        total, remaining = Progress.estimate_execution_duration(g1)
+        total, remaining, consumed = Progress.estimate_execution_duration(g1)
         self.assertTrue(isinstance(total, timedelta))
         self.assertTrue(isinstance(remaining, timedelta))
+        self.assertTrue(isinstance(consumed, timedelta))
 
 
     def test_estimate_execution_duration_with_no_job_valid(self):
@@ -404,7 +405,8 @@ class TestProgress(WithUser, TestCase):
         g1.created = datetime(2010, 1, 1)
         g1.save()
 
-        total, remaining = Progress.estimate_execution_duration(g1)
+        total, remaining, consumed = Progress.estimate_execution_duration(g1)
         self.assertIsNone(total)
         self.assertIsNone(remaining)
+        self.assertIsNone(consumed)
 
