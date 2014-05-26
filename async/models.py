@@ -1,16 +1,23 @@
 """
     Django Async models.
 """
-from datetime import datetime, timedelta
+from datetime import  timedelta
 from django.db import models, transaction
+try:
+    # No name 'timezone' in module 'django.utils'
+    # pylint: disable=E0611
+    from django.utils import timezone
+except ImportError:
+    from datetime import datetime as timezone
 # No name 'sha1' in module 'hashlib'
 # pylint: disable=E0611
 from hashlib import sha1
 from simplejson import dumps, loads
 from traceback import format_exc
 
-from async import _logger
+from async.logger import _logger
 from async.utils import object_at_end_of_path, non_unicode_kwarg_keys
+
 from django.core.exceptions import ValidationError
 
 
@@ -89,7 +96,7 @@ class Job(models.Model):
         def start():
             """Record the start time for the job.
             """
-            self.started = datetime.now()
+            self.started = timezone.now()
             self.save()
         transaction.commit_on_success(start)()
         try:
@@ -102,7 +109,7 @@ class Job(models.Model):
         except Exception, exception:
             self.started = None
             errors = 1 + self.errors.count()
-            self.scheduled = (datetime.now() +
+            self.scheduled = (timezone.now() +
                 timedelta(seconds=60 * pow(errors, 1.6)))
             self.priority = self.priority - 1
             _logger.error(
@@ -119,7 +126,7 @@ class Job(models.Model):
             transaction.commit_on_success(record)()
             raise
         else:
-            self.executed = datetime.now()
+            self.executed = timezone.now()
             self.result = dumps(result)
             self.save() # Single SQL statement so no need for transaction
             return result

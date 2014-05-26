@@ -1,13 +1,22 @@
 language: python
 
+services:
+    - postgresql
+
 python:
     - "2.7"
 
 env:
     - DJANGO=1_3
+    - DJANGO=1_4
+    - DJANGO=1_4 OPTS=--settings=django_1_4.settings.usetz
 
-install: "pip install -r test-projects/common.pip -r test-projects/django_${DJANGO}/setup.pip"
+install:
+    - "pip install -r test-projects/common.pip -r test-projects/django_${DJANGO}/setup.pip"
+
+before_script:
+  - psql -c 'create database "async-exec";' -U postgres
 
 script:
     - "pylint --rcfile=pylintrc --output-format=colorized async"
-    - "cd test-projects/django_${DJANGO} && python -tt manage.py test async"
+    - "cd test-projects/django_${DJANGO} && python -tt manage.py test ${OPTS} async"

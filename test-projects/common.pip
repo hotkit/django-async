@@ -1,12 +1,13 @@
 simplejson
-psycopg2==2.4.1
+psycopg2
 lockfile
+south
 
 # Used for testing
 coverage
 mock
 unittest2
-pylint
+pylint==1.2.1
 
 # Used to test the optional Slumber compatibility.
 django-slumber >= 0.7.7

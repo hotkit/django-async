@@ -2,3 +2,4 @@
 coverage
 *.pyc
 /test-projects/django_1_3/.coverage
+/test-projects/django_1_4/.coverage

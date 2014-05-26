@@ -6,6 +6,12 @@ from slumber.server.http import require_user, require_permission
 
 from django.shortcuts import Http404
 from django.db.models import Count
+try:
+    # No name 'timezone' in module 'django.utils'
+    # pylint: disable=E0611
+    from django.utils import timezone
+except ImportError:
+    from datetime import datetime as timezone
 
 from async import schedule
 from async.models import Group
@@ -58,10 +64,10 @@ class Progress(InstanceOperation):
         if total_jobs > 0:
             # Don't allow to calculate if executed jobs are not valid.
             if total_executed_jobs == 0:
-                return None, None
+                return None, None, None
             if group.jobs.filter(executed__isnull=True):
                 # Some jobs are unexecuted.
-                time_consumed = datetime.datetime.now() - group.created
+                time_consumed = timezone.now() - group.created
                 estimated_time = datetime.timedelta(seconds=(
                     time_consumed.seconds/float(total_executed_jobs))
                         * total_jobs)
@@ -70,10 +76,11 @@ class Progress(InstanceOperation):
                 # All jobs in group are executed.
                 estimated_time = (Progress.latest_executed_job_time(group)
                     - group.created)
+                time_consumed = estimated_time
                 remaining = datetime.timedelta(seconds=0)
-            return estimated_time, remaining
+            return estimated_time, remaining, time_consumed
         else:
-            return None, None
+            return None, None, None
 
     @staticmethod
     def latest_executed_job_time(group):
@@ -96,14 +103,15 @@ class Progress(InstanceOperation):
             if total_jobs > 0:
                 total_unexecuted_jobs = total_jobs - total_executed_jobs
 
-                total, remaining = \
+                total, remaining, consumed = \
                     self.estimate_execution_duration(latest_group)
+                latest = self.latest_executed_job_time(latest_group)
                 response['progress'] = {
                     'id': latest_group.id,
                     'reference': latest_group.reference,
-                    'created': latest_group.created,
+                    'created': latest_group.created.isoformat(),
                     'last_job_completed':
-                        self.latest_executed_job_time(latest_group),
+                        latest.isoformat() if latest else None,
                     'total_jobs': total_jobs,
                     'total_executed_jobs': total_executed_jobs,
                     'total_unexecuted_jobs': total_unexecuted_jobs,
@@ -111,6 +119,8 @@ class Progress(InstanceOperation):
                         latest_group.jobs.filter(errors__isnull=False)
                             .distinct().count(),
                     'estimated_total_time': total,
+                    'consumed_seconds':
+                        consumed.seconds if consumed else None,
                     'remaining_seconds':
                         remaining.seconds if remaining else None
                 }

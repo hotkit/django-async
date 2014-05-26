@@ -19,7 +19,7 @@ from async.models import Error, Job, Group
 from async.utils import full_name
 
 
-def _get_today_dt():
+def _get_now():
     """Get today datetime, testing purpose.
     """
     return timezone.now()
@@ -40,8 +40,7 @@ def schedule(function, args=None, kwargs=None,
             args=dumps(args or []), kwargs=dumps(kwargs or {}),
         meta=dumps(meta or {}), scheduled=run_after,
         priority=priority,
-        group=expected_group
-        )
+        group=expected_group)
     job.save()
     return job
 
@@ -54,7 +53,7 @@ def deschedule(function, args=None, kwargs=None):
             args=dumps(args or []), kwargs=dumps(kwargs or {}))
     mark_cancelled = Job.objects.filter(executed=None,
         identity=sha1(unicode(job)).hexdigest())
-    mark_cancelled.update(cancelled=_get_today_dt())
+    mark_cancelled.update(cancelled=_get_now())
 
 
 def health():
@@ -80,7 +79,7 @@ def remove_old_jobs(remove_jobs_before_days=30, resched_hours=8):
     - Groups (and their jobs) where all jobs have executed before the removal
         date.
     """
-    start_remove_jobs_before_dt = _get_today_dt() - timedelta(
+    start_remove_jobs_before_dt = _get_now() - timedelta(
         days=remove_jobs_before_days)
 
     # Jobs not in a group that are old enough to delete
@@ -98,7 +97,7 @@ def remove_old_jobs(remove_jobs_before_days=30, resched_hours=8):
             group.jobs.filter(rm_job).delete()
             group.delete()
 
-    next_exec = _get_today_dt() + timedelta(hours=resched_hours)
+    next_exec = _get_now() + timedelta(hours=resched_hours)
 
     schedule(remove_old_jobs,
         args=[remove_jobs_before_days, resched_hours],
