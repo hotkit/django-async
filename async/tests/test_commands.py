@@ -12,7 +12,7 @@ except ImportError:
 from mock import patch
 
 from async import schedule
-from async.api import health
+from async.api import health, deschedule
 from async.models import Job
 
 
@@ -107,6 +107,16 @@ class TestFlushQueue(TestCase):
             schedule(_dummy)
         management.call_command('flush_queue')
         self.assertEqual(Job.objects.filter(executed=None).count(), 5)
+
+    def test_flush_queue_with_cancelled_jobs__should_not_be_executed(self):
+        """Make sure that the number of job run by default is 300.
+        """
+        for _ in xrange(5):
+            job = schedule(_dummy)
+            deschedule(job.name)
+        management.call_command('flush_queue')
+        self.assertEqual(Job.objects.filter(executed=None).count(), 5)
+        self.assertEqual(Job.objects.filter(cancelled=None).count(), 0)
 
 
 class TestHealth(TestCase):

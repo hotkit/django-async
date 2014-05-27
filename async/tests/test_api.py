@@ -192,7 +192,7 @@ class TestRemoveOldJobs(TestCase):
         self.assertEqual(Group.objects.all().count(), 1, Group.objects.all())
         self.assertEqual(Error.objects.all().count(), 1, Error.objects.all())
 
-    def test_groups_are_removed(self):
+    def test_groups_with_executed_job_are_removed(self):
         test_base_dt = get_now()
         group = Group.objects.create(reference='rm-group')
         job = self.create_job('rm-group', group)
@@ -236,3 +236,115 @@ class TestRemoveOldJobs(TestCase):
         self.assertEqual(Group.objects.all().count(), 1, Group.objects.all())
         self.assertEqual(Error.objects.all().count(), 2, Error.objects.all())
 
+    @patch('async.api._get_now')
+    def test_remove__cancelled_jobs(self, mock_get_today_dt):
+        """ job name job-0 must be removed after flush_queue run.
+        """
+        mock_get_today_dt.return_value = (
+            get_now() - datetime.timedelta(days=60))
+
+        j1, j2, j3 = map(self.create_job, range(3))
+
+        j1.cancelled = get_d_before_dt_by_days(
+            mock_get_today_dt.return_value, 30)
+        j1.save()
+        j2.cancelled = get_d_before_dt_by_days(
+            mock_get_today_dt.return_value, 15)
+        j2.save()
+        j3.cancelled = get_d_before_dt_by_days(
+            mock_get_today_dt.return_value, 15)
+        j3.save()
+
+        api.remove_old_jobs(20)
+
+        self.assertEqual(
+            Job.objects.filter(name__in=['job-1', 'job-2']).count(), 2)
+
+        mock_get_today_dt.return_value = get_now()
+        management.call_command('flush_queue')
+
+        self.assertEqual(
+            Job.objects.filter(name__in=['job-1', 'job-2']).count(), 0)
+
+    @patch('async.api._get_now')
+    def test_remove__mixing_jobs(self, mock_get_today_dt):
+        """ job name job-0 must be removed after flush_queue run.
+        """
+        mock_get_today_dt.return_value = (
+            get_now() - datetime.timedelta(days=60))
+
+        j1, j2, j3, j4, j5, j6 = map(self.create_job, range(6))
+
+        j1.executed = get_d_before_dt_by_days(
+            mock_get_today_dt.return_value, 30)
+        j1.save()
+        j2.executed = get_d_before_dt_by_days(
+            mock_get_today_dt.return_value, 15)
+        j2.save()
+        j3.executed = get_d_before_dt_by_days(
+            mock_get_today_dt.return_value, 15)
+        j3.save()
+        j4.cancelled = get_d_before_dt_by_days(
+            mock_get_today_dt.return_value, 30)
+        j4.save()
+        j5.cancelled = get_d_before_dt_by_days(
+            mock_get_today_dt.return_value, 15)
+        j5.save()
+        j6.cancelled = get_d_before_dt_by_days(
+            mock_get_today_dt.return_value, 15)
+        j6.save()
+
+        api.remove_old_jobs()
+
+        self.assertEqual(
+            Job.objects.filter(name__in=['job-1', 'job-2', 'job-3', 'job-4', 'job-5', 'job-6']).count(), 5)
+
+        mock_get_today_dt.return_value = get_now()
+        management.call_command('flush_queue')
+
+        self.assertEqual(
+            Job.objects.filter(name__in=['job-1', 'job-2', 'job-3', 'job-4', 'job-5', 'job-6']).count(), 0)
+
+    def test_groups__with_young_cancelled_jobs_are_not_removed(self):
+        test_base_dt = get_now()
+        group = Group.objects.create(reference='not_rm-young-group')
+        job = self.create_job('not_rm-young-group', group)
+        job.cancelled = test_base_dt - datetime.timedelta(days=16)
+        job.save()
+
+        api.remove_old_jobs()
+
+        self.assertEqual(Job.objects.all().count(), 2, Job.objects.all())
+        self.assertEqual(Group.objects.all().count(), 1, Group.objects.all())
+        self.assertEqual(Error.objects.all().count(), 1, Error.objects.all())
+
+    def test_groups_with_cancelled_job_are_removed(self):
+        test_base_dt = get_now()
+        group = Group.objects.create(reference='rm-group')
+        job = self.create_job('rm-group', group)
+        job.cancelled = test_base_dt - datetime.timedelta(days=31)
+        job.save()
+
+        api.remove_old_jobs()
+
+        self.assertEqual(Job.objects.all().count(), 1, Job.objects.all())
+        self.assertEqual(Job.objects.all()[0].name, 'async.api.remove_old_jobs')
+        self.assertEqual(Group.objects.all().count(), 0, Group.objects.all())
+        self.assertEqual(Error.objects.all().count(), 0, Error.objects.all())
+
+    def test_groups__with_young_and_old_cancelled_jobs_are_not_removed(self):
+        test_base_dt = get_now()
+        group = Group.objects.create(reference='not_rm-mixed-group')
+        job1 = self.create_job('not_rm-mixed-group', group)
+        job2 = self.create_job('not_rm-mixed-group', group)
+
+        job1.cancelled = test_base_dt - datetime.timedelta(days=45)
+        job1.save()
+        job2.cancelled = test_base_dt - datetime.timedelta(days=16)
+        job2.save()
+
+        api.remove_old_jobs()
+
+        self.assertEqual(Job.objects.all().count(), 3, Job.objects.all())
+        self.assertEqual(Group.objects.all().count(), 1, Group.objects.all())
+        self.assertEqual(Error.objects.all().count(), 2, Error.objects.all())

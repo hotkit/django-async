@@ -63,6 +63,7 @@ class Job(models.Model):
         help_text="If not set, will be executed ASAP")
     started = models.DateTimeField(null=True, blank=True)
     executed = models.DateTimeField(null=True, blank=True)
+    cancelled = models.DateTimeField(null=True, blank=True)
 
     group = models.ForeignKey(Group, related_name='jobs',
         null=True, blank=True)

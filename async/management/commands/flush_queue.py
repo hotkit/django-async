@@ -47,7 +47,7 @@ def run_queue(which, outof, limit):
     for _ in xrange(limit):
         now = timezone.now()
         by_priority = (Job.objects
-            .filter(executed=None)
+            .filter(executed=None, cancelled=None)
             .exclude(scheduled__gt=now)
             .order_by('-priority'))
         number = by_priority.count()

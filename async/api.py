@@ -51,9 +51,9 @@ def deschedule(function, args=None, kwargs=None):
     job = Job(
         name=full_name(function),
             args=dumps(args or []), kwargs=dumps(kwargs or {}))
-    mark_executed = Job.objects.filter(executed=None,
+    mark_cancelled = Job.objects.filter(executed=None,
         identity=sha1(unicode(job)).hexdigest())
-    mark_executed.update(executed=_get_now())
+    mark_cancelled.update(cancelled=_get_now())
 
 
 def health():
@@ -84,11 +84,14 @@ def remove_old_jobs(remove_jobs_before_days=30, resched_hours=8):
 
     # Jobs not in a group that are old enough to delete
     rm_job = (Q(executed__isnull=False) &
-        Q(executed__lt=start_remove_jobs_before_dt))
+        Q(executed__lt=start_remove_jobs_before_dt)) | \
+             (Q(cancelled__isnull=False) &
+        Q(cancelled__lt=start_remove_jobs_before_dt))
     Job.objects.filter(Q(group__isnull=True), rm_job).delete()
 
     # Groups with all executed jobs -- look for groups that qualify
-    groups = Group.objects.filter(Q(jobs__executed__isnull=False))
+    groups = Group.objects.filter(Q(jobs__executed__isnull=False) |
+                                  Q(jobs__cancelled__isnull=False))
     for group in groups.iterator():
         if group.jobs.filter(rm_job).count() == group.jobs.all().count():
             group.jobs.filter(rm_job).delete()
