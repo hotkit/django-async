@@ -80,7 +80,7 @@ class Group(models.Model):
         """When the last executed job in the group was completed.
         """
         if self.jobs.filter(executed__isnull=False).count():
-            return self.jobs.latest('executed')
+            return self.jobs.filter(executed__isnull=False).latest('executed')
 
     def has_completed(self):
         """Return True if all jobs are either executed or cancelled.
