@@ -3,7 +3,7 @@
 """
 
 
-def schedule(*a, **kw):
+def schedule(*a, **kw): # pragma: no cover
     """Wrapper for async.schedule.schedule that allow coverage.
     """
     # Redefining name 'schedule' from outer scope

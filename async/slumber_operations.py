@@ -10,7 +10,7 @@ try:
     # No name 'timezone' in module 'django.utils'
     # pylint: disable=E0611
     from django.utils import timezone
-except ImportError:
+except ImportError: # pragma: no cover
     from datetime import datetime as timezone
 
 from async import schedule

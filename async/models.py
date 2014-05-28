@@ -7,7 +7,7 @@ try:
     # No name 'timezone' in module 'django.utils'
     # pylint: disable=E0611
     from django.utils import timezone
-except ImportError:
+except ImportError: # pragma: no cover
     from datetime import datetime as timezone
 # No name 'sha1' in module 'hashlib'
 # pylint: disable=E0611
