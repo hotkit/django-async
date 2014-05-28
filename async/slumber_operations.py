@@ -1,21 +1,13 @@
 """
     Implementation of the Slumber operations.
 """
+from django.shortcuts import Http404
+from django.db.models import Count
 from slumber.operations import ModelOperation, InstanceOperation
 from slumber.server.http import require_user, require_permission
 
-from django.shortcuts import Http404
-from django.db.models import Count
-try:
-    # No name 'timezone' in module 'django.utils'
-    # pylint: disable=E0611
-    from django.utils import timezone
-except ImportError: # pragma: no cover
-    from datetime import datetime as timezone
-
 from async import schedule
 from async.models import Group
-import datetime
 
 
 # Method could be a function
@@ -52,36 +44,6 @@ class Progress(InstanceOperation):
     """Return information about the progress of a job.
     """
     @staticmethod
-    def estimate_execution_duration(group):
-        """Estimate of the total amount of time (in seconds) that the group
-        will take to execute.
-        """
-        result = group.jobs.aggregate(
-            job_count=Count('id'), executed_job_count=Count('executed'))
-        total_jobs = result['job_count']
-        total_executed_jobs = result['executed_job_count']
-        if total_jobs > 0:
-            # Don't allow to calculate if executed jobs are not valid.
-            if total_executed_jobs == 0:
-                return None, None, None
-            if group.jobs.filter(executed__isnull=True):
-                # Some jobs are unexecuted.
-                time_consumed = timezone.now() - group.created
-                estimated_time = datetime.timedelta(seconds=(
-                    time_consumed.seconds/float(total_executed_jobs))
-                        * total_jobs)
-                remaining = estimated_time - time_consumed
-            else:
-                # All jobs in group are executed.
-                estimated_time = (Progress.latest_executed_job_time(group)
-                    - group.created)
-                time_consumed = estimated_time
-                remaining = datetime.timedelta(seconds=0)
-            return estimated_time, remaining, time_consumed
-        else:
-            return None, None, None
-
-    @staticmethod
     def latest_executed_job_time(group):
         """When the last executed job in the group was completed.
         """
@@ -103,7 +65,7 @@ class Progress(InstanceOperation):
                 total_unexecuted_jobs = total_jobs - total_executed_jobs
 
                 total, remaining, consumed = \
-                    self.estimate_execution_duration(latest_group)
+                    latest_group.estimate_execution_duration()
                 latest = self.latest_executed_job_time(latest_group)
                 response['progress'] = {
                     'id': latest_group.id,

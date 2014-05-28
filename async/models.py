@@ -3,7 +3,7 @@
 """
 from datetime import  timedelta
 from django.db import models, transaction
-from django.db.models import Q
+from django.db.models import Count, Q
 try:
     # No name 'timezone' in module 'django.utils'
     # pylint: disable=E0611
@@ -43,6 +43,42 @@ class Group(models.Model):
                 "Group reference [%s] still has unexecuted jobs." %
                     self.reference)
         return super(Group, self).save(*args, **kwargs)
+
+    def estimate_execution_duration(self):
+        """Estimate of the total amount of time (in seconds) that the group
+        will take to execute.
+        """
+        result = self.jobs.aggregate(
+            job_count=Count('id'), executed_job_count=Count('executed'))
+        total_jobs = result['job_count']
+        total_executed_jobs = result['executed_job_count']
+        if total_jobs > 0:
+            # Don't allow to calculate if executed jobs are not valid.
+            if total_executed_jobs == 0:
+                return None, None, None
+            elif self.jobs.filter(executed__isnull=True):
+                # Some jobs are unexecuted.
+                time_consumed = timezone.now() - self.created
+                estimated_time = timedelta(seconds=(
+                    time_consumed.seconds/float(total_executed_jobs))
+                        * total_jobs)
+                remaining = estimated_time - time_consumed
+            else:
+                # All jobs in group are executed.
+                estimated_time = (
+                    self.latest_executed_job().executed - self.created)
+                time_consumed = estimated_time
+                remaining = timedelta(seconds=0)
+            return estimated_time, remaining, time_consumed
+        else:
+            return None, None, None
+
+    def latest_executed_job(self):
+        """When the last executed job in the group was completed.
+        """
+        if self.jobs.filter(executed__isnull=False).count():
+            return self.jobs.latest('executed')
+
 
     @staticmethod
     def latest_group_by_reference(reference):

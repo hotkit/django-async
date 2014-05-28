@@ -317,7 +317,7 @@ class TestProgress(WithUser, TestCase):
         self.assertEqual(json_progress.get('total_unexecuted_jobs'), 0)
         self.assertEqual(json_progress.get('total_error_jobs'), 0)
         self.assertEqual(json_progress.get('estimated_total_time'),
-                         str(Progress.estimate_execution_duration(group1)[0]))
+                         str(group1.estimate_execution_duration()[0]))
 
     def test_all_jobs_executed_with_error(self):
         """Test get detail from group with job errors.
@@ -355,7 +355,7 @@ class TestProgress(WithUser, TestCase):
         self.assertEqual(json_progress.get('total_unexecuted_jobs'), 0)
         self.assertEqual(json_progress.get('total_error_jobs'), 2)
         self.assertEqual(json_progress.get('estimated_total_time'),
-                         str(Progress.estimate_execution_duration(group1)[0]))
+                         str(group1.estimate_execution_duration()[0]))
 
     def test_estimate_execution_duration_can_produce_result(self):
         """Just to test if estimate function produce result,
@@ -380,13 +380,15 @@ class TestProgress(WithUser, TestCase):
             j.save()
             return j
 
+        self.assertIsNone(g1.latest_executed_job())
+
         j1, j2, j3, j4, j5, j6 = map(create_job_series, range(0, 6))
         j1.executed = j1.added + timedelta(days=10)
         j1.save()
         j2.executed = j2.added + timedelta(days=10)
         j2.save()
 
-        total, remaining, consumed = Progress.estimate_execution_duration(g1)
+        total, remaining, consumed = g1.estimate_execution_duration()
         self.assertTrue(isinstance(total, timedelta))
         self.assertTrue(isinstance(remaining, timedelta))
         self.assertTrue(isinstance(consumed, timedelta))
@@ -399,7 +401,7 @@ class TestProgress(WithUser, TestCase):
         g1.created = timezone.now() - timedelta(days=5000)
         g1.save()
 
-        total, remaining, consumed = Progress.estimate_execution_duration(g1)
+        total, remaining, consumed = g1.estimate_execution_duration()
         self.assertIsNone(total)
         self.assertIsNone(remaining)
         self.assertIsNone(consumed)
