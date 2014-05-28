@@ -43,13 +43,6 @@ class Schedule(ModelOperation):
 class Progress(InstanceOperation):
     """Return information about the progress of a job.
     """
-    @staticmethod
-    def latest_executed_job_time(group):
-        """When the last executed job in the group was completed.
-        """
-        if not group.jobs.filter(executed__isnull=True):
-            return group.jobs.latest('executed').executed
-
     @require_user
     def get(self, _request, response, _app, _models, group_reference_name):
         """The current progress and estimated completion time of the job.
