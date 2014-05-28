@@ -32,7 +32,10 @@ def schedule(function, args=None, kwargs=None,
     # Too many arguments
     # pylint: disable=R0913
     if group:
-        expected_group = Group.objects.filter(reference=group).latest('created')
+        if type(group) == Group:
+            expected_group = group
+        else:
+            expected_group = Group.latest_group_by_reference(group)
     else:
         expected_group = None
     job = Job(

@@ -1,3 +1,6 @@
+2014-05-28  Kirit Saelensminde  <kirit@felspar.com>
+ When giving a group name to the schedule API it now does the right thing and creates a new group instance if appropriate.
+
 2014-05-26  Nuttakit Phuechnaowarat  <nuttakit@proteus-tech.com>
  Add field cancelled to job
  Make remove old job function include cancelled jobs

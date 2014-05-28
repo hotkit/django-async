@@ -44,8 +44,7 @@ class Schedule(ModelOperation):
             meta=request.POST.get('meta', {}),
             run_after=request.POST.get('run_after', None),
             priority=request.POST.get('priority', 5),
-            group=request.POST.get('group', None)
-            )
+            group=request.POST.get('group', None))
         response['job'] = dict(id=job.id)
 
 

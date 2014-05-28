@@ -45,8 +45,7 @@ class TestJob(TransactionTestCase):
         """
         group = Group.objects.create(
             reference='test-group',
-            description='for testing'
-        )
+            description='for testing')
         job = schedule('async.tests.test_models._fn')
         job.group = group
         job.save()
@@ -161,11 +160,30 @@ class TestGroup(TestCase):
             one job and already executed. Creating should success.
         """
         self.j1.group = self.g1
+        self.j1.save()
+        self.j2.group = self.g1
+        self.j2.save()
+
         self.j1.executed = timezone.now()
+        self.j1.save()
+        self.j2.cancelled = timezone.now()
+        self.j2.save()
+
+        g2 = Group.objects.create(reference=self.g1.reference)
+        self.assertEqual(
+            Group.objects.filter(reference=self.g1.reference).count(), 2)
+
+    def test_cancelled_jobs_allow_new_group(self):
+        """ Make sure that a cancelled job allows us to make a new
+            group with the same reference.
+        """
+        self.j1.group = self.g1
+        self.j1.cancelled = timezone.now()
         self.j1.save()
 
         g2 = Group.objects.create(reference=self.g1.reference)
-        self.assertEqual(Group.objects.filter(reference=self.g1.reference).count(), 2)
+        self.assertEqual(
+            Group.objects.filter(reference=self.g1.reference).count(), 2)
 
     def test_creating_group_with_duplicate_reference_and_has_one_unexecuted_job(self):
         """ Create new group with reference same as old group which has
@@ -175,17 +193,14 @@ class TestGroup(TestCase):
         # Assiging j1, j2, j3 to group1
         self.j1.group = self.g1
         self.j1.save()
-
         self.j2.group = self.g1
         self.j2.save()
-
         self.j3.group = self.g1
         self.j3.save()
 
         # Mark executed for j1, j2
         self.j1.executed = timezone.now()
         self.j1.save()
-
         self.j2.executed = timezone.now()
         self.j2.save()
 
@@ -207,13 +222,45 @@ class TestGroup(TestCase):
         self.assertTrue(isinstance(e.exception, ValidationError))
         self.assertEqual(Job.objects.filter(group=self.g1).count(), 1)
 
+    def test_adding_job_to_group_that_has_cancelled_job(self):
+        """ Add job to group which have one cancelled job.
+        """
+        self.j1.group = self.g1
+        self.j1.cancelled = timezone.now()
+        self.j1.save()
+
+        with self.assertRaises(ValidationError) as e:
+            self.j2.group = self.g1
+            self.j2.save()
+        self.assertTrue(isinstance(e.exception, ValidationError))
+        self.assertEqual(Job.objects.filter(group=self.g1).count(), 1)
+
     def test_adding_job_to_group_that_has_unexecuted_job(self):
         """ Add jobs to group which has unexecuted job.
         """
         self.j1.group = self.g1
         self.j1.save()
-
         self.j2.group = self.g1
         self.j2.save()
 
         self.assertEqual(Group.objects.get(reference=self.g1.reference).jobs.count(), 2)
+
+    def test_adding_job_to_executed_group(self):
+        """ Adding a new job to a fully executed group creates a new group.
+        """
+        self.j1.group = self.g1
+        self.j1.executed = timezone.now()
+        self.j1.save()
+
+        job = schedule('async.tests.test_models._fn',
+            group=self.g1.reference)
+        self.assertEqual(job.group.reference, self.g1.reference)
+        self.assertNotEqual(job.group.pk, self.g1.pk)
+
+    def test_schedule_passing_group_instance(self):
+        """ Scheduling a job passing in a group object works.
+        """
+        job = schedule('async.tests.test_models._fn',
+            group=self.g1)
+        self.assertEqual(job.group.pk, self.g1.pk)
+
