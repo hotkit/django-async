@@ -49,18 +49,21 @@ class Group(models.Model):
         will take to execute.
         """
         result = self.jobs.aggregate(
-            job_count=Count('id'), executed_job_count=Count('executed'))
+            job_count=Count('id'), executed_job_count=Count('executed'),
+            cancelled_job_count=Count('cancelled'))
         total_jobs = result['job_count']
         total_executed_jobs = result['executed_job_count']
+        total_cancelled_jobs = result['cancelled_job_count']
+        total_done = total_executed_jobs + total_cancelled_jobs
         if total_jobs > 0:
             # Don't allow to calculate if executed jobs are not valid.
-            if total_executed_jobs == 0:
+            if total_done == 0:
                 return None, None, None
-            elif self.jobs.filter(executed__isnull=True):
+            elif not self.has_completed():
                 # Some jobs are unexecuted.
                 time_consumed = timezone.now() - self.created
                 estimated_time = timedelta(seconds=(
-                    time_consumed.seconds/float(total_executed_jobs))
+                    time_consumed.seconds/float(total_done))
                         * total_jobs)
                 remaining = estimated_time - time_consumed
             else:
