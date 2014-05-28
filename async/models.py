@@ -79,6 +79,13 @@ class Group(models.Model):
         if self.jobs.filter(executed__isnull=False).count():
             return self.jobs.latest('executed')
 
+    def has_completed(self):
+        """Return True if all jobs are either executed or cancelled.
+        """
+        return (self.jobs.all().count() > 0 and
+            self.jobs.filter(
+                Q(executed__isnull=True) & Q(cancelled__isnull=True)
+            ).count() == 0)
 
     @staticmethod
     def latest_group_by_reference(reference):
@@ -89,17 +96,13 @@ class Group(models.Model):
         try:
             group = Group.objects.filter(
                 reference=reference).latest('created')
-            if (group.jobs.all().count() > 0 and
-                    group.jobs.filter(
-                        Q(executed__isnull=True) & Q(cancelled__isnull=True)
-                    ).count() == 0):
+            if group.has_completed():
                 # The found group is either fully executed or cancelled
                 # so make a new one
                 group = Group.objects.create(
-                    reference=reference)
+                    reference=reference, description=group.description)
         except Group.DoesNotExist:
-            group = Group.objects.create(
-                reference=reference)
+            group = Group.objects.create(reference=reference)
         return group
 
 
