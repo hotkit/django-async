@@ -9,6 +9,16 @@ Building a database backed task queue is a fairly trivial thing, but getting the
 
 All documentation can be found at http://www.kirit.com/Django%20Async
 
+## New in the development branch ##
+
+### Job cancellation ###
+
+There is now a separate `cancelled` field  on jobs which can be used to mark those which are no longer to be run.
+
+### Groups ###
+
+There is now an optional job grouping in `async.models.Group`. Jobs can be placed into a group so that related jobs can be tracked together.
+
 # Doing development #
 
 _This project uses git flow. Don't forget to do `git flow init -d`_
