@@ -3,11 +3,12 @@
 """
 from datetime import  timedelta
 from django.db import models, transaction
+from django.db.models import Q
 try:
     # No name 'timezone' in module 'django.utils'
     # pylint: disable=E0611
     from django.utils import timezone
-except ImportError:
+except ImportError: # pragma: no cover
     from datetime import datetime as timezone
 # No name 'sha1' in module 'hashlib'
 # pylint: disable=E0611
@@ -34,15 +35,36 @@ class Group(models.Model):
 
     def save(self, *args, **kwargs):
         # We can't create a new group with that reference
-        # if the old group still have jobs that havn't executed.
-        if Job.objects.filter(
-                group__reference=self.reference,
-                executed__isnull=True
-        ).count() > 0:
+        # if the old group still has jobs that haven't executed.
+        if Job.objects.filter(group__reference=self.reference).filter(
+                    Q(executed__isnull=True) & Q(cancelled__isnull=True)
+                ).count() > 0:
             raise ValidationError(
-                "There have group reference [%s] has unexecuted jobs." %
+                "Group reference [%s] still has unexecuted jobs." %
                     self.reference)
         return super(Group, self).save(*args, **kwargs)
+
+    @staticmethod
+    def latest_group_by_reference(reference):
+        """
+            Fetch the latest group with the requested reference. It will
+            create a new group if necessary.
+        """
+        try:
+            group = Group.objects.filter(
+                reference=reference).latest('created')
+            if (group.jobs.all().count() > 0 and
+                    group.jobs.filter(
+                        Q(executed__isnull=True) & Q(cancelled__isnull=True)
+                    ).count() == 0):
+                # The found group is either fully executed or cancelled
+                # so make a new one
+                group = Group.objects.create(
+                    reference=reference)
+        except Group.DoesNotExist:
+            group = Group.objects.create(
+                reference=reference)
+        return group
 
 
 class Job(models.Model):
@@ -80,7 +102,9 @@ class Job(models.Model):
         # Checking if group obj got passed and current job is not in that group
         if self.group and self not in self.group.jobs.all():
             # Cannot add current job to latest group that have an executed job.
-            if self.group.jobs.filter(executed__isnull=False).count() > 0:
+            if self.group.jobs.filter(
+                        Q(executed__isnull=False) | Q(cancelled__isnull=False)
+                    ).count() > 0:
                 raise ValidationError(
                     "Cannot add job [%s] to group [%s] because this group "
                         "has executed jobs." %

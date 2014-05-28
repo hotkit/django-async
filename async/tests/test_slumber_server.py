@@ -155,22 +155,23 @@ class TestSchedule(WithUser, TestCase):
         self.assertEqual(job.group.reference, group.reference)
 
     def test_create_job_with_non_exist_group(self):
-        """Create job with non exist group
+        """Create job with non exist group creates one
         """
         scheduled = timezone.now() + timedelta(days=1)
         response = self.client.post(self.URL, dict(
                 name='test-job-1',
                 run_after=scheduled,
                 group='non-exist-group'))
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)
         json = loads(response.content)
-        self.assertEqual(json, dict(
-                _meta={
-                    'status': 404,
-                    'username': 'test',
-                    'message': 'Not Found'
-                },
-                error='Group matching query does not exist.'))
+        self.assertEqual(json['_meta'], {
+            'status': 200,
+            'username': 'test',
+            'message': 'OK'})
+        job = Job.objects.get(pk=json['job']['id'])
+        self.assertEqual(job.group.reference, 'non-exist-group')
+        self.assertEqual(
+            Group.objects.filter(reference='non-exist-group').count(), 1)
 
     def test_create_job_with_multiple_group_same_reference(self):
         """Create job by assiging multiple group
@@ -202,18 +203,16 @@ class TestSchedule(WithUser, TestCase):
         g1 = Group.objects.create(reference='test-group')
 
         j1 = Job.objects.create(
-            name='test-job-1',
-            args='[]',
-            kwargs='{}',
-            meta='{}',
-            priority=5,
-            group=g1
-        )
+            name='test-job-1', group=g1,
+            args='[]', kwargs='{}', meta='{}', priority=5)
+        j2 = Job.objects.create(
+            name='test-job-2', group=g1,
+            args='[]', kwargs='{}', meta='{}', priority=5)
         j1.executed = timezone.now() - timedelta(days=30)
         j1.save()
         with self.assertRaises(ValidationError) as e:
             response = self.client.post(self.URL, dict(
-                name='test-job-2',
+                name='test-job-3',
                 run_after=scheduled,
                 group='test-group'))
 

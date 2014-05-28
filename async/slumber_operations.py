@@ -10,7 +10,7 @@ try:
     # No name 'timezone' in module 'django.utils'
     # pylint: disable=E0611
     from django.utils import timezone
-except ImportError:
+except ImportError: # pragma: no cover
     from datetime import datetime as timezone
 
 from async import schedule
@@ -44,8 +44,7 @@ class Schedule(ModelOperation):
             meta=request.POST.get('meta', {}),
             run_after=request.POST.get('run_after', None),
             priority=request.POST.get('priority', 5),
-            group=request.POST.get('group', None)
-            )
+            group=request.POST.get('group', None))
         response['job'] = dict(id=job.id)
 
 

@@ -1,25 +1,28 @@
-2014-05-26 Nuttakit Phuechnaowarat <nuttakit@proteus-tech.com>
+2014-05-28  Kirit Saelensminde  <kirit@felspar.com>
+ When giving a group name to the schedule API it now does the right thing and creates a new group instance if appropriate.
+
+2014-05-26  Nuttakit Phuechnaowarat  <nuttakit@proteus-tech.com>
  Add field cancelled to job
  Make remove old job function include cancelled jobs
 
-2014-05-23 Kirit Saelensminde  <kirit@felspar.com>
+2014-05-23  Kirit Saelensminde  <kirit@felspar.com>
  Include the time consumed in the progress report and switch to ISO formatted dates.
  Fix pylint 1.2.1 issues.
  Brought in time zone support in Django 1.4. Thanks to Peter Brooks for initiating the effort.
 
-2014-03-13 Kirit Saelensminde  <kirit@felspar.com>
+2014-03-13  Kirit Saelensminde  <kirit@felspar.com>
  Changed the progress `estimated_group_duration` to `estimated_total_time` and added in `remaining_seconds` to the Slumber progress operation.
 
-2014-03-12 Kirit Saelensminde  <kirit@felspar.com>
+2014-03-12  Kirit Saelensminde  <kirit@felspar.com>
  Add the ability to have multiple workers so that throughput and latency can be improved.
 
-2014-02-12 Siraset Jirapatchandej  <siraset@proteus-tech.com>
+2014-02-12  Siraset Jirapatchandej  <siraset@proteus-tech.com>
  Add a function that can be placed into the async queue for clearing out old jobs.
 
-2014-02-06 Siraset Jirapatchandej  <siraset@proteus-tech.com>
+2014-02-06  Siraset Jirapatchandej  <siraset@proteus-tech.com>
  Modified api to accept target group parameter.
 
-2014-02-03 Siraset Jirapatchandej  <siraset@proteus-tech.com>
+2014-02-03  Siraset Jirapatchandej  <siraset@proteus-tech.com>
  Added group model for grouping job, slumber operation for that model.
 
 2013-11-20  Chirapat Harigulrak  <chirapat@proteus-tech.com>
