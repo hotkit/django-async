@@ -261,7 +261,7 @@ class TestProgress(WithUser, TestCase):
         self.assertEqual(json_progress.get('total_unexecuted_jobs'), 2)
         self.assertEqual(json_progress.get('total_error_jobs'), 0)
         self.assertIsNone(json_progress.get('estimated_total_time'))
-        self.assertIsNone(json_progress.get('remaining_seconds'))
+        self.assertEqual(json_progress.get('remaining_seconds'), 0)
 
     def test_no_any_job_in_group(self):
         """Create group but no job create for that group.
@@ -310,14 +310,12 @@ class TestProgress(WithUser, TestCase):
         self.assertTrue(json_progress)
         self.assertEqual(json_progress.get('id'), group1.id)
         self.assertEqual(json_progress.get('created'), group1.created.isoformat())
-        self.assertEqual(json_progress.get('last_job_completed'),
-                         Progress.latest_executed_job_time(group1).isoformat())
+        self.assertEqual(json_progress.get('latest_job_completed'),
+                         group1.latest_executed_job().executed.isoformat())
         self.assertEqual(json_progress.get('total_jobs'), group1.jobs.count())
         self.assertEqual(json_progress.get('total_executed_jobs'), 5)
         self.assertEqual(json_progress.get('total_unexecuted_jobs'), 0)
         self.assertEqual(json_progress.get('total_error_jobs'), 0)
-        self.assertEqual(json_progress.get('estimated_total_time'),
-                         str(group1.estimate_execution_duration()[0]))
 
     def test_all_jobs_executed_with_error(self):
         """Test get detail from group with job errors.
@@ -348,14 +346,12 @@ class TestProgress(WithUser, TestCase):
         self.assertTrue(json_progress)
         self.assertEqual(json_progress.get('id'), group1.id)
         self.assertEqual(json_progress.get('created'), group1.created.isoformat())
-        self.assertEqual(json_progress.get('last_job_completed'),
-                         Progress.latest_executed_job_time(group1).isoformat())
+        self.assertEqual(json_progress.get('latest_job_completed'),
+            group1.latest_executed_job().executed.isoformat())
         self.assertEqual(json_progress.get('total_jobs'), group1.jobs.count())
         self.assertEqual(json_progress.get('total_executed_jobs'), 5)
         self.assertEqual(json_progress.get('total_unexecuted_jobs'), 0)
         self.assertEqual(json_progress.get('total_error_jobs'), 2)
-        self.assertEqual(json_progress.get('estimated_total_time'),
-                         str(group1.estimate_execution_duration()[0]))
 
     def test_estimate_execution_duration_can_produce_result(self):
         """Just to test if estimate function produce result,

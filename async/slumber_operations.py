@@ -57,26 +57,30 @@ class Progress(InstanceOperation):
             if total_jobs > 0:
                 total_unexecuted_jobs = total_jobs - total_executed_jobs
 
-                total, remaining, consumed = \
+                _, remaining, consumed = \
                     latest_group.estimate_execution_duration()
-                latest = self.latest_executed_job_time(latest_group)
+                latest = latest_group.latest_executed_job()
                 response['progress'] = {
                     'id': latest_group.id,
                     'reference': latest_group.reference,
                     'created': latest_group.created.isoformat(),
-                    'last_job_completed':
-                        latest.isoformat() if latest else None,
+                    'latest_job_completed':
+                        latest.executed.isoformat() if latest else None,
                     'total_jobs': total_jobs,
                     'total_executed_jobs': total_executed_jobs,
                     'total_unexecuted_jobs': total_unexecuted_jobs,
                     'total_error_jobs':
-                        latest_group.jobs.filter(errors__isnull=False)
-                            .distinct().count(),
-                    'estimated_total_time': total,
+                        latest_group.jobs.filter(
+                            errors__isnull=False).distinct().count(),
+                    'current_errors':
+                        latest_group.jobs.filter(
+                                errors__isnull=False, executed__isnull=True,
+                                cancelled__isnull=True
+                            ).distinct().count(),
                     'consumed_seconds':
                         consumed.seconds if consumed else None,
                     'remaining_seconds':
-                        remaining.seconds if remaining else None
+                        remaining.seconds if remaining else 0
                 }
         else:
             raise Http404("Cannot find group with reference [%s]." %
