@@ -40,11 +40,22 @@ class Group(models.Model):
         # if the old group still has jobs that haven't executed.
         if Job.objects.filter(group__reference=self.reference).filter(
                     Q(executed__isnull=True) & Q(cancelled__isnull=True)
-                ).count() > 0:
+                ).exclude(group__id=self.id).count() > 0:
             raise ValidationError(
                 "Group reference [%s] still has unexecuted jobs." %
                     self.reference)
-        return super(Group, self).save(*args, **kwargs)
+        result = super(Group, self).save(*args, **kwargs)
+        if self.final and self.final.group != self:
+            self.final.group = self
+            self.final.save()
+        return result
+
+    def on_completion(self, job):
+        """Set a job to be the one that executes when the other jobs
+        in the group have completed.
+        """
+        self.final = job
+        self.save()
 
     def estimate_execution_duration(self):
         """Estimate of the total amount of time (in seconds) that the group
@@ -84,11 +95,14 @@ class Group(models.Model):
         if self.jobs.filter(executed__isnull=False).count():
             return self.jobs.filter(executed__isnull=False).latest('executed')
 
-    def has_completed(self):
+    def has_completed(self, exclude=None):
         """Return True if all jobs are either executed or cancelled.
         """
-        return (self.jobs.all().count() > 0 and
-            self.jobs.filter(
+        job_query = self.jobs.all()
+        if exclude:
+            job_query = job_query.exclude(pk=exclude.pk)
+        return (job_query.count() > 0 and
+            job_query.filter(
                 Q(executed__isnull=True) & Q(cancelled__isnull=True)
             ).count() == 0)
 

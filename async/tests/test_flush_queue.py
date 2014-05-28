@@ -51,3 +51,28 @@ class TestFlushQueue(TestCase):
             self.assertIsNotNone(j1.executed)
             self.assertIsNone(j2.executed)
 
+class TestFinalJob(TestCase):
+    def test_final_when_added_last(self):
+        self.group = Group.objects.create(reference='final-job')
+        self.j1 = schedule(do_job, group=self.group)
+        self.j2 = schedule(do_job, group=self.group)
+        self.j3 = schedule(do_job)
+        self.group.on_completion(self.j3)
+        management.call_command('flush_queue')
+        j1 = Job.objects.get(pk=self.j1.pk)
+        j2 = Job.objects.get(pk=self.j2.pk)
+        j3 = Job.objects.get(pk=self.j3.pk)
+        self.assertLess(j1.executed, j2.executed)
+        self.assertLess(j2.executed, j3.executed)
+
+    def test_final_when_added_first(self):
+        self.j1 = schedule(do_job)
+        self.group = Group.objects.create(reference='final-job', final=self.j1)
+        self.j2 = schedule(do_job, group=self.group)
+        self.j3 = schedule(do_job, group=self.group)
+        management.call_command('flush_queue')
+        j1 = Job.objects.get(pk=self.j1.pk)
+        j2 = Job.objects.get(pk=self.j2.pk)
+        j3 = Job.objects.get(pk=self.j3.pk)
+        self.assertLess(j2.executed, j3.executed)
+        self.assertLess(j3.executed, j1.executed)

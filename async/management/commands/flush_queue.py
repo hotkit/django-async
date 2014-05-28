@@ -59,6 +59,10 @@ def run_queue(which, outof, limit):
             """
             for job in jobs.iterator():
                 if job.id % outof == which % outof:
+                    if (job.group and job.group.final and
+                            job.group.final.pk == job.pk):
+                        if not job.group.has_completed(job):
+                            continue
                     print "%s: %s" % (job.id, unicode(job))
                     job.execute()
                     return False
