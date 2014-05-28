@@ -29,6 +29,8 @@ class Group(models.Model):
     reference = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
+    final = models.ForeignKey('Job', blank=True, null=True,
+        related_name='ends')
 
     def __unicode__(self):
         return u'%s' % self.reference
