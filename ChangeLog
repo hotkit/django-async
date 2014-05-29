@@ -1,5 +1,6 @@
 2014-05-28  Kirit Saelensminde  <kirit@felspar.com>
  When giving a group name to the schedule API it now does the right thing and creates a new group instance if appropriate.
+ A final job can be set on a group (using `on_completion`) which will be executed after all of the other jobs have been done.
 
 2014-05-26  Nuttakit Phuechnaowarat  <nuttakit@proteus-tech.com>
  Add field cancelled to job

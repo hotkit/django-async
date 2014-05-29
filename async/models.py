@@ -3,7 +3,7 @@
 """
 from datetime import  timedelta
 from django.db import models, transaction
-from django.db.models import Q
+from django.db.models import Count, Q
 try:
     # No name 'timezone' in module 'django.utils'
     # pylint: disable=E0611
@@ -29,6 +29,8 @@ class Group(models.Model):
     reference = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
+    final = models.ForeignKey('Job', blank=True, null=True,
+        related_name='ends')
 
     def __unicode__(self):
         return u'%s' % self.reference
@@ -38,11 +40,71 @@ class Group(models.Model):
         # if the old group still has jobs that haven't executed.
         if Job.objects.filter(group__reference=self.reference).filter(
                     Q(executed__isnull=True) & Q(cancelled__isnull=True)
-                ).count() > 0:
+                ).exclude(group__id=self.id).count() > 0:
             raise ValidationError(
                 "Group reference [%s] still has unexecuted jobs." %
                     self.reference)
-        return super(Group, self).save(*args, **kwargs)
+        result = super(Group, self).save(*args, **kwargs)
+        if self.final and self.final.group != self:
+            self.final.group = self
+            self.final.save()
+        return result
+
+    def on_completion(self, job):
+        """Set a job to be the one that executes when the other jobs
+        in the group have completed.
+        """
+        self.final = job
+        self.save()
+
+    def estimate_execution_duration(self):
+        """Estimate of the total amount of time (in seconds) that the group
+        will take to execute.
+        """
+        result = self.jobs.aggregate(
+            job_count=Count('id'), executed_job_count=Count('executed'),
+            cancelled_job_count=Count('cancelled'))
+        total_jobs = result['job_count']
+        total_executed_jobs = result['executed_job_count']
+        total_cancelled_jobs = result['cancelled_job_count']
+        total_done = total_executed_jobs + total_cancelled_jobs
+        if total_jobs > 0:
+            # Don't allow to calculate if executed jobs are not valid.
+            if total_done == 0:
+                return None, None, None
+            elif not self.has_completed():
+                # Some jobs are unexecuted.
+                time_consumed = timezone.now() - self.created
+                estimated_time = timedelta(seconds=(
+                    time_consumed.seconds/float(total_done))
+                        * total_jobs)
+                remaining = estimated_time - time_consumed
+            else:
+                # All jobs in group are executed.
+                estimated_time = (
+                    self.latest_executed_job().executed - self.created)
+                time_consumed = estimated_time
+                remaining = timedelta(seconds=0)
+            return estimated_time, remaining, time_consumed
+        else:
+            return None, None, None
+
+    def latest_executed_job(self):
+        """When the last executed job in the group was completed.
+        """
+        if self.jobs.filter(executed__isnull=False).count():
+            return self.jobs.filter(executed__isnull=False).latest('executed')
+
+    def has_completed(self, exclude=None):
+        """Return True if all jobs are either executed or cancelled.
+        """
+        job_query = self.jobs.all()
+        if exclude:
+            job_query = job_query.exclude(pk=exclude.pk)
+        return (self.jobs.all().count() > 0 and
+            job_query.filter(
+                Q(executed__isnull=True) & Q(cancelled__isnull=True)
+            ).count() == 0)
 
     @staticmethod
     def latest_group_by_reference(reference):
@@ -53,17 +115,13 @@ class Group(models.Model):
         try:
             group = Group.objects.filter(
                 reference=reference).latest('created')
-            if (group.jobs.all().count() > 0 and
-                    group.jobs.filter(
-                        Q(executed__isnull=True) & Q(cancelled__isnull=True)
-                    ).count() == 0):
+            if group.has_completed():
                 # The found group is either fully executed or cancelled
                 # so make a new one
                 group = Group.objects.create(
-                    reference=reference)
+                    reference=reference, description=group.description)
         except Group.DoesNotExist:
-            group = Group.objects.create(
-                reference=reference)
+            group = Group.objects.create(reference=reference)
         return group
 
 
