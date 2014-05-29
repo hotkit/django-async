@@ -76,3 +76,11 @@ class TestFinalJob(TestCase):
         j3 = Job.objects.get(pk=self.j3.pk)
         self.assertLess(j2.executed, j3.executed)
         self.assertLess(j3.executed, j1.executed)
+
+    def test_only_has_final_job(self):
+        self.j1 = schedule(do_job)
+        self.group = Group.objects.create(reference='final-job', final=self.j1)
+        management.call_command('flush_queue')
+        j1 = Job.objects.get(pk=self.j1.pk)
+        self.assertIsNotNone(j1.executed)
+

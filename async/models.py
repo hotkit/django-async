@@ -101,7 +101,7 @@ class Group(models.Model):
         job_query = self.jobs.all()
         if exclude:
             job_query = job_query.exclude(pk=exclude.pk)
-        return (job_query.count() > 0 and
+        return (self.jobs.all().count() > 0 and
             job_query.filter(
                 Q(executed__isnull=True) & Q(cancelled__isnull=True)
             ).count() == 0)
