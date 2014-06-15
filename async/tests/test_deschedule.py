@@ -30,7 +30,7 @@ class TestDeschedule(TestCase):
         self.assertEqual(job1.identity, sha1(unicode(job2)).hexdigest())
 
     def test_deschedule_by_name(self):
-        """We must be able to schedule a job by giving its name.
+        """We must be able to deschedule a job by giving its name.
         """
         job = schedule('async.tests.test_deschedule._example')
         self.assertEqual(job.name, 'async.tests.test_deschedule._example')

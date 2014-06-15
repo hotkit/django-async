@@ -64,11 +64,11 @@ def run_queue(which, outof, limit):
             .exclude(scheduled__gt=now)
             .order_by('-priority'))
         while True:
-            number = by_priority.count()
-            if number == 0:
-                print "No jobs found for execution"
+            try:
+                priority = by_priority[0].priority
+            except IndexError:
+                print "No jobs to execute"
                 return
-            priority = by_priority[0].priority
             if run(Job.objects
                     .filter(executed=None, cancelled=None,
                         scheduled__lte=now, priority=priority)

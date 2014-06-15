@@ -175,19 +175,22 @@ class Job(models.Model):
             Run the job using the specified meta values to control the
             execution.
         """
-        def start():
-            """Record the start time for the job.
-            """
-            self.started = timezone.now()
-            self.save()
-        transaction.commit_on_success(start)()
         try:
             _logger.info("%s %s", self.id, unicode(self))
             args = loads(self.args)
             kwargs = non_unicode_kwarg_keys(loads(self.kwargs))
             function = object_at_end_of_path(self.name)
             _logger.debug(u"%s resolved to %s" % (self.name, function))
-            result = transaction.commit_on_success(function)(*args, **kwargs)
+            def execute():
+                """Execute the database updates in one transaction.
+                """
+                self.started = timezone.now()
+                result = function(*args, **kwargs)
+                self.executed = timezone.now()
+                self.result = dumps(result)
+                self.save()
+                return result
+            return transaction.commit_on_success(execute)()
         except Exception, exception:
             self.started = None
             errors = 1 + self.errors.count()
@@ -207,11 +210,6 @@ class Job(models.Model):
                 self.save()
             transaction.commit_on_success(record)()
             raise
-        else:
-            self.executed = timezone.now()
-            self.result = dumps(result)
-            self.save() # Single SQL statement so no need for transaction
-            return result
 
 
 class Error(models.Model):

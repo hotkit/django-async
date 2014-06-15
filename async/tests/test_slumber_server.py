@@ -216,6 +216,17 @@ class TestSchedule(WithUser, TestCase):
                 run_after=scheduled,
                 group='test-group'))
 
+    def test_group_progres_url(self):
+        """Make sure that references with odd characters still generate
+        correct progress URLs.
+        """
+        g1 = Group.objects.create(reference="space test")
+        response = self.client.get('/slumber/async/Group/data/%s/' % g1.pk)
+        self.assertEqual(response.status_code, 200)
+        json = loads(response.content)
+        self.assertEqual(json['operations']['progress'],
+            '/slumber/async/Group/progress/space%20test/')
+
 
 class TestProgress(WithUser, TestCase):
     URL = '/slumber/async/Group/progress/'
