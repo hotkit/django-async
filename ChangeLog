@@ -1,3 +1,8 @@
+2014-06-15  Kirit Saelensminde  <kirit@felspar.com>
+ Fixed a bug that stopped us from running jobs in top level modules.
+ Added database indexes to speed up selection of jobs, and the progress operation and re-arranged the bookkeeping of job execution to lower transaction costs. Also added in scripts to make testing of the queue overhead simpler.
+ Fixed the generation of the progress operation URL.
+
 2014-05-28  Kirit Saelensminde  <kirit@felspar.com>
  When giving a group name to the schedule API it now does the right thing and creates a new group instance if appropriate.
  A final job can be set on a group (using `on_completion`) which will be executed after all of the other jobs have been done.
