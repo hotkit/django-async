@@ -33,7 +33,7 @@ def deschedule(function, args = None, kwargs = None):
         name=full_name(function),
             args=dumps(args or []), kwargs=dumps(kwargs or {}))
     mark_executed = Job.objects.filter(executed=None,
-        identity=sha1(unicode(job)).hexdigest())
+        identity=sha1(str(job).encode()).hexdigest())
     mark_executed.update(executed=datetime.now())
 
 
