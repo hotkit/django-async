@@ -22,7 +22,7 @@ def acquire_lock(lockname):
             try:
                 lock.acquire(timeout = -1)
             except AlreadyLocked:
-                print 'Lock is already set, aborting.'
+                print('Lock is already set, aborting.')
                 return
             try:
                 handler(self, **options)
@@ -60,13 +60,13 @@ class Command(BaseCommand):
                 .order_by('-priority'))
             number = by_priority.count()
             if number == 0:
-                print "No jobs found for execution"
+                print("No jobs found for execution")
                 return
             def run(jobs):
                 """Run the jobs handed to it
                 """
                 for job in jobs.iterator():
-                    print "%s: %s" % (job.id, unicode(job))
+                    print("%s: %s" % (job.id, unicode(job)))
                     job.execute()
                     return False
                 return True
