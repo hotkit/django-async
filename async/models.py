@@ -62,7 +62,7 @@ class Job(models.Model):
             function = object_at_end_of_path(self.name)
             _logger.debug(u"%s resolved to %s" % (self.name, function))
             result = transaction.commit_on_success(function)(*args, **kwargs)
-        except Exception, exception:
+        except Exception as exception:
             self.started = None
             errors = 1 + self.errors.count()
             self.scheduled = (datetime.now() +

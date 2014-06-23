@@ -8,7 +8,7 @@ def full_name(item):
     """Return the full name of a something passed in so it can be retrieved
     later on.
     """
-    if isinstance(item, basestring):
+    if isinstance(item, str):
         return item
     if ismethod(item):
         module_name = full_name(dict(getmembers(item))['im_self'])
