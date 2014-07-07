@@ -19,7 +19,7 @@ class JobAdmin(admin.ModelAdmin):
     """
 
     def display_group(obj):
-        return obj.group.reference
+        return obj.group.reference if obj.group else None
     display_group.short_description = 'Group'
 
     list_display = ['__unicode__', 'scheduled', 'executed', display_group]
