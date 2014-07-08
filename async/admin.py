@@ -17,12 +17,12 @@ class ErrorInline(admin.TabularInline):
 def display_group(obj):
     return obj.group.reference if obj.group else None
 
+display_group.short_description = 'Group'
+
 
 class JobAdmin(admin.ModelAdmin):
     """Allow us to manipulate jobs.
     """
-
-    display_group.short_description = 'Group'
 
     list_display = ['__unicode__', 'scheduled', 'executed', display_group]
     inlines = [ErrorInline]
