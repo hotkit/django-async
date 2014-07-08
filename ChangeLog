@@ -1,3 +1,6 @@
+2014-07-08  Chirapat Harigulrak  <chirapat@proteus-tech.com>
+Fix admin error when a job has no group
+
 2014-06-15  Kirit Saelensminde  <kirit@felspar.com>
  Fixed a bug that stopped us from running jobs in top level modules.
  Added database indexes to speed up selection of jobs, and the progress operation and re-arranged the bookkeeping of job execution to lower transaction costs. Also added in scripts to make testing of the queue overhead simpler.
