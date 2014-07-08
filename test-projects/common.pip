@@ -10,4 +10,4 @@ unittest2
 pylint==1.2.1
 
 # Used to test the optional Slumber compatibility.
-django-slumber >= 0.7.7
+django-slumber >= 0.7.9
