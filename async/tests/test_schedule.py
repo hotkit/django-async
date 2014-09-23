@@ -28,3 +28,10 @@ class TestSchedule(TestCase):
         # Different versions of Django will import this file differently
         self.assertTrue(job.name.endswith(
             'async.tests.test_schedule._example'))
+
+    def test_schedule_in_group(self):
+        """Make sure that a group is created if it doesn't already exist.
+        """
+        job = schedule(_example, group='test_schedule_in_group')
+        self.assertEqual(job.group.reference, 'test_schedule_in_group')
+

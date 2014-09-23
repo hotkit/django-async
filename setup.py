@@ -10,7 +10,7 @@ def read(fname1, fname2):
 
 setup(
     name = "django-async",
-    version = "0.5.4",
+    version = "0.6",
     author = "Kirit Saelensminde",
     author_email = "kirit@felspar.com",
     url='http://www.kirit.com/Django%20Async',
@@ -30,5 +30,7 @@ setup(
     packages = ['async',
         'async.tests',
         'async.management',
-        'async.management.commands'],
+        'async.management.commands',
+        'async.migrations',
+    ],
 )
