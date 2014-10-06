@@ -67,9 +67,36 @@ def health():
     output['queue']['all-jobs'] = Job.objects.all().count()
     output['queue']['not-executed'] = Job.objects.filter(executed=None).count()
     output['queue']['executed'] = Job.objects.exclude(executed=None).count()
+    output['queue']['estimated-completion-current-job'] = _estimate_current_completion()
     output['queue']['estimated-completion'] = _estimate_completion_all()
     output['errors']['number'] = Error.objects.all().count()
     return output
+
+
+def _estimate_current_completion():
+    """ Estimate remaining completion time current job based on
+        average of previous runs
+
+        Returns a floating value representing time in seconds
+    """
+    try:
+        job = Job.objects.get(executed__isnull=True, cancelled__isnull=True,
+                              started__isnull=False)
+        similar_executed_jobs = Job.objects.filter(name=job.name,
+                                                   executed__isnull=False,
+                                                   cancelled__isnull=True,
+                                                   group__isnull=True)
+        total_execution_time = 0
+        for similar_job in similar_executed_jobs:
+            delta = similar_job.executed - similar_job.started
+            total_execution_time += float(delta.total_seconds())
+        average_runtime = total_execution_time / \
+                          (similar_executed_jobs.count() or 1)
+        time_spent = _get_now() - job.started
+        projection = average_runtime - time_spent.total_seconds()
+        return round(projection, 2)
+    except Job.DoesNotExist:
+        return None
 
 
 def _estimate_completion_all():

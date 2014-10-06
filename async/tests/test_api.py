@@ -96,6 +96,23 @@ class TestHealth(TestCase):
         TestRemoveOldJobs.create_job(2)
         self.assertEquals(api._estimate_completion_all(), 15.0)
 
+    @patch('async.api._get_now')
+    def test_estimate_current_job_completion(self, mock_now):
+        mock_now.return_value = datetime.datetime(2099, 12, 31, 23, 59, 59)
+        job = TestRemoveOldJobs.create_job(1)
+        self.assertEquals(api._estimate_current_completion(), None)
+
+        job_started = datetime.datetime(2099, 12, 31, 23, 59, 50)
+        job.started = job_started
+        job.executed = job_started + datetime.timedelta(seconds=5)
+        job.save()
+        self.assertEquals(api._estimate_current_completion(), None)
+
+        job2 = TestRemoveOldJobs.create_job(1)
+        job2.started = datetime.datetime(2099, 12, 31, 23, 59, 56)
+        job2.save()
+        self.assertEquals(api._estimate_current_completion(), 2.0)
+
 
 class TestRemoveOldJobs(TestCase):
     """Tests removing old jobs.
