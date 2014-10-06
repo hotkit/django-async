@@ -25,6 +25,78 @@ def get_d_before_dt_by_days(base_dt, d):
     return base_dt - datetime.timedelta(days=d)
 
 
+class TestHealth(TestCase):
+    """Tests health and statistics of the queue.
+    """
+
+    def test_estimate_completion_time_for_ungrouped_jobs(self):
+        job1 = TestRemoveOldJobs.create_job(1)
+        job_started = timezone.now()
+        job1.started = job_started
+        job1.executed = job_started + datetime.timedelta(seconds=5)
+        job1.save()
+
+        job2 = TestRemoveOldJobs.create_job(2)
+        job2.started = job_started
+        job2.executed = job_started + datetime.timedelta(seconds=10)
+        job2.save()
+
+        job2 = TestRemoveOldJobs.create_job(2)
+        job2.started = job_started
+        job2.executed = job_started + datetime.timedelta(seconds=8.4)
+        job2.save()
+
+        TestRemoveOldJobs.create_job(1)
+        TestRemoveOldJobs.create_job(2)
+        TestRemoveOldJobs.create_job(1)
+        self.assertEquals(api._estimate_completion_ungrouped(), 19.2)
+        self.assertEquals(api._estimate_completion_all(), 19.2)
+
+    def test_estimate_completion_time_for_grouped_jobs(self):
+        job1 = TestRemoveOldJobs.create_job(1, group="a")
+        job_started = timezone.now()
+        job1.started = job_started
+        job1.executed = job_started + datetime.timedelta(seconds=5)
+        job1.save()
+
+        job2 = TestRemoveOldJobs.create_job(2, group="b")
+        job2.started = job_started
+        job2.executed = job_started + datetime.timedelta(seconds=10)
+        job2.save()
+
+        job2 = TestRemoveOldJobs.create_job(2, group="b")
+        job2.started = job_started
+        job2.executed = job_started + datetime.timedelta(seconds=8.4)
+        job2.save()
+
+        TestRemoveOldJobs.create_job(1, group="a")
+        TestRemoveOldJobs.create_job(2, group="b")
+        TestRemoveOldJobs.create_job(1, group="a")
+        self.assertEquals(api._estimate_completion_all(), 23.38)
+
+    def test_estimate_completion_time_for_all_jobs(self):
+        job1 = TestRemoveOldJobs.create_job(1)
+        job_started = timezone.now()
+        job1.started = job_started
+        job1.executed = job_started + datetime.timedelta(seconds=5)
+        job1.save()
+
+        job2 = TestRemoveOldJobs.create_job(2)
+        job2.started = job_started
+        job2.executed = job_started + datetime.timedelta(seconds=10)
+        job2.save()
+
+        job3 = TestRemoveOldJobs.create_job(1, group="a")
+        job_started = timezone.now()
+        job3.started = job_started
+        job3.executed = job_started + datetime.timedelta(seconds=5)
+        job3.save()
+
+        TestRemoveOldJobs.create_job(1, group="a")
+        TestRemoveOldJobs.create_job(2)
+        self.assertEquals(api._estimate_completion_all(), 15.0)
+
+
 class TestRemoveOldJobs(TestCase):
     """Tests removing old jobs.
     """
