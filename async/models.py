@@ -187,6 +187,7 @@ class Job(models.Model):
                 self.started = timezone.now()
                 result = function(*args, **kwargs)
                 self.executed = timezone.now()
+                self.cancelled = None
                 self.result = dumps(result)
                 self.save()
                 return result
