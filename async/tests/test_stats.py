@@ -17,7 +17,8 @@ def create_job(jid, group=None):
     Error.objects.create(job=job, exception='Error', traceback='code stack')
     return job
 
-class TestStatss(TestCase):
+
+class TestStats(TestCase):
     """Tests statsistics of the queue.
     """
 
@@ -42,7 +43,7 @@ class TestStatss(TestCase):
         create_job(2)
         create_job(1)
         self.assertEquals(stats._estimate_completion_ungrouped(), 19.2)
-        self.assertEquals(stats._estimate_completion_all(), 19.2)
+        self.assertEquals(stats.estimate_queue_completion(), 19.2)
 
     def test_estimate_completion_time_for_grouped_jobs(self):
         job1 = create_job(1, group="a")
@@ -64,7 +65,7 @@ class TestStatss(TestCase):
         create_job(1, group="a")
         create_job(2, group="b")
         create_job(1, group="a")
-        self.assertEquals(stats._estimate_completion_all(), 23.38)
+        self.assertEquals(stats.estimate_queue_completion(), 23.38)
 
     def test_estimate_completion_time_for_all_jobs(self):
         job1 = create_job(1)
@@ -86,21 +87,21 @@ class TestStatss(TestCase):
 
         create_job(1, group="a")
         create_job(2)
-        self.assertEquals(stats._estimate_completion_all(), 15.0)
+        self.assertEquals(stats.estimate_queue_completion(), 15.0)
 
     @patch('async.stats._get_now')
     def test_estimate_current_job_completion(self, mock_now):
         mock_now.return_value = datetime.datetime(2099, 12, 31, 23, 59, 59)
         job = create_job(1)
-        self.assertEquals(stats._estimate_current_completion(), None)
+        self.assertEquals(stats.estimate_current_job_completion(), None)
 
         job_started = datetime.datetime(2099, 12, 31, 23, 59, 50)
         job.started = job_started
         job.executed = job_started + datetime.timedelta(seconds=5)
         job.save()
-        self.assertEquals(stats._estimate_current_completion(), None)
+        self.assertEquals(stats.estimate_current_job_completion(), None)
 
         job2 = create_job(1)
         job2.started = datetime.datetime(2099, 12, 31, 23, 59, 56)
         job2.save()
-        self.assertEquals(stats._estimate_current_completion(), 2.0)
+        self.assertEquals(stats.estimate_current_job_completion(), 2.0)

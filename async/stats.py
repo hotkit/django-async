@@ -13,7 +13,7 @@ def _get_now():
     """
     return timezone.now()
 
-def _estimate_current_completion():
+def estimate_current_job_completion():
     """ Estimate remaining completion time current job based on
         average of previous runs
 
@@ -39,7 +39,7 @@ def _estimate_current_completion():
         return None
 
 
-def _estimate_completion_all():
+def estimate_queue_completion():
     """Estimate average time (in seconds) that the queue
        will take to execute
 
