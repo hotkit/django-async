@@ -26,7 +26,74 @@ def get_d_before_dt_by_days(base_dt, d):
 
 
 class TestHealth(TestCase):
-    """Tests health and statistics of the queue.
+    """ Tests health of the queue.
+    """
+
+    def test_health_for_executed_jobs(self):
+        job1 = TestRemoveOldJobs.create_job(1)
+        job_started = timezone.now()
+        job1.started = job_started
+        job1.executed = job_started + datetime.timedelta(seconds=5)
+        job1.save()
+
+        job2 = TestRemoveOldJobs.create_job(2)
+        job2.started = job_started
+        job2.executed = job_started + datetime.timedelta(seconds=10)
+        job2.save()
+
+        job2_a = TestRemoveOldJobs.create_job(2)
+        job2_a.started = job_started
+        job2_a.save()
+
+        TestRemoveOldJobs.create_job(1)
+
+        queue_health = api.health().get('queue', None)
+
+        self.assertEquals(queue_health['not-executed'], 2)
+        self.assertEquals(queue_health['executed'], 2)
+        self.assertEquals(queue_health['oldest-executed'], job1)
+        self.assertEquals(queue_health['most-recent-executed'], job2)
+
+
+    def test_health_for_cancelled_jobs(self):
+        dt_now = timezone.now()
+        job1 = TestRemoveOldJobs.create_job(1)
+        job1.cancelled = dt_now
+        job1.save()
+
+        job2 = TestRemoveOldJobs.create_job(2)
+        job2.cancelled = dt_now + datetime.timedelta(seconds=10)
+        job2.save()
+
+        TestRemoveOldJobs.create_job(2)
+        TestRemoveOldJobs.create_job(1)
+
+        queue_health = api.health().get('queue', None)
+
+        self.assertEquals(queue_health['cancelled'], 2)
+        self.assertEquals(queue_health['oldest-cancelled'], job1)
+        self.assertEquals(queue_health['most-recent-cancelled'], job2)
+
+
+    def test_health_for_errors(self):
+        dt_now = timezone.now()
+        job1 = api.schedule('job-1', group=None)
+        error1 = Error.objects.create(job=job1, executed=dt_now, exception="First", traceback="None")
+
+        dt_now = dt_now + datetime.timedelta(seconds=10)
+        error2 = Error.objects.create(job=job1, executed=dt_now, exception="Second", traceback="None")
+        for error in Error.objects.all():
+            print error
+
+        queue_errors = api.health().get('errors', None)
+
+        self.assertEquals(queue_errors['number'], 2)
+        self.assertEquals(queue_errors['oldest-error'], error1)
+        self.assertEquals(queue_errors['most-recent-error'], error2)
+
+
+class TestStats(TestCase):
+    """Tests statistics of the queue.
     """
 
     def test_estimate_completion_time_for_ungrouped_jobs(self):

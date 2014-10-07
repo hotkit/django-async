@@ -64,13 +64,38 @@ def health():
     can be turned into JSON.
     """
     output = {'queue': {}, 'errors': {}}
+
     output['queue']['all-jobs'] = Job.objects.all().count()
+
     output['queue']['not-executed'] = Job.objects.filter(executed=None).count()
     output['queue']['executed'] = Job.objects.exclude(executed=None).count()
+    output['queue']['oldest-executed'] = get_first(
+        Job.objects.exclude(executed=None).order_by('executed'))
+    output['queue']['most-recent-executed'] = get_first(
+        Job.objects.exclude(executed=None).order_by('-executed'))
+
+    output['queue']['cancelled'] = Job.objects.filter(cancelled=None).count()
+    output['queue']['oldest-cancelled'] = get_first(
+        Job.objects.exclude(cancelled=None).order_by('cancelled'))
+    output['queue']['most-recent-cancelled'] = get_first(
+        Job.objects.exclude(cancelled=None).order_by('-cancelled'))
+
     output['queue']['estimated-completion-current-job'] = _estimate_current_completion()
     output['queue']['estimated-completion'] = _estimate_completion_all()
+
     output['errors']['number'] = Error.objects.all().count()
+    output['errors']['oldest-error'] = get_first(
+        Error.objects.all().order_by('executed'))
+    output['errors']['most-recent-error'] = get_first(
+        Error.objects.all().order_by('-executed'))
     return output
+
+
+def get_first(queryset, default=None):
+    """ Return first element of queryset or default """
+    if queryset:
+        return queryset[0]
+    return default
 
 
 def _estimate_current_completion():
