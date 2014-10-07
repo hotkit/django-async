@@ -17,7 +17,8 @@ except ImportError: # pragma: no cover
 
 from async.models import Error, Job, Group
 from async.utils import full_name
-from async.stats import estimate_queue_completion, estimate_current_job_completion
+from async.stats import estimate_queue_completion, \
+                        estimate_current_job_completion
 
 
 def _get_now():
@@ -81,7 +82,8 @@ def health():
     output['queue']['most-recent-cancelled'] = get_first(
         Job.objects.exclude(cancelled=None).order_by('-cancelled'))
 
-    output['queue']['estimated-completion-current-job'] = estimate_current_job_completion()
+    output['queue']['estimated-completion-current-job'] = \
+        estimate_current_job_completion()
     output['queue']['estimated-completion'] = estimate_queue_completion()
 
     output['errors']['number'] = Error.objects.all().count()

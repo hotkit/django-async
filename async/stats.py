@@ -4,6 +4,8 @@
 from async.models import Group, Job
 from datetime import timedelta
 try:
+    # No name 'timezone' in module 'django.utils'
+    # pylint: disable=E0611
     from django.utils import timezone
 except ImportError:
     from datetime import datetime as timezone
