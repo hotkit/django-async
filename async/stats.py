@@ -36,7 +36,7 @@ def estimate_current_job_completion():
         projection = average_runtime - time_spent.total_seconds()
         return round(projection, 2)
     except Job.DoesNotExist:
-        return None
+        return 0
 
 
 def estimate_queue_completion():
@@ -51,7 +51,7 @@ def estimate_queue_completion():
         estimated, _, _ = group.estimate_execution_duration()
         if isinstance(estimated, timedelta):
             total_estimated += estimated.total_seconds()
-    return round(total_estimated +
+    return round(total_estimated + estimate_current_job_completion() +
                  _estimate_completion_ungrouped(), 2)
 
 
@@ -73,7 +73,8 @@ def _estimate_completion_ungrouped():
         remaining_jobs = Job.objects.filter(name=name,
                                             executed__isnull=True,
                                             cancelled__isnull=True,
-                                            group__isnull=True)
+                                            group__isnull=True,
+                                            started__isnull=True)
         total_execution_time = 0
         for job in executed_jobs:
             delta = job.executed - job.started

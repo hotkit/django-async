@@ -93,13 +93,13 @@ class TestStats(TestCase):
     def test_estimate_current_job_completion(self, mock_now):
         mock_now.return_value = datetime.datetime(2099, 12, 31, 23, 59, 59)
         job = create_job(1)
-        self.assertEquals(stats.estimate_current_job_completion(), None)
+        self.assertEquals(stats.estimate_current_job_completion(), 0)
 
         job_started = datetime.datetime(2099, 12, 31, 23, 59, 50)
         job.started = job_started
         job.executed = job_started + datetime.timedelta(seconds=5)
         job.save()
-        self.assertEquals(stats.estimate_current_job_completion(), None)
+        self.assertEquals(stats.estimate_current_job_completion(), 0)
 
         job2 = create_job(1)
         job2.started = datetime.datetime(2099, 12, 31, 23, 59, 56)

@@ -82,14 +82,37 @@ class TestHealth(TestCase):
 
         dt_now = dt_now + datetime.timedelta(seconds=10)
         error2 = Error.objects.create(job=job1, executed=dt_now, exception="Second", traceback="None")
-        for error in Error.objects.all():
-            print error
 
         queue_errors = api.health().get('errors', None)
 
         self.assertEquals(queue_errors['number'], 2)
         self.assertEquals(queue_errors['oldest-error'], error1)
         self.assertEquals(queue_errors['most-recent-error'], error2)
+
+    @patch('async.stats._get_now')
+    def test_health_for_queue_completion_estimates(self, mock_now):
+        mock_now.return_value = datetime.datetime(2099, 12, 31, 23, 59, 59)
+        job = TestRemoveOldJobs.create_job(1)
+        queue_health = api.health().get('queue', None)
+        self.assertEquals(queue_health['estimated-completion-current-job'], 0)
+        self.assertEquals(queue_health['estimated-completion'], 0)
+
+        job_started = datetime.datetime(2099, 12, 31, 23, 59, 50)
+        job.started = job_started
+        job.executed = job_started + datetime.timedelta(seconds=5)
+        job.save()
+
+        queue_health = api.health().get('queue', None)
+        self.assertEquals(queue_health['estimated-completion-current-job'], 0)
+        self.assertEquals(queue_health['estimated-completion'], 0)
+
+        job2 = TestRemoveOldJobs.create_job(1)
+        job2.started = datetime.datetime(2099, 12, 31, 23, 59, 56)
+        job2.save()
+
+        queue_health = api.health().get('queue', None)
+        self.assertEquals(queue_health['estimated-completion-current-job'], 2.0)
+        self.assertEquals(queue_health['estimated-completion'], 2.0)
 
 
 class TestRemoveOldJobs(TestCase):
