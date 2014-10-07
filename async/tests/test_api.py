@@ -91,13 +91,13 @@ class TestHealth(TestCase):
 
     @patch('async.stats._get_now')
     def test_health_for_queue_completion_estimates(self, mock_now):
-        mock_now.return_value = datetime.datetime(2099, 12, 31, 23, 59, 59)
+        mock_now.return_value = timezone.now()
         job = TestRemoveOldJobs.create_job(1)
         queue_health = api.health().get('queue', None)
         self.assertEquals(queue_health['estimated-completion-current-job'], 0)
         self.assertEquals(queue_health['estimated-completion'], 0)
 
-        job_started = datetime.datetime(2099, 12, 31, 23, 59, 50)
+        job_started = mock_now.return_value - datetime.timedelta(seconds=9)
         job.started = job_started
         job.executed = job_started + datetime.timedelta(seconds=5)
         job.save()
@@ -107,12 +107,12 @@ class TestHealth(TestCase):
         self.assertEquals(queue_health['estimated-completion'], 0)
 
         job2 = TestRemoveOldJobs.create_job(1)
-        job2.started = datetime.datetime(2099, 12, 31, 23, 59, 56)
+        job2.started = mock_now.return_value - datetime.timedelta(seconds=3)
         job2.save()
 
         queue_health = api.health().get('queue', None)
-        self.assertEquals(queue_health['estimated-completion-current-job'], 2.0)
-        self.assertEquals(queue_health['estimated-completion'], 2.0)
+        self.assertAlmostEqual(queue_health['estimated-completion-current-job'], 2.0)
+        self.assertAlmostEqual(queue_health['estimated-completion'], 2.0)
 
 
 class TestRemoveOldJobs(TestCase):
