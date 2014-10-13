@@ -7,7 +7,7 @@ from datetime import timedelta
 from hashlib import sha1
 from simplejson import dumps
 
-from django.db.models import Q
+from django.db.models import Q, Count
 try:
     # No name 'timezone' in module 'django.utils'
     # pylint: disable=E0611
@@ -69,18 +69,25 @@ def health(estimation_fn=estimate_rough_queue_completion):
 
     output['queue']['all-jobs'] = Job.objects.all().count()
 
-    output['queue']['not-executed'] = Job.objects.filter(executed=None).count()
     output['queue']['executed'] = Job.objects.exclude(executed=None).count()
+    output['queue']['executed-details'] = \
+        get_grouped_aggregate(jobs_type='executed')
     output['queue']['oldest-executed'] = get_first(
         Job.objects.exclude(executed=None).order_by('executed'))
     output['queue']['most-recent-executed'] = get_first(
         Job.objects.exclude(executed=None).order_by('-executed'))
+
+    output['queue']['not-executed'] = Job.objects.filter(executed=None).count()
+    output['queue']['not-executed-details'] = \
+        get_grouped_aggregate(jobs_type='executed', complement=True)
 
     output['queue']['cancelled'] = Job.objects.filter(cancelled=None).count()
     output['queue']['oldest-cancelled'] = get_first(
         Job.objects.exclude(cancelled=None).order_by('cancelled'))
     output['queue']['most-recent-cancelled'] = get_first(
         Job.objects.exclude(cancelled=None).order_by('-cancelled'))
+    output['queue']['cancelled-details'] = \
+        get_grouped_aggregate(jobs_type='cancelled', complement=True)
 
     output['queue']['estimated-completion-current-job'] = \
         estimate_current_job_completion()
@@ -92,6 +99,19 @@ def health(estimation_fn=estimate_rough_queue_completion):
     output['errors']['most-recent-error'] = get_first(
         Error.objects.all().order_by('-executed'))
     return output
+
+
+def get_grouped_aggregate(jobs_type, complement=False):
+    """
+       Returns count of jobs, grouped by name, based on
+       job type.
+    """
+    values = Job.objects.values('name')
+    if complement:
+        return list(values.filter(**{jobs_type: None})\
+                     .order_by('name').annotate(Count('name')))
+    return list(values.exclude(**{jobs_type: None})\
+                 .order_by('name').annotate(Count('name')))
 
 
 def get_first(queryset, default=None):

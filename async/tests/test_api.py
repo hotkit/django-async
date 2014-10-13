@@ -24,6 +24,42 @@ def get_now():
 def get_d_before_dt_by_days(base_dt, d):
     return base_dt - datetime.timedelta(days=d)
 
+class TestGroupedAggregate(TestCase):
+
+    def test_for_executed_jobs(self):
+        job1 = TestRemoveOldJobs.create_job(1)
+        job_started = timezone.now()
+        job1.started = job_started
+        job1.executed = job_started + datetime.timedelta(seconds=5)
+        job1.save()
+
+        job2 = TestRemoveOldJobs.create_job(2)
+        job2.started = job_started
+        job2.executed = job_started + datetime.timedelta(seconds=10)
+        job2.save()
+
+        job2_a = TestRemoveOldJobs.create_job(2)
+        job2_a.started = job_started
+        job2_a.cancelled = job_started
+        job2_a.save()
+
+        job1a = TestRemoveOldJobs.create_job(1)
+        job1a.executed = job_started + datetime.timedelta(seconds=20)
+        job1a.save()
+
+        cancelled_jobs = api.get_grouped_aggregate(jobs_type='cancelled')
+        self.assertEqual(cancelled_jobs[0]['name__count'], 1)
+        executed_jobs = api.get_grouped_aggregate(jobs_type='executed')
+        self.assertEqual(executed_jobs[0]['name__count'], 2)
+        self.assertEqual(executed_jobs[0]['name'], u'job-1')
+        self.assertEqual(executed_jobs[1]['name__count'], 1)
+        self.assertEqual(executed_jobs[1]['name'], u'job-2')
+        unexecuted_jobs = api.get_grouped_aggregate(jobs_type='executed',
+                                                         complement=True)
+        self.assertEquals(unexecuted_jobs[0]['name__count'], 1)
+        self.assertEquals(unexecuted_jobs[0]['name'], 'job-2')
+
+
 
 class TestHealth(TestCase):
     """ Tests health of the queue.
