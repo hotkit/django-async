@@ -15,6 +15,35 @@ def _get_now():
     """
     return timezone.now()
 
+
+def estimate_rough_queue_completion():
+    """ Roughly estimate the remaining execution time for the queue,
+        assuming that there is no waiting time.
+
+        Ignore idle time because it overweights the average when
+        number of upcoming jobs are less.
+    """
+    executed_jobs_since_yesterday = Job.objects.filter(executed__gt=_get_now()
+                                                       - timedelta(days=1))\
+                                               .order_by('scheduled')
+    total_executed = executed_jobs_since_yesterday.count()
+    total_execution_time, total_waiting_time = 0, 0
+
+    for job in executed_jobs_since_yesterday:
+        delta = job.executed - job.started
+        total_execution_time += float(delta.total_seconds())
+        if job.scheduled:
+            delta_waiting = job.started - job.scheduled
+            total_waiting_time += delta_waiting.total_seconds()
+
+    avg_runtime = total_execution_time / total_executed
+    avg_wait_time = total_waiting_time / total_executed
+    remaining_jobs_count = Job.objects.filter(executed__isnull=True,
+                                              started__isnull=True,
+                                              cancelled__isnull=True).count()
+    return round(remaining_jobs_count * (avg_runtime + avg_wait_time), 2)
+
+
 def estimate_current_job_completion():
     """ Estimate remaining completion time current job based on
         average of previous runs
@@ -47,6 +76,8 @@ def estimate_queue_completion():
 
        Return floating point value indicating average time
        for completion of all jobs in the queue
+
+       Does not account for idle and waiting time
     """
     total_estimated = 0
     for group in Group.objects.all():

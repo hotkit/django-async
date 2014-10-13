@@ -90,3 +90,32 @@ class TestStats(TestCase):
         job2.started = mock_now.return_value - datetime.timedelta(seconds=3)
         job2.save()
         self.assertAlmostEqual(stats.estimate_current_job_completion(), 2.0, 1)
+
+    @patch('async.stats._get_now')
+    def test_estimate_rough_queue_completion(self, mock_now):
+        job_started = timezone.now()
+        mock_now.return_value = job_started
+
+        job1a = create_job(1)
+        job1a_started = job_started - datetime.timedelta(hours=7)
+        job1a.started = job1a_started
+        job1a.scheduled = job1a_started
+        job1a.executed = job1a_started + datetime.timedelta(seconds=5)
+        job1a.save()
+
+        job1b = create_job(11)
+        job1b_started = job_started - datetime.timedelta(hours=7, seconds=10)
+        job1b.started = job1b_started
+        job1b.scheduled = job1b_started - datetime.timedelta(seconds=3)
+        job1b.executed = job1b_started + datetime.timedelta(seconds=7)
+        job1b.save()
+
+        job2a = create_job(2)
+        job2a_started = job_started - datetime.timedelta(hours=7, seconds=20)
+        job2a.started = job2a_started
+        job2a.executed = job2a_started + datetime.timedelta(seconds=25)
+        job2a.save()
+
+        create_job(2)
+
+        self.assertEquals(stats.estimate_rough_queue_completion(), 13.33)
