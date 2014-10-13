@@ -12,7 +12,7 @@ except ImportError:
 
 import datetime
 
-from async import api
+from async import api, stats
 from async.models import Job, Group, Error
 from mock import patch, Mock
 
@@ -93,7 +93,7 @@ class TestHealth(TestCase):
     def test_health_for_queue_completion_estimates(self, mock_now):
         mock_now.return_value = timezone.now()
         job = TestRemoveOldJobs.create_job(1)
-        queue_health = api.health().get('queue', None)
+        queue_health = api.health(stats.estimate_queue_completion).get('queue', None)
         self.assertEquals(queue_health['estimated-completion-current-job'], 0)
         self.assertEquals(queue_health['estimated-completion'], 0)
 
@@ -102,7 +102,7 @@ class TestHealth(TestCase):
         job.executed = job_started + datetime.timedelta(seconds=5)
         job.save()
 
-        queue_health = api.health().get('queue', None)
+        queue_health = api.health(stats.estimate_queue_completion).get('queue', None)
         self.assertEquals(queue_health['estimated-completion-current-job'], 0)
         self.assertEquals(queue_health['estimated-completion'], 0)
 
@@ -110,7 +110,8 @@ class TestHealth(TestCase):
         job2.started = mock_now.return_value - datetime.timedelta(seconds=3)
         job2.save()
 
-        queue_health = api.health().get('queue', None)
+        #queue_health = api.health().get('queue', None)
+        queue_health = api.health(stats.estimate_queue_completion).get('queue', None)
         self.assertAlmostEqual(queue_health['estimated-completion-current-job'], 2.0)
         self.assertAlmostEqual(queue_health['estimated-completion'], 2.0)
 

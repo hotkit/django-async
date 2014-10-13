@@ -130,3 +130,13 @@ class TestHealth(TestCase):
                 lambda x: self.assertEqual(x, health())):
             management.call_command('queue_health')
 
+
+    def test_health_with_options(self):
+        """Excecute command.
+        """
+        with patch(
+                'async.management.commands.queue_health.dumps',
+                lambda x: self.assertEqual(x, health())):
+            management.call_command('queue_health', algorithm='rough')
+        self.assertRaises(BaseException, management.call_command,
+                          'queue_health', algorithm='hello')

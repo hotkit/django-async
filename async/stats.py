@@ -36,8 +36,8 @@ def estimate_rough_queue_completion():
             delta_waiting = job.started - job.scheduled
             total_waiting_time += delta_waiting.total_seconds()
 
-    avg_runtime = total_execution_time / total_executed
-    avg_wait_time = total_waiting_time / total_executed
+    avg_runtime = total_execution_time / (total_executed or 1)
+    avg_wait_time = total_waiting_time / (total_executed or 1)
     remaining_jobs_count = Job.objects.filter(executed__isnull=True,
                                               started__isnull=True,
                                               cancelled__isnull=True).count()

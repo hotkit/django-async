@@ -17,8 +17,8 @@ except ImportError: # pragma: no cover
 
 from async.models import Error, Job, Group
 from async.utils import full_name
-from async.stats import estimate_queue_completion, \
-                        estimate_current_job_completion
+from async.stats import estimate_current_job_completion, \
+    estimate_rough_queue_completion
 
 
 def _get_now():
@@ -61,7 +61,7 @@ def deschedule(function, args=None, kwargs=None):
     mark_cancelled.update(cancelled=_get_now())
 
 
-def health():
+def health(estimation_fn=estimate_rough_queue_completion):
     """Return information about the health of the queue in a format that
     can be turned into JSON.
     """
@@ -84,7 +84,7 @@ def health():
 
     output['queue']['estimated-completion-current-job'] = \
         estimate_current_job_completion()
-    output['queue']['estimated-completion'] = estimate_queue_completion()
+    output['queue']['estimated-completion'] = estimation_fn()
 
     output['errors']['number'] = Error.objects.all().count()
     output['errors']['oldest-error'] = get_first(
