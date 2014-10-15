@@ -7,7 +7,7 @@ from datetime import timedelta
 from hashlib import sha1
 from simplejson import dumps
 
-from django.db.models import Q
+from django.db.models import Q, Count
 try:
     # No name 'timezone' in module 'django.utils'
     # pylint: disable=E0611
@@ -17,6 +17,8 @@ except ImportError: # pragma: no cover
 
 from async.models import Error, Job, Group
 from async.utils import full_name
+from async.stats import estimate_current_job_completion, \
+    estimate_rough_queue_completion
 
 
 def _get_now():
@@ -59,16 +61,64 @@ def deschedule(function, args=None, kwargs=None):
     mark_cancelled.update(cancelled=_get_now())
 
 
-def health():
+def health(estimation_fn=estimate_rough_queue_completion):
     """Return information about the health of the queue in a format that
     can be turned into JSON.
     """
     output = {'queue': {}, 'errors': {}}
+
     output['queue']['all-jobs'] = Job.objects.all().count()
-    output['queue']['not-executed'] = Job.objects.filter(executed=None).count()
+
     output['queue']['executed'] = Job.objects.exclude(executed=None).count()
+    output['queue']['executed-details'] = \
+        get_grouped_aggregate(jobs_type='executed')
+    output['queue']['oldest-executed'] = get_first(
+        Job.objects.exclude(executed=None).order_by('executed'))
+    output['queue']['most-recent-executed'] = get_first(
+        Job.objects.exclude(executed=None).order_by('-executed'))
+
+    output['queue']['not-executed'] = Job.objects.filter(executed=None).count()
+    output['queue']['not-executed-details'] = \
+        get_grouped_aggregate(jobs_type='executed', complement=True)
+
+    output['queue']['cancelled'] = Job.objects.filter(cancelled=None).count()
+    output['queue']['oldest-cancelled'] = get_first(
+        Job.objects.exclude(cancelled=None).order_by('cancelled'))
+    output['queue']['most-recent-cancelled'] = get_first(
+        Job.objects.exclude(cancelled=None).order_by('-cancelled'))
+    output['queue']['cancelled-details'] = \
+        get_grouped_aggregate(jobs_type='cancelled', complement=True)
+
+    output['queue']['estimated-completion-current-job'] = \
+        estimate_current_job_completion()
+    output['queue']['estimated-completion'] = estimation_fn()
+
     output['errors']['number'] = Error.objects.all().count()
+    output['errors']['oldest-error'] = get_first(
+        Error.objects.all().order_by('executed'))
+    output['errors']['most-recent-error'] = get_first(
+        Error.objects.all().order_by('-executed'))
     return output
+
+
+def get_grouped_aggregate(jobs_type, complement=False):
+    """
+       Returns count of jobs, grouped by name, based on
+       job type.
+    """
+    values = Job.objects.values('name')
+    if complement:
+        return list(values.filter(**{jobs_type: None})\
+                     .order_by('name').annotate(Count('name')))
+    return list(values.exclude(**{jobs_type: None})\
+                 .order_by('name').annotate(Count('name')))
+
+
+def get_first(queryset, default=None):
+    """ Return first element of queryset or default """
+    if queryset:
+        return queryset[0]
+    return default
 
 
 def remove_old_jobs(remove_jobs_before_days=30, resched_hours=8):
