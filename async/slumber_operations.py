@@ -8,11 +8,22 @@ from slumber.server.http import require_user, require_permission
 from urllib import quote
 
 from async import schedule
+from async.api import health
 from async.models import Group
 
 
 # Method could be a function
 # pylint: disable=R0201
+
+
+class Health(ModelOperation):
+    """Allow us to get the queue Health.
+    """
+    @require_user
+    def get(self, _request, response, _app, _model):
+        """Return the current queue health.
+        """
+        response['health'] = health()
 
 
 class Schedule(ModelOperation):

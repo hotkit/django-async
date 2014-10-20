@@ -413,3 +413,13 @@ class TestProgress(WithUser, TestCase):
         self.assertIsNone(remaining)
         self.assertIsNone(consumed)
 
+
+class TestHealth(WithUser, TestCase):
+    URL = '/slumber/async/Job/health/'
+
+    def test_get_wired(self):
+        response = self.client.get(self.URL)
+        self.assertEqual(response.status_code, 200)
+        json = loads(response.content)
+        self.assertTrue(json.has_key('health'))
+

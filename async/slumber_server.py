@@ -4,11 +4,12 @@
 from slumber import configure
 
 from async.models import Job, Group
-from async.slumber_operations import Schedule, Progress
+from async.slumber_operations import Health, Schedule, Progress
 
 
 configure(Job, operations_extra=[
-    (Schedule, 'schedule')
+    (Health, 'health'),
+    (Schedule, 'schedule'),
 ])
 
 configure(Group, operations_extra=[
