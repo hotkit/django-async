@@ -1,5 +1,8 @@
+2014-10-07  Suhrid Satyal  <suhridsatyal@proteus-tech.com>
+ Add completion estimates of jobs in output of health command
+ 
 2014-07-08  Chirapat Harigulrak  <chirapat@proteus-tech.com>
-Fix admin error when a job has no group
+ Fix admin error when a job has no group
 
 2014-06-15  Kirit Saelensminde  <kirit@felspar.com>
  Fixed a bug that stopped us from running jobs in top level modules.
