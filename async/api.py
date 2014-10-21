@@ -6,6 +6,7 @@ from datetime import timedelta
 # pylint: disable=E0611
 from hashlib import sha1
 from simplejson import dumps
+from slumber import data_link
 
 from django.db.models import Q, Count
 try:
@@ -72,20 +73,27 @@ def health(estimation_fn=estimate_rough_queue_completion):
     output['queue']['executed'] = Job.objects.exclude(executed=None).count()
     output['queue']['executed-details'] = \
         get_grouped_aggregate(jobs_type='executed')
-    output['queue']['oldest-executed'] = get_first(
-        Job.objects.exclude(executed=None).order_by('executed'))
-    output['queue']['most-recent-executed'] = get_first(
-        Job.objects.exclude(executed=None).order_by('-executed'))
+    output['queue']['oldest-executed'] = data_link(get_first(
+        Job.objects.exclude(executed=None).order_by('executed')))
+    output['queue']['most-recent-executed'] = data_link(get_first(
+        Job.objects.exclude(executed=None).order_by('-executed')))
+
+    output['queue']['remaining'] = Job.objects.filter(
+        executed=None, cancelled=None).count()
+    # output['queue']['remaining-details'] = \
+    #     get_grouped_aggregate(
+    #         jobs_type='done',
+    #         complement=True)
 
     output['queue']['not-executed'] = Job.objects.filter(executed=None).count()
     output['queue']['not-executed-details'] = \
         get_grouped_aggregate(jobs_type='executed', complement=True)
 
     output['queue']['cancelled'] = Job.objects.filter(cancelled=None).count()
-    output['queue']['oldest-cancelled'] = get_first(
-        Job.objects.exclude(cancelled=None).order_by('cancelled'))
-    output['queue']['most-recent-cancelled'] = get_first(
-        Job.objects.exclude(cancelled=None).order_by('-cancelled'))
+    output['queue']['oldest-cancelled'] = data_link(get_first(
+        Job.objects.exclude(cancelled=None).order_by('cancelled')))
+    output['queue']['most-recent-cancelled'] = data_link(get_first(
+        Job.objects.exclude(cancelled=None).order_by('-cancelled')))
     output['queue']['cancelled-details'] = \
         get_grouped_aggregate(jobs_type='cancelled', complement=True)
 
@@ -94,10 +102,6 @@ def health(estimation_fn=estimate_rough_queue_completion):
     output['queue']['estimated-completion'] = estimation_fn()
 
     output['errors']['number'] = Error.objects.all().count()
-    output['errors']['oldest-error'] = get_first(
-        Error.objects.all().order_by('executed'))
-    output['errors']['most-recent-error'] = get_first(
-        Error.objects.all().order_by('-executed'))
     return output
 
 

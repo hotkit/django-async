@@ -1,5 +1,5 @@
 2014-10-19  Kirit Saelensminde  <kirit@felspar.com>
- Wire up the server health API to a Slumber operation.
+ Wire up the server health API to a Slumber operation. Tidy up the output somewhat.
 
 2014-10-07  Suhrid Satyal  <suhridsatyal@proteus-tech.com>
  Add completion estimates of jobs in output of health command

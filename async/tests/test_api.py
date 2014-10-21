@@ -15,6 +15,7 @@ import datetime
 from async import api, stats
 from async.models import Job, Group, Error
 from mock import patch, Mock
+from slumber.server.meta import applications
 
 
 def get_now():
@@ -64,6 +65,10 @@ class TestGroupedAggregate(TestCase):
 class TestHealth(TestCase):
     """ Tests health of the queue.
     """
+    def setUp(self):
+        # Ensure we bootstrap Slumber's server side
+        applications()
+
 
     def test_health_for_executed_jobs(self):
         job1 = TestRemoveOldJobs.create_job(1)
@@ -87,8 +92,10 @@ class TestHealth(TestCase):
 
         self.assertEquals(queue_health['not-executed'], 2)
         self.assertEquals(queue_health['executed'], 2)
-        self.assertEquals(queue_health['oldest-executed'], job1)
-        self.assertEquals(queue_health['most-recent-executed'], job2)
+        self.assertEquals(queue_health['oldest-executed'],
+            '/slumber/async/Job/data/%s/' % job1.pk)
+        self.assertEquals(queue_health['most-recent-executed'],
+            '/slumber/async/Job/data/%s/' % job2.pk)
 
 
     def test_health_for_cancelled_jobs(self):
@@ -107,8 +114,10 @@ class TestHealth(TestCase):
         queue_health = api.health().get('queue', None)
 
         self.assertEquals(queue_health['cancelled'], 2)
-        self.assertEquals(queue_health['oldest-cancelled'], job1)
-        self.assertEquals(queue_health['most-recent-cancelled'], job2)
+        self.assertEquals(queue_health['oldest-cancelled'],
+            '/slumber/async/Job/data/%s/' % job1.pk)
+        self.assertEquals(queue_health['most-recent-cancelled'],
+            '/slumber/async/Job/data/%s/' % job2.pk)
 
 
     def test_health_for_errors(self):
@@ -122,8 +131,7 @@ class TestHealth(TestCase):
         queue_errors = api.health().get('errors', None)
 
         self.assertEquals(queue_errors['number'], 2)
-        self.assertEquals(queue_errors['oldest-error'], error1)
-        self.assertEquals(queue_errors['most-recent-error'], error2)
+
 
     @patch('async.stats._get_now')
     def test_health_for_queue_completion_estimates(self, mock_now):
