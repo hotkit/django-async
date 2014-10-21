@@ -11,5 +11,4 @@ pylint==1.2.1
 
 # Used to test the optional Slumber compatibility.
 # django-slumber >= 0.8
-git+ssh://git@github.com/KayEss/django-slumber.git@develop
-
+git+https://github.com/KayEss/django-slumber.git
