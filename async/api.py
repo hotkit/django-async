@@ -112,10 +112,11 @@ def get_grouped_aggregate(jobs_type, complement=False):
     """
     values = Job.objects.values('name')
     if complement:
-        return list(values.filter(**{jobs_type: None})\
+        result = list(values.filter(**{jobs_type: None})\
                      .order_by('name').annotate(Count('name')))
-    return list(values.exclude(**{jobs_type: None})\
+    result = list(values.exclude(**{jobs_type: None})\
                  .order_by('name').annotate(Count('name')))
+    return dict([(v['name'], v['name__count']) for v in result])
 
 
 def get_first(queryset, default=None):
