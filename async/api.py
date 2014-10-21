@@ -116,7 +116,7 @@ def get_grouped_aggregate(jobs_type, complement=False):
                      .order_by('name').annotate(Count('name')))
     result = list(values.exclude(**{jobs_type: None})\
                  .order_by('name').annotate(Count('name')))
-    return dict([(v['name'], v['name__count']) for v in result])
+    return dict([(v['name'], dict(count=v['name__count'])) for v in result])
 
 
 def get_first(queryset, default=None):

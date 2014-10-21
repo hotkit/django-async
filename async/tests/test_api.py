@@ -49,13 +49,13 @@ class TestGroupedAggregate(TestCase):
         job1a.save()
 
         cancelled_jobs = api.get_grouped_aggregate(jobs_type='cancelled')
-        self.assertEqual(cancelled_jobs[job2_a.name], 1)
+        self.assertEqual(cancelled_jobs[job2_a.name]['count'], 1)
         executed_jobs = api.get_grouped_aggregate(jobs_type='executed')
-        self.assertEqual(executed_jobs[job1.name], 2)
-        self.assertEqual(executed_jobs[job2.name], 1)
+        self.assertEqual(executed_jobs[job1.name]['count'], 2)
+        self.assertEqual(executed_jobs[job2.name]['count'], 1)
         unexecuted_jobs = api.get_grouped_aggregate(
             jobs_type='executed', complement=True)
-        self.assertEquals(unexecuted_jobs[job2_a.name], 1)
+        self.assertEquals(unexecuted_jobs[job2_a.name]['count'], 1)
 
 
 
