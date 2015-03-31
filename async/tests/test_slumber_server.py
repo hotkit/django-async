@@ -35,23 +35,7 @@ class TestSlumber(TestCase):
         response = self.client.get('/slumber/')
         self.assertEqual(response.status_code, 200)
         json = loads(response.content)
-        self.assertEqual(json, dict(
-            services=None,
-            configuration={},
-            apps={
-                'async': '/slumber/async/',
-                'django.contrib.sites': '/slumber/django/contrib/sites/',
-                'django.contrib.admin': '/slumber/django/contrib/admin/',
-                'django.contrib.auth': '/slumber/django/contrib/auth/',
-                'django.contrib.contenttypes':
-                    '/slumber/django/contrib/contenttypes/',
-                'django.contrib.messages': '/slumber/django/contrib/messages/',
-                'django.contrib.sessions': '/slumber/django/contrib/sessions/',
-                'django.contrib.staticfiles':
-                    '/slumber/django/contrib/staticfiles/',
-                'django_nose': '/slumber/django_nose/',
-                'south': '/slumber/south/'},
-            _meta={'message': 'OK', 'status': 200}), dumps(json, indent=2))
+        self.assertIsNone(json['services'], dumps(json, indent=2))
 
 
 class WithUser(object):
