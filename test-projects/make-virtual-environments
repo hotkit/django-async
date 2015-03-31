@@ -4,12 +4,15 @@ source virtualenvwrapper.sh
 
 mkvirtualenv async_1.3
 pip install -U -r common.pip -r django_1_3/setup.pip
+pip freeze
 deactivate
 
 mkvirtualenv async_1.4
 pip install -U -r common.pip -r django_1_4/setup.pip
+pip freeze
 deactivate
 
 mkvirtualenv async_1.7
 pip install -U -r common.pip -r django_1_7/setup.pip
+pip freeze
 deactivate
