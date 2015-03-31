@@ -1,3 +1,6 @@
+2015-03-31  Kirit Saelensminde  <kirit@felspar.com>
+ Add Django 1.7 to the tests and update migrations so they are 1.7 compatible.
+
 2014-10-19  Kirit Saelensminde  <kirit@felspar.com>
  Wire up the server health API to a Slumber operation. Tidy up the output somewhat.
 
