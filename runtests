@@ -25,3 +25,7 @@ echo "Django 1.4 (USE_TZ=False)"
 check_worked python manage.py test async
 echo "Django 1.4 (USE_TZ=True)"
 check_worked python manage.py test --settings=django_1_4.settings.usetz async
+
+workon async_1.7
+cd ../django_1_7
+echo_worked python manage.py test async
