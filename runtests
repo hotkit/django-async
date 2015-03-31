@@ -19,8 +19,13 @@ check_worked python -tt manage.py test async
 cd ../..
 check_worked pylint --rcfile=pylintrc --output-format=colorized async
 
+workon async_1.7
+cd test-projects/django_1_7
+echo Django 1.7
+check_worked python manage.py test async
+
 workon async_1.4
-cd test-projects/django_1_4
+cd ../django_1_4
 echo "Django 1.4 (USE_TZ=False)"
 check_worked python manage.py test async
 echo "Django 1.4 (USE_TZ=True)"

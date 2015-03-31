@@ -35,23 +35,7 @@ class TestSlumber(TestCase):
         response = self.client.get('/slumber/')
         self.assertEqual(response.status_code, 200)
         json = loads(response.content)
-        self.assertEqual(json, dict(
-            services=None,
-            configuration={},
-            apps={
-                'async': '/slumber/async/',
-                'django.contrib.sites': '/slumber/django/contrib/sites/',
-                'django.contrib.admin': '/slumber/django/contrib/admin/',
-                'django.contrib.auth': '/slumber/django/contrib/auth/',
-                'django.contrib.contenttypes':
-                    '/slumber/django/contrib/contenttypes/',
-                'django.contrib.messages': '/slumber/django/contrib/messages/',
-                'django.contrib.sessions': '/slumber/django/contrib/sessions/',
-                'django.contrib.staticfiles':
-                    '/slumber/django/contrib/staticfiles/',
-                'django_nose': '/slumber/django_nose/',
-                'south': '/slumber/south/'},
-            _meta={'message': 'OK', 'status': 200}), json)
+        self.assertIsNone(json['services'], dumps(json, indent=2))
 
 
 class WithUser(object):
@@ -297,6 +281,7 @@ class TestProgress(WithUser, TestCase):
         # now it just thrown TemplateDoesNotExist
         with self.assertRaises(Exception) as e:
             response = self.client.get(self.URL + 'fake-group/')
+            self.assertEqual(response.status, 404)
 
     def test_all_jobs_executed(self):
         """Test get detail from group with all executed jobs.

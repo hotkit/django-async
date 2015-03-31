@@ -1,74 +1,71 @@
 # -*- coding: utf-8 -*-
-from south.utils import datetime_utils as datetime
-from south.db import db
-from south.v2 import SchemaMigration
-from django.db import models
+from __future__ import unicode_literals
+
+from django.db import models, migrations
 
 
-class Migration(SchemaMigration):
+class Migration(migrations.Migration):
 
-    def forwards(self, orm):
-        # Adding model 'Job'
-        db.create_table('async_job', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('args', self.gf('django.db.models.fields.TextField')()),
-            ('kwargs', self.gf('django.db.models.fields.TextField')()),
-            ('meta', self.gf('django.db.models.fields.TextField')()),
-            ('result', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('priority', self.gf('django.db.models.fields.IntegerField')()),
-            ('identity', self.gf('django.db.models.fields.CharField')(max_length=100, db_index=True)),
-            ('added', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('scheduled', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
-            ('started', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
-            ('executed', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
-        ))
-        db.send_create_signal('async', ['Job'])
+    dependencies = [
+    ]
 
-        # Adding model 'Error'
-        db.create_table('async_error', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('job', self.gf('django.db.models.fields.related.ForeignKey')(related_name='errors', to=orm['async.Job'])),
-            ('executed', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('exception', self.gf('django.db.models.fields.TextField')()),
-            ('traceback', self.gf('django.db.models.fields.TextField')()),
-        ))
-        db.send_create_signal('async', ['Error'])
-
-
-    def backwards(self, orm):
-        # Deleting model 'Job'
-        db.delete_table('async_job')
-
-        # Deleting model 'Error'
-        db.delete_table('async_error')
-
-
-    models = {
-        'async.error': {
-            'Meta': {'object_name': 'Error'},
-            'exception': ('django.db.models.fields.TextField', [], {}),
-            'executed': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'job': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'errors'", 'to': "orm['async.Job']"}),
-            'traceback': ('django.db.models.fields.TextField', [], {})
-        },
-        'async.job': {
-            'Meta': {'object_name': 'Job'},
-            'added': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'args': ('django.db.models.fields.TextField', [], {}),
-            'executed': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'identity': ('django.db.models.fields.CharField', [], {'max_length': '100', 'db_index': 'True'}),
-            'kwargs': ('django.db.models.fields.TextField', [], {}),
-            'meta': ('django.db.models.fields.TextField', [], {}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'priority': ('django.db.models.fields.IntegerField', [], {}),
-            'result': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'scheduled': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'started': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'})
-        }
-    }
-
-    complete_apps = ['async']
-
+    operations = [
+        migrations.CreateModel(
+            name='Error',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('executed', models.DateTimeField(auto_now_add=True)),
+                ('exception', models.TextField()),
+                ('traceback', models.TextField()),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Group',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('reference', models.CharField(max_length=100)),
+                ('description', models.TextField(null=True, blank=True)),
+                ('created', models.DateTimeField(auto_now_add=True)),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Job',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=100)),
+                ('args', models.TextField()),
+                ('kwargs', models.TextField()),
+                ('meta', models.TextField()),
+                ('result', models.TextField(blank=True)),
+                ('priority', models.IntegerField()),
+                ('identity', models.CharField(max_length=100, db_index=True)),
+                ('added', models.DateTimeField(auto_now_add=True)),
+                ('scheduled', models.DateTimeField(help_text=b'If not set, will be executed ASAP', null=True, blank=True)),
+                ('started', models.DateTimeField(null=True, blank=True)),
+                ('executed', models.DateTimeField(null=True, blank=True)),
+                ('cancelled', models.DateTimeField(null=True, blank=True)),
+                ('group', models.ForeignKey(related_name='jobs', blank=True, to='async.Group', null=True)),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.AddField(
+            model_name='group',
+            name='final',
+            field=models.ForeignKey(related_name='ends', blank=True, to='async.Job', null=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='error',
+            name='job',
+            field=models.ForeignKey(related_name='errors', to='async.Job'),
+            preserve_default=True,
+        ),
+    ]
