@@ -297,6 +297,7 @@ class TestProgress(WithUser, TestCase):
         # now it just thrown TemplateDoesNotExist
         with self.assertRaises(Exception) as e:
             response = self.client.get(self.URL + 'fake-group/')
+            self.assertEqual(response.status, 404)
 
     def test_all_jobs_executed(self):
         """Test get detail from group with all executed jobs.
