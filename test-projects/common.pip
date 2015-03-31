@@ -1,7 +1,7 @@
 simplejson
 psycopg2
 lockfile
-south
+south>1.0
 
 # Used for testing
 coverage
