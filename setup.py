@@ -32,5 +32,6 @@ setup(
         'async.management',
         'async.management.commands',
         'async.migrations',
+        'async.south_migrations',
     ],
 )
