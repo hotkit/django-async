@@ -51,7 +51,7 @@ class TestSlumber(TestCase):
                     '/slumber/django/contrib/staticfiles/',
                 'django_nose': '/slumber/django_nose/',
                 'south': '/slumber/south/'},
-            _meta={'message': 'OK', 'status': 200}), json)
+            _meta={'message': 'OK', 'status': 200}), dumps(json, indent=2))
 
 
 class WithUser(object):
