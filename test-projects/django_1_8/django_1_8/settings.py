@@ -43,9 +43,6 @@ INSTALLED_APPS = (
     'async',
 )
 
-# Needed to get the Django nose test runner working
-TEST_RUNNER='django_nose.NoseTestSuiteRunner'
-
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
