@@ -6,5 +6,8 @@ urlpatterns = [
     # url(r'^$', 'django_1_8.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
 
+    # Enable Slumber
+    (r'^slumber/', include('slumber.urls')),
+
     url(r'^admin/', include(admin.site.urls)),
 ]
