@@ -16,3 +16,8 @@ mkvirtualenv async_1.7
 pip install -U -r common.pip -r django_1_7/setup.pip
 pip freeze
 deactivate
+
+mkvirtualenv async_1.8
+pip install -U -r common.pip -r django_1_8/setup.pip
+pip freeze
+deactivate
