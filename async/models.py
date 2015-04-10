@@ -2,7 +2,12 @@
     Django Async models.
 """
 from datetime import  timedelta
-from django.db import models, transaction
+from django.db import models
+try:
+    # pylint: disable=no-name-in-module
+    from django.db.transaction import atomic
+except ImportError:
+    from django.db.transaction import commit_on_success as atomic
 from django.db.models import Count, Q
 try:
     # No name 'timezone' in module 'django.utils'
@@ -191,7 +196,7 @@ class Job(models.Model):
                 self.result = dumps(result)
                 self.save()
                 return result
-            return transaction.commit_on_success(execute)()
+            return atomic(execute)()
         except Exception, exception:
             self.started = None
             errors = 1 + self.errors.count()
@@ -209,7 +214,7 @@ class Job(models.Model):
                 Error.objects.create(job=self, exception=repr(exception),
                     traceback=format_exc())
                 self.save()
-            transaction.commit_on_success(record)()
+            atomic(record)()
             raise
 
 
