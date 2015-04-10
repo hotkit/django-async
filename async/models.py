@@ -7,6 +7,7 @@ try:
     # pylint: disable=no-name-in-module
     from django.db.transaction import atomic
 except ImportError:
+    # pylint: disable=no-name-in-module
     from django.db.transaction import commit_on_success as atomic
 from django.db.models import Count, Q
 try:
