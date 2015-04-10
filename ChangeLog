@@ -1,3 +1,6 @@
+2015-04-10  Kirit Saelensminde  <kirit@felspar.com>
+ Added Django 1.8 to the tests.
+
 2015-03-31  Kirit Saelensminde  <kirit@felspar.com>
  Add Django 1.7 to the tests and update migrations so they are 1.7 compatible.
 
