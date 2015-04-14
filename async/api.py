@@ -6,7 +6,6 @@ from datetime import timedelta
 # pylint: disable=E0611
 from hashlib import sha1
 from simplejson import dumps
-from slumber import data_link
 
 from django.db.models import Q, Count
 try:
@@ -66,6 +65,9 @@ def health(estimation_fn=estimate_rough_queue_completion):
     """Return information about the health of the queue in a format that
     can be turned into JSON.
     """
+    # Import this here so that we only need slumber if health is called.
+    from slumber import data_link
+
     output = {'queue': {}, 'errors': {}}
 
     output['queue']['all-jobs'] = Job.objects.all().count()
