@@ -45,14 +45,6 @@ INSTALLED_APPS = (
 # Needed to get the Django nose test runner working
 TEST_RUNNER='django_nose.NoseTestSuiteRunner'
 
-NOSE_ARGS = [
-    '--with-coverage',
-    '--cover-erase',
-    '--cover-branches',
-    '--cover-package=async',
-    '--cover-html', '--cover-html-dir=../../coverage',
-]
-
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

@@ -1,3 +1,6 @@
+2015-04-14  Kirit Saelensminde  <kirit@felspar.com>
+ No longer include coverage in the 1.7 tests as it doesn't properly work anyway.
+
 2015-04-10  Kirit Saelensminde  <kirit@felspar.com>
  Added Django 1.8 to the tests.
 
