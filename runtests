@@ -39,4 +39,4 @@ check_worked python manage.py test --settings=django_1_4.settings.usetz async
 workon async_1.0
 cd ../django_1_0
 echo "Django 1.0"
-check_worked python manage.py test async
+check_worked python manage.py test d1
