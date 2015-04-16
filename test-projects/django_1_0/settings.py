@@ -78,4 +78,5 @@ INSTALLED_APPS = (
     'django.contrib.sites',
 
     'async',
+    'd1', # Needed to load tests
 )
