@@ -1,4 +1,7 @@
 # Django settings for django_1_0 project.
+import os
+PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+_join_with_project_path = lambda a, *p: os.path.join(PROJECT_ROOT, a, *p)
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -65,11 +68,9 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'django_1_0.urls'
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
+TEMPLATE_DIRS = [
+    _join_with_project_path('../templates'),
+]
 
 INSTALLED_APPS = (
     'django.contrib.auth',
