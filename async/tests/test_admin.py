@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from django.test import TestCase
 import async
 from async.admin import display_group
