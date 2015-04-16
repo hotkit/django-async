@@ -7,7 +7,7 @@ from datetime import timedelta
 from hashlib import sha1
 from simplejson import dumps
 
-from django.db.models import Q, Count
+from django.db.models import Q
 try:
     # No name 'timezone' in module 'django.utils'
     # pylint: disable=E0611
@@ -112,6 +112,8 @@ def get_grouped_aggregate(jobs_type, complement=False):
        Returns count of jobs, grouped by name, based on
        job type.
     """
+    # Have this import here so we can use most things on Django 1.0
+    from django.db.models import Count
     values = Job.objects.values('name')
     if complement:
         result = list(values.filter(**{jobs_type: None})\
