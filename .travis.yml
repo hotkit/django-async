@@ -7,6 +7,7 @@ python:
     - "2.7"
 
 env:
+    - DJANGO=1_0 OPTS=d1
     - DJANGO=1_3
     - DJANGO=1_4
     - DJANGO=1_4 OPTS=--settings=django_1_4.settings.usetz
@@ -22,3 +23,7 @@ before_script:
 script:
     - "pylint --rcfile=pylintrc --output-format=colorized async"
     - "cd test-projects/django_${DJANGO} && python -tt manage.py test ${OPTS} async"
+
+matrix:
+    allow_failures:
+        - env: DJANGO=1_0 OPTS=d1

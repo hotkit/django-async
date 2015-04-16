@@ -3,7 +3,11 @@
 """
 import datetime
 
-from django.test import TestCase, TransactionTestCase
+try:
+    from django.test import TestCaseTransactionTestCase
+except ImportError:
+    from django.test import TestCase
+    TransactionTestCase = TestCase
 from django.core.exceptions import ValidationError
 try:
     # No name 'timezone' in module 'django.utils'

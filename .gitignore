@@ -1,6 +1,8 @@
+/coverage
+/django-async.kdev4
 /.idea/*
-coverage
-*.pyc
+/.kdev4
 /test-projects/django_1_3/.coverage
 /test-projects/django_1_4/.coverage
 /test-projects/django_1_7/.coverage
+*.pyc

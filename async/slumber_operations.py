@@ -2,7 +2,6 @@
     Implementation of the Slumber operations.
 """
 from django.shortcuts import Http404
-from django.db.models import Count
 from slumber.operations import ModelOperation, InstanceOperation
 from slumber.server.http import require_user, require_permission
 from urllib import quote
@@ -67,6 +66,8 @@ class Progress(InstanceOperation):
     def get(self, _request, response, _app, _models, group_reference_name):
         """The current progress and estimated completion time of the job.
         """
+        # Have this import here so we can use most things on Django 1.0
+        from django.db.models import Count
         groups = Group.objects.filter(reference=group_reference_name)
         if groups:
             latest_group = groups.latest('created')

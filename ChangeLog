@@ -1,3 +1,6 @@
+2015-04-16  Kirit Saelensminde  <kirit@felspar.com>
+ Added Django 1.0 to the tests. These don't all pass.
+
 2015-04-14  Kirit Saelensminde  <kirit@felspar.com>
  Change an import to try to keep Slumber optional.
  No longer include coverage in the 1.7 tests as it doesn't properly work anyway.

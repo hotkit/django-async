@@ -9,7 +9,7 @@ try:
 except ImportError:
     # pylint: disable=no-name-in-module
     from django.db.transaction import commit_on_success as atomic
-from django.db.models import Count, Q
+from django.db.models import Q
 try:
     # No name 'timezone' in module 'django.utils'
     # pylint: disable=E0611
@@ -67,6 +67,8 @@ class Group(models.Model):
         """Estimate of the total amount of time (in seconds) that the group
         will take to execute.
         """
+        # Have this import here so we can use most things on Django 1.0
+        from django.db.models import Count
         result = self.jobs.aggregate(
             job_count=Count('id'), executed_job_count=Count('executed'),
             cancelled_job_count=Count('cancelled'))

@@ -41,7 +41,7 @@ class TestSlumber(TestCase):
 class WithUser(object):
     def setUp(self):
         super(WithUser, self).setUp()
-        self.user = User.objects.create(username='test')
+        self.user = User(username='test', is_active=True, is_staff=True)
         self.user.set_password('password')
         self.user.save()
         self.client.login(username='test', password='password')
