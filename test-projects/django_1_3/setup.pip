@@ -2,3 +2,4 @@ django < 1.4
 south>1.0
 django-nose
 git+git://github.com/nose-devs/nose.git
+psycopg2

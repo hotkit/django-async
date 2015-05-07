@@ -1,3 +1,6 @@
+2015-05-07  Kirit Saelensminde  <kirit@felspar.com>
+ Get the Django 1.0 tests to run using Postgres.
+
 2015-04-16  Kirit Saelensminde  <kirit@felspar.com>
  Added Django 1.0 to the tests. These don't all pass.
 

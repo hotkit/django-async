@@ -1,5 +1,4 @@
 simplejson
-psycopg2
 lockfile
 
 # Used for testing
