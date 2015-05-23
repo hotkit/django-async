@@ -1,5 +1,6 @@
 import os
 from setuptools import setup
+import sys
 
 def read(fname1, fname2):
     if os.path.exists(fname1):
@@ -8,9 +9,13 @@ def read(fname1, fname2):
         fname = fname2
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
+extra = {}
+if sys.version_info >= (3,):
+    extra['use_2to3'] = True
+
 setup(
     name = "django-async",
-    version = "0.6.0.10",
+    version = "0.6.0.11",
     author = "Kirit Saelensminde",
     author_email = "kirit@felspar.com",
     url='http://www.kirit.com/Django%20Async',
@@ -34,4 +39,5 @@ setup(
         'async.migrations',
         'async.south_migrations',
     ],
+    **extra
 )
