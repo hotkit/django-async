@@ -95,6 +95,15 @@ class TestHealth(TestCase):
             '/slumber/async/Job/data/%s/' % job2.pk)
 
 
+    def test_health_for_not_executed_jobs(self):
+        TestRemoveOldJobs.create_job(1)
+        TestRemoveOldJobs.create_job(2)
+
+        queue_health = api.health().get('queue', None)
+
+        self.assertEquals(queue_health['not-executed'], 2)
+
+
     def test_health_for_cancelled_jobs(self):
         dt_now = timezone.now()
         job1 = TestRemoveOldJobs.create_job(1)
