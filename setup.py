@@ -15,7 +15,7 @@ if sys.version_info >= (3,):
 
 setup(
     name = "django-async",
-    version = "0.6.0.11",
+    version = "0.6.0.12",
     author = "Kirit Saelensminde",
     author_email = "kirit@felspar.com",
     url='http://www.kirit.com/Django%20Async',
