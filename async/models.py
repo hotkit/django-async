@@ -159,8 +159,13 @@ class Job(models.Model):
     def __unicode__(self):
         # __unicode__: Instance of 'bool' has no 'items' member
         # pylint: disable=E1103
-        args = ', '.join([repr(s) for s in loads(self.args)] +
-            ['%s=%s' % (k, repr(v)) for k, v in loads(self.kwargs).items()])
+        def tostr(string):
+            """Convert a string to a quoted string good enough for printing.
+            """
+            return ("'%s'" % string if issubclass(type(string), basestring)
+                else repr(string))
+        args = ', '.join([tostr(s) for s in loads(self.args)] +
+            ['%s=%s' % (k, tostr(v)) for k, v in loads(self.kwargs).items()])
         return u'%s(%s)' % (self.name, args)
 
     def save(self, *a, **kw):
