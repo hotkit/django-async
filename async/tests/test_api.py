@@ -102,6 +102,9 @@ class TestHealth(TestCase):
         queue_health = api.health().get('queue', None)
 
         self.assertEquals(queue_health['not-executed'], 2)
+        self.assertEquals(queue_health['executed'], 0)
+        self.assertEquals(queue_health['cancelled'], 0)
+
 
 
     def test_health_for_cancelled_jobs(self):
