@@ -87,11 +87,13 @@ def health(estimation_fn=estimate_rough_queue_completion):
     #         jobs_type='done',
     #         complement=True)
 
-    output['queue']['not-executed'] = Job.objects.filter(executed=None).count()
+    output['queue']['not-executed'] = \
+        Job.objects.filter(executed=None, cancelled__isnull=True).count()
     output['queue']['not-executed-details'] = \
-        get_grouped_aggregate(jobs_type='executed', complement=True)
+        get_not_exeuted_details()
 
-    output['queue']['cancelled'] = Job.objects.filter(cancelled=None).count()
+    output['queue']['cancelled'] = \
+        Job.objects.filter(cancelled__isnull=False).count()
     output['queue']['oldest-cancelled'] = data_link(get_first(
         Job.objects.exclude(cancelled=None).order_by('cancelled')))
     output['queue']['most-recent-cancelled'] = data_link(get_first(
@@ -107,6 +109,19 @@ def health(estimation_fn=estimate_rough_queue_completion):
     return output
 
 
+def get_not_exeuted_details():
+    """
+       Returns count of not executed jobs, grouped by name, based on
+       job type.
+    """
+    from django.db.models import Count
+    values = Job.objects.values('name')
+    result = list(values.filter(Q(executed=None) &
+                                Q(cancelled__isnull=True))
+                  .order_by('name').annotate(Count('name')))
+    return dict([(v['name'], dict(count=v['name__count'])) for v in result])
+
+
 def get_grouped_aggregate(jobs_type, complement=False):
     """
        Returns count of jobs, grouped by name, based on
@@ -118,7 +133,8 @@ def get_grouped_aggregate(jobs_type, complement=False):
     if complement:
         result = list(values.filter(**{jobs_type: None})\
                      .order_by('name').annotate(Count('name')))
-    result = list(values.exclude(**{jobs_type: None})\
+    else:
+        result = list(values.exclude(**{jobs_type: None})\
                  .order_by('name').annotate(Count('name')))
     return dict([(v['name'], dict(count=v['name__count'])) for v in result])
 

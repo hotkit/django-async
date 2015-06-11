@@ -1,4 +1,7 @@
-2015-05-07  Kirit Saelensminde  <wmunjai@gmail.com>
+2015-06-11  Wutcharin Munjai  <wmunjai@gmail.com>
+ Fixed async health numbers not correct in not-executed, cancelled and not-executed-details
+
+2015-06-09  Wutcharin Munjai  <wmunjai@gmail.com>
  Convert a string to a quoted string good enough for printing.
  Remove test model for dict in test_unicode_with_args
 
