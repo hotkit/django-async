@@ -1,3 +1,6 @@
+2015-08-25 Nui Narongwet <narongwet@proteus-tech.com>
+ Add clear_queue decorator
+
 2015-06-11  Wutcharin Munjai  <wmunjai@gmail.com>
  Fixed async health numbers not correct in not-executed, cancelled and not-executed-details
 
