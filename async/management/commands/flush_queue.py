@@ -37,7 +37,7 @@ def acquire_lock(lockname):
     return decorator
 
 
-def run_queue(which, outof, limit):
+def run_queue(which, outof, limit, name_filter):
     """
         Code that actually executes the jobs in the queue.
 
@@ -60,7 +60,8 @@ def run_queue(which, outof, limit):
                     return False
             return True
         by_priority = by_priority_filter = (Job.objects
-            .filter(executed=None, cancelled=None)
+            .filter(executed=None, cancelled=None,
+                name__startswith=name_filter)
             .exclude(scheduled__gt=now)
             .order_by('-priority'))
         while True:
@@ -71,11 +72,13 @@ def run_queue(which, outof, limit):
                 return
             if run(Job.objects
                     .filter(executed=None, cancelled=None,
-                        scheduled__lte=now, priority=priority)
+                        scheduled__lte=now, priority=priority,
+                        name__startswith=name_filter)
                     .order_by('scheduled', 'id')):
                 if run(Job.objects
                         .filter(executed=None, cancelled=None,
-                            scheduled=None, priority=priority)
+                            scheduled=None, priority=priority,
+                            name__startswith=name_filter)
                         .order_by('id')):
                     by_priority = by_priority_filter.filter(
                         priority__lt=priority)
@@ -97,6 +100,8 @@ class Command(BaseCommand):
             help='The worker ID number'),
         make_option('--outof', '-o', dest='outof',
             help='How many workers there are'),
+        make_option('--filter', '-f', dest='filter',
+            help='Filter jobs by fully qualified name'),
     )
     help = 'Does a single pass over the asynchronous queue'
 
@@ -107,6 +112,7 @@ class Command(BaseCommand):
         jobs_limit = int(options.get('jobs') or 300)
         which = int(options.get('which') or 0)
         outof = int(options.get('outof') or 1)
+        name_filter = str(options.get('filter') or '')
 
         acquire_lock('async_flush_queue%s' % which)(
-            run_queue)(which, outof, jobs_limit)
+            run_queue)(which, outof, jobs_limit, name_filter)
