@@ -1,4 +1,7 @@
-2015-08-25 Nui Narongwet <narongwet@proteus-tech.com>
+2015-11-21  Pawan Jain  <pawan@flywheel.com>
+ Ability to filter jobs by name
+
+2015-08-25  Nui Narongwet  <narongwet@proteus-tech.com>
  Add clear_queue decorator
 
 2015-06-11  Wutcharin Munjai  <wmunjai@gmail.com>
