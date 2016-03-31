@@ -1,3 +1,6 @@
+2016-03-31  Yothin Muangsommuk  <yothin@proteus-tech.com>
+ Try to initialize slumber applications before running commands
+
 2015-11-21  Pawan Jain  <pawan@flywheel.com>
  Ability to filter jobs by name
 
