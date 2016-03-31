@@ -21,7 +21,7 @@ before_script:
   - psql -c 'create database "async-exec";' -U postgres
 
 script:
-    - "pylint --rcfile=pylintrc --output-format=colorized async"
+    #- "pylint --rcfile=pylintrc --output-format=colorized async"
     - "cd test-projects/django_${DJANGO} && python -tt manage.py test ${OPTS} async"
 
 matrix:
