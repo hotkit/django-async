@@ -1,4 +1,5 @@
 2016-07-05  Kirit Saelensminde  <kirit@felspar.com>
+ * Encode before hashing to calculate the Job identity.
  * Code fixes for the latest pylint.
  * Use an older Django nose for the older Django versions.
 

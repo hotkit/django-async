@@ -181,7 +181,7 @@ class Job(models.Model):
                     "Cannot add job [%s] to group [%s] because this group "
                         "has executed jobs." %
                             (self.name, self.group.reference))
-        self.identity = sha1(unicode(self)).hexdigest()
+        self.identity = sha1(unicode(self).encode('utf-8')).hexdigest()
         return super(Job, self).save(*a, **kw)
 
     def execute(self, **_meta):
