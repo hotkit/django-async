@@ -31,7 +31,7 @@ class Command(BaseCommand):
         algorithm = options.get('algorithm' or None)
         if algorithm == "rough":
             estimation_fn = estimate_rough_queue_completion
-        elif algorithm == "precise" or algorithm == None:
+        elif algorithm == "precise" or algorithm is None:
             estimation_fn = estimate_queue_completion
         else:
             raise CommandError("Unknown option for estimation algorithm")

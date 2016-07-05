@@ -5,7 +5,7 @@ lockfile
 coverage
 mock
 unittest2
-pylint==1.2.1
+pylint
 
 # Used to test the optional Slumber compatibility.
 # django-slumber >= 0.8

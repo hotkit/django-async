@@ -1,4 +1,5 @@
 2016-07-05  Kirit Saelensminde  <kirit@felspar.com>
+ * Code fixes for the latest pylint.
  * Use an older Django nose for the older Django versions.
 
 2016-03-31  Yothin Muangsommuk  <yothin@proteus-tech.com>

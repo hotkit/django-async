@@ -9,10 +9,9 @@ from simplejson import dumps
 
 from django.db.models import Q
 try:
-    # No name 'timezone' in module 'django.utils'
-    # pylint: disable=E0611
     from django.utils import timezone
 except ImportError: # pragma: no cover
+    # pylint: disable = ungrouped-imports
     from datetime import datetime as timezone
 
 from async.models import Error, Job, Group
@@ -34,7 +33,7 @@ def schedule(function, args=None, kwargs=None,
     # Too many arguments
     # pylint: disable=R0913
     if group:
-        if type(group) == Group:
+        if isinstance(group, Group):
             expected_group = group
         else:
             expected_group = Group.latest_group_by_reference(group)

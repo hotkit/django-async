@@ -2,6 +2,7 @@
     Django Async models.
 """
 from datetime import  timedelta
+from django.core.exceptions import ValidationError
 from django.db import models
 try:
     # pylint: disable=no-name-in-module
@@ -15,6 +16,7 @@ try:
     # pylint: disable=E0611
     from django.utils import timezone
 except ImportError: # pragma: no cover
+    # pylint: disable = ungrouped-imports
     from datetime import datetime as timezone
 # No name 'sha1' in module 'hashlib'
 # pylint: disable=E0611
@@ -25,7 +27,6 @@ from traceback import format_exc
 from async.logger import _logger
 from async.utils import object_at_end_of_path, non_unicode_kwarg_keys
 
-from django.core.exceptions import ValidationError
 
 
 class Group(models.Model):
