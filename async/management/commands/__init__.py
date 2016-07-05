@@ -5,5 +5,5 @@
 try:
     from slumber.server.meta import applications
     applications()
-except ImportError:
+except ImportError: # pragma: no cover
     pass
