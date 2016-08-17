@@ -44,11 +44,12 @@ def run_queue(which, outof, limit, name_filter):
         This implementation is pretty ugly, but does behave in the
         right way.
     """
-    for _ in xrange(limit):
+    while limit:
         now = timezone.now()
-        def run(jobs):
+        def run(limit, jobs):
             """Run the jobs handed to it
             """
+            executed = 0
             for job in jobs.iterator():
                 if job.id % outof == which % outof:
                     if (job.group and job.group.final and
@@ -57,35 +58,39 @@ def run_queue(which, outof, limit, name_filter):
                             continue
                     print "%s: %s" % (job.id, unicode(job))
                     job.execute()
-                    return False
-            return True
+                    executed = executed + 1
+                    if executed >= limit:
+                        break
+            return executed
         by_priority = by_priority_filter = (Job.objects
             .filter(executed=None, cancelled=None,
                 name__startswith=name_filter)
             .exclude(scheduled__gt=now)
             .order_by('-priority'))
-        while True:
+        while limit:
             try:
                 priority = by_priority[0].priority
             except IndexError:
                 print "No jobs to execute"
                 return
-            if run(Job.objects
+            executed = 1
+            while executed and limit:
+                executed = run(limit, Job.objects
                     .filter(executed=None, cancelled=None,
                         scheduled__lte=now, priority=priority,
                         name__startswith=name_filter)
-                    .order_by('scheduled', 'id')):
-                if run(Job.objects
-                        .filter(executed=None, cancelled=None,
-                            scheduled=None, priority=priority,
-                            name__startswith=name_filter)
-                        .order_by('id')):
-                    by_priority = by_priority_filter.filter(
-                        priority__lt=priority)
-                else:
-                    break
-            else:
-                break
+                    .order_by('scheduled', 'id'))
+                limit = limit - executed
+            executed = 1
+            while executed and limit:
+                executed = run(limit, Job.objects
+                    .filter(executed=None, cancelled=None,
+                        scheduled=None, priority=priority,
+                        name__startswith=name_filter)
+                    .order_by('id'))
+                limit = limit - executed
+            by_priority = by_priority_filter.filter(
+                priority__lt=priority)
 
 
 class Command(BaseCommand):
