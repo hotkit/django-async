@@ -37,6 +37,11 @@ matrix:
         - python: "3.6"
     exclude:
       - env: DJANGO=1_0 OPTS=d1
+      - python: "3.4"
+        env: DJANGO=1_3
+        env: DJANGO=1_4
+        env: DJANGO=1_4 OPTS=--settings=django_1_4.settings.usetz
+        env: DJANGO=1_7
       - python: "3.5"
         env: DJANGO=1_3
       - python: "3.5"
