@@ -13,6 +13,7 @@ env:
     - DJANGO=1_4 OPTS=--settings=django_1_4.settings.usetz
     - DJANGO=1_7
     - DJANGO=1_8
+    - DJANGO=1_9
 
 install:
     - "pip install -r test-projects/common.pip -r test-projects/django_${DJANGO}/setup.pip"
