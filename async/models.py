@@ -182,7 +182,11 @@ class Job(models.Model):
                     "Cannot add job [%s] to group [%s] because this group "
                         "has executed jobs." %
                             (self.name, self.group.reference))
-        self.identity = sha1(unicode(self).encode('utf-8')).hexdigest()
+        try:
+            self.identity = sha1(unicode(self).encode('utf-8')).hexdigest()
+        except NameError:
+            self.identity = sha1(self).hexdigest()
+
         return super(Job, self).save(*a, **kw)
 
     def execute(self, **_meta):
