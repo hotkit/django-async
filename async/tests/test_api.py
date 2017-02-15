@@ -11,11 +11,16 @@ except ImportError:
     from datetime import datetime as timezone
 
 import datetime
+import unittest
 
 from async import api, stats
 from async.models import Job, Group, Error
 from mock import patch, Mock
-from slumber.server.meta import applications
+
+try:
+    from slumber.server.meta import applications
+except ImportError:
+    raise unittest.SkipTest("Such-and-such failed. Skipping all tests in foo.py")
 
 
 def get_now():
