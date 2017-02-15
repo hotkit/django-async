@@ -206,7 +206,7 @@ class Job(models.Model):
                 self.save()
                 return result
             return atomic(execute)()
-        except Exception, exception:
+        except Exception as exception:
             self.started = None
             errors = 1 + self.errors.count()
             self.scheduled = (timezone.now() +
