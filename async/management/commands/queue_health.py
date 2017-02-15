@@ -35,4 +35,4 @@ class Command(BaseCommand):
             estimation_fn = estimate_queue_completion
         else:
             raise CommandError("Unknown option for estimation algorithm")
-        print dumps(health(estimation_fn))
+        print( dumps(health(estimation_fn)))

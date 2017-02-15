@@ -27,7 +27,7 @@ def acquire_lock(lockname):
             try:
                 lock.acquire(timeout=-1)
             except AlreadyLocked: # pragma: no cover
-                print 'Lock is already set, aborting.'
+                print ('Lock is already set, aborting.')
                 return
             try:
                 handler(*args)
@@ -56,7 +56,7 @@ def run_queue(which, outof, limit, name_filter):
                             job.group.final.pk == job.pk):
                         if not job.group.has_completed(job):
                             continue
-                    print "%s: %s" % (job.id, unicode(job))
+                    print ("%s: %s" % (job.id, job))
                     job.execute()
                     executed = executed + 1
                     if executed >= limit:
@@ -71,7 +71,7 @@ def run_queue(which, outof, limit, name_filter):
             try:
                 priority = by_priority[0].priority
             except IndexError:
-                print "No jobs to execute"
+                print("No jobs to execute")
                 return
             executed = 1
             while executed and limit:

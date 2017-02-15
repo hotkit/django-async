@@ -8,6 +8,7 @@ def full_name(item):
     """Return the full name of a something passed in so it can be retrieved
     later on.
     """
+    basestring = (str, bytes)
     if isinstance(item, basestring):
         return item
     if ismethod(item):
