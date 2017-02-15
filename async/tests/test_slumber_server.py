@@ -16,10 +16,11 @@ except ImportError:
     from datetime import datetime as timezone
 
 from async.models import Job, Group, Error
-from async.slumber_operations import Progress
+
 
 try:
     from slumber import data_link
+    from async.slumber_operations import Progress
 except ImportError:
     raise unittest.SkipTest("Such-and-such failed. Skipping all tests in foo.py")
 
