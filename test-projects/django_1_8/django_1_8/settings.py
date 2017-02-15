@@ -73,7 +73,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'django_1_8.wsgi.application'
 
 
-# Database
+# Database Fix Postgres
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
 DATABASES = {
