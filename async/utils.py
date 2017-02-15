@@ -16,7 +16,10 @@ def full_name(item):
     else:
         module_name = getmodule(item).__name__
     if isfunction(item):
-        name = item.func_name
+        try:
+            name = item.func_name
+        except AttributeError:
+            name = item.__name__
     else:
         name = item.__name__
     return '.'.join([module_name, name])
