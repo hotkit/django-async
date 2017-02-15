@@ -5,6 +5,7 @@ services:
 
 python:
     - "2.7"
+    - "3.4"
     - "3.5"
     - "3.6"
 env:
@@ -31,6 +32,7 @@ matrix:
     allow_failures:
         - env: DJANGO=1_10
         - env: DJANGO=1_11
+        - python: "3.4"
         - python: "3.5"
         - python: "3.6"
     exclude:
