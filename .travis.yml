@@ -8,10 +8,10 @@ python:
 
 env:
     - DJANGO=1_0 OPTS=d1
-    - DJANGO=1_3
-    - DJANGO=1_4
+    - DJANGO=1_3 OPTS=d1
+    - DJANGO=1_4 OPTS=d1
     - DJANGO=1_4 OPTS=--settings=django_1_4.settings.usetz
-    - DJANGO=1_7
+    - DJANGO=1_7 OPTS=d1
     - DJANGO=1_8
     - DJANGO=1_9
 

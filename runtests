@@ -11,6 +11,21 @@ function check_worked {
     fi
 }
 
+workon async_1.9
+cd test-projects/django_1_9
+echo Django 1.9
+check_worked python manage.py test async
+
+workon async_1.10
+cd test-projects/django_1_10
+echo Django 1.10
+check_worked python manage.py test async
+
+workon async_1.11
+cd test-projects/django_1_11
+echo Django 1.11
+check_worked python manage.py test async
+
 workon async_1.3
 cd test-projects/django_1_3
 echo Django 1.3
