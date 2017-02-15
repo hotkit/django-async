@@ -35,3 +35,10 @@ matrix:
         - python: "3.5"
     exclude:
       - env: DJANGO=1_0 OPTS=d1
+      - python: "3.5"
+        env: DJANGO=1_3
+      - python: "3.5"
+        env: DJANGO=1_4
+      - python: "3.5"
+        env: DJANGO=1_7
+
