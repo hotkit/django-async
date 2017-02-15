@@ -17,10 +17,11 @@ from async import api, stats
 from async.models import Job, Group, Error
 from mock import patch, Mock
 
+NoSlumber = False
 try:
     from slumber.server.meta import applications
 except ImportError:
-    raise unittest.SkipTest("Such-and-such failed. Skipping all tests in foo.py")
+    NoSlumber = True
 
 
 def get_now():
@@ -29,6 +30,7 @@ def get_now():
 
 def get_d_before_dt_by_days(base_dt, d):
     return base_dt - datetime.timedelta(days=d)
+
 
 class TestGroupedAggregate(TestCase):
 
@@ -63,7 +65,7 @@ class TestGroupedAggregate(TestCase):
         self.assertEquals(unexecuted_jobs[job2_a.name]['count'], 1)
 
 
-
+@unittest.skipIf(NoSlumber)
 class TestHealth(TestCase):
     """ Tests health of the queue.
     """
@@ -172,6 +174,7 @@ class TestHealth(TestCase):
         queue_health = api.health(stats.estimate_queue_completion).get('queue', None)
         self.assertAlmostEqual(queue_health['estimated-completion-current-job'], 2.0)
         self.assertAlmostEqual(queue_health['estimated-completion'], 2.0)
+
 
 
 class TestRemoveOldJobs(TestCase):

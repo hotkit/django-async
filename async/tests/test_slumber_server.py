@@ -17,18 +17,19 @@ except ImportError:
 
 from async.models import Job, Group, Error
 
-
+NoSlumber = False
 try:
     from slumber import data_link
     from async.slumber_operations import Progress
 except ImportError:
-    raise unittest.SkipTest("Such-and-such failed. Skipping all tests in foo.py")
+    NoSlumber = True
 
 # Instance of 'WSGIRequest' has no 'status_code' member
 #  (but some types could not be inferred)
 # pylint: disable=E1103
 
 
+@unittest.skipIf(NoSlumber)
 class TestSlumber(TestCase):
     """Make sure that Slumber is wired in properly.
     """
@@ -42,7 +43,7 @@ class TestSlumber(TestCase):
         json = loads(response.content)
         self.assertIsNone(json['services'], dumps(json, indent=2))
 
-
+@unittest.skipIf(NoSlumber)
 class WithUser(object):
     def setUp(self):
         super(WithUser, self).setUp()
@@ -53,7 +54,7 @@ class WithUser(object):
         self.permission = Permission.objects.get(codename='add_job')
         self.user.user_permissions.add(self.permission)
 
-
+@unittest.skipIf(NoSlumber)
 class TestSchedule(WithUser, TestCase):
     """Make sure the schedule API wrapper works.
     """
@@ -216,7 +217,7 @@ class TestSchedule(WithUser, TestCase):
         self.assertEqual(json['operations']['progress'],
             '/slumber/async/Group/progress/space%20test/')
 
-
+@unittest.skipIf(NoSlumber)
 class TestProgress(WithUser, TestCase):
     URL = '/slumber/async/Group/progress/'
 
@@ -403,7 +404,7 @@ class TestProgress(WithUser, TestCase):
         self.assertIsNone(remaining)
         self.assertIsNone(consumed)
 
-
+@unittest.skipIf(NoSlumber)
 class TestHealth(WithUser, TestCase):
     URL = '/slumber/async/Job/health/'
 
