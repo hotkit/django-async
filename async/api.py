@@ -65,8 +65,10 @@ def health(estimation_fn=estimate_rough_queue_completion):
     can be turned into JSON.
     """
     # Import this here so that we only need slumber if health is called.
-    from slumber import data_link
-
+    try:
+        from slumber import data_link
+    except ImportError:  # pragma: no cover
+        return {}
     output = {'queue': {}, 'errors': {}}
 
     output['queue']['all-jobs'] = Job.objects.all().count()
