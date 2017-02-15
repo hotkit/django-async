@@ -4,7 +4,7 @@
 from datetime import timedelta
 from simplejson import dumps, loads
 from mock import patch
-
+import unittest
 from django.contrib.auth.models import User, Permission
 from django.test import TestCase
 from django.core.exceptions import ValidationError
@@ -18,6 +18,10 @@ except ImportError:
 from async.models import Job, Group, Error
 from async.slumber_operations import Progress
 
+try:
+    from slumber import data_link
+except ImportError:
+    raise unittest.SkipTest("Such-and-such failed. Skipping all tests in foo.py")
 
 # Instance of 'WSGIRequest' has no 'status_code' member
 #  (but some types could not be inferred)
