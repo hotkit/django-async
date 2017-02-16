@@ -3,20 +3,21 @@
 """
 from inspect import getmembers, getmodule, isfunction, ismethod
 
+try:
+    unicode = unicode
+except NameError:
+    # 'unicode' is undefined, must be Python 3
+    unicode = str
+    basestring = (str, bytes)
+else:
+    # 'unicode' exists, must be Python 2
+    bytes = str
 
 def full_name(item):
     """Return the full name of a something passed in so it can be retrieved
     later on.
     """
-    try:
-        unicode = unicode
-    except NameError:
-        # 'unicode' is undefined, must be Python 3
-        unicode = str
-        basestring = (str, bytes)
-    else:
-        # 'unicode' exists, must be Python 2
-        bytes = str
+
 
     if isinstance(item, basestring):
         return item
