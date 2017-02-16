@@ -3,7 +3,6 @@
 """
 from django.core.management.base import BaseCommand, CommandError
 from simplejson import dumps
-from optparse import make_option
 
 from async.api import health
 from async.stats import estimate_queue_completion, \
@@ -18,12 +17,13 @@ class Command(BaseCommand):
         arguments: rough - (default) Gets rough estimate of queue completion
                    precise - Gets a more precise estimate of queue completion
     """
-    option_list = BaseCommand.option_list + (
-        make_option('--algorithm', '-a', dest='algorithm',
-                    help="""The algorithm for queue estimation.
-                    Options: rough(default), precise"""),
-    )
+
     help = 'Prints information about the queue in JSON format.'
+
+    def add_arguments(self, parser):
+        parser.add_argument('--algorithm', '-a', dest='algorithm',
+                    help="""The algorithm for queue estimation.
+                    Options: rough(default), precise""")
 
     def handle(self, *args, **options):
         """Command implementation.
