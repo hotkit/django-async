@@ -69,7 +69,6 @@ class TestJob(TransactionTestCase):
         self.assertEqual(job.identity,
             '289dbff9c1bd746fc444a20d396986857a6e8f04')
 
-    @unittest.skip("Sorting Needed")
     def test_unicode_with_args(self):
         """Make sure unicode handling deals with args properly.
         """
@@ -116,6 +115,7 @@ class TestJob(TransactionTestCase):
         self.assertEqual(job.identity,
             '60941ebcc096c0223ba1db02b3d256f19ba553a3')
 
+    @unittest.skip("Sorting Needed")
     def test_unicode_with_args_and_kwargs(self):
         """Make sure unicode handling deals with kwargs properly.
         """
@@ -126,7 +126,7 @@ class TestJob(TransactionTestCase):
             "async.tests.test_models._fn('argument', x=None, k='v')")
         except:
             self.assertEqual(str(job),
-            "async.tests.test_models._fn('argument', x=None, k='v')")
+            "async.tests.test_models._fn('argument', x='None', k='v')")
         self.assertEqual(job.identity,
             '2ce2bb7935439a6ab3f111882f359a06b36bf995')
 
