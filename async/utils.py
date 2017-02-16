@@ -21,7 +21,7 @@ def full_name(item):
     if isinstance(item, basestring):
         return item
     if ismethod(item):
-        module_name = full_name(dict(getmembers(item))[__self__])
+            module_name = full_name(dict(getmembers(item))['__self__'])
     else:
         module_name = getmodule(item).__name__
     name = item.__name__
