@@ -185,7 +185,7 @@ class Job(models.Model):
         try:
             self.identity = sha1(unicode(self).encode('utf-8')).hexdigest()
         except NameError:
-            self.identity = sha1(str(self).encode('utf-8')).hexdigest()
+            self.identity = sha1(str(self).encode('utf-8')).encode('utf-8').hexdigest()
 
         return super(Job, self).save(*a, **kw)
 

@@ -27,7 +27,7 @@ class TestDeschedule(TestCase):
         job1 = schedule('async.tests.test_deschedule._example')
         job2 = Job(name='async.tests.test_deschedule._example',
             args="[]", kwargs="{}")
-        self.assertEqual(job1.identity, sha1(unicode(job2)).hexdigest())
+        self.assertEqual(job1.identity, sha1(unicode(job2)).encode('utf-8').hexdigest())
 
     def test_deschedule_by_name(self):
         """We must be able to deschedule a job by giving its name.
