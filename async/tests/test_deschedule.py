@@ -30,7 +30,7 @@ class TestDeschedule(TestCase):
         try:
             self.assertEqual(job1.identity, sha1(unicode(job2)).encode('utf-8').hexdigest())
         except NameError:
-            self.assertEqual(job1.identity, sha1(str(job2)).encode('utf-8').hexdigest())
+            self.assertEqual(job1.identity, sha1(str(job2).encode('utf-8')).hexdigest())
 
     def test_deschedule_by_name(self):
         """We must be able to deschedule a job by giving its name.

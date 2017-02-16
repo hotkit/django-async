@@ -8,20 +8,28 @@ def full_name(item):
     """Return the full name of a something passed in so it can be retrieved
     later on.
     """
-    basestring = (str, bytes)
+    try:
+        unicode = unicode
+    except NameError:
+        # 'unicode' is undefined, must be Python 3
+        str = str
+        unicode = str
+        bytes = bytes
+        basestring = (str, bytes)
+    else:
+        # 'unicode' exists, must be Python 2
+        str = str
+        unicode = unicode
+        bytes = str
+        basestring = basestring
+
     if isinstance(item, basestring):
         return item
     if ismethod(item):
         module_name = full_name(dict(getmembers(item))['im_self'])
     else:
         module_name = getmodule(item).__name__
-    if isfunction(item):
-        try:
-            name = item.func_name
-        except AttributeError:
-            name = item.__name__
-    else:
-        name = item.__name__
+    name = item.__name__
     return '.'.join([module_name, name])
 
 
