@@ -173,6 +173,20 @@ class Job(models.Model):
             ['%s=%s' % (k, tostr(v)) for k, v in loads(self.kwargs).items()])
         return u'%s(%s)' % (self.name, args)
 
+    def __str__(self):
+        # __unicode__: Instance of 'bool' has no 'items' member
+        # pylint: disable=E1103
+        def tostr(string):
+            """Convert a string to a quoted string good enough for printing.
+            """
+            basestring = (str, bytes)
+            return ("'%s'" % string if issubclass(type(string), basestring)
+                else repr(string))
+        args = ', '.join([tostr(s) for s in loads(self.args)] +
+            ['%s=%s' % (k, tostr(v)) for k, v in loads(self.kwargs).items()])
+        return u'%s(%s)' % (self.name, args)
+
+
     def save(self, *a, **kw):
         # Stop us from cheating by adding the new jobs to the old group.
         # Checking if group obj got passed and current job is not in that group
