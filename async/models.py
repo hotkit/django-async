@@ -183,7 +183,7 @@ class Job(models.Model):
             return ("'%s'" % string if issubclass(type(string), basestring)
                 else repr(string))
         args = ', '.join([tostr(s) for s in loads(self.args)] +
-            ['%s=%s' % (k, tostr(v)) for k, v in loads(self.kwargs).items()])
+            ['%s=%s' % (k, tostr(v)) for k, v in loads(self.kwargs).items().sort()])
         return '%s(%s)' % (self.name, args)
 
 
