@@ -193,7 +193,7 @@ class Job(models.Model):
 
         kwargstr = [pwkarg(k, v) for k, v in kwargs.items()]
 
-        args = argstr + kwargstr
+        args = argstr.join(kwargstr)
         return '%s(%s)' % (self.name, args)
 
 
