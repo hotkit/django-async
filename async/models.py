@@ -42,6 +42,9 @@ class Group(models.Model):
     def __unicode__(self):
         return u'%s' % self.reference
 
+    def __str__(self):
+        return '%s' % self.reference
+
     def save(self, *args, **kwargs):
         # We can't create a new group with that reference
         # if the old group still has jobs that haven't executed.
