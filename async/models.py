@@ -176,7 +176,6 @@ class Job(models.Model):
     def __str__(self):
         # __unicode__: Instance of 'bool' has no 'items' member
         # pylint: disable=E1103
-
         def tostr(string):
             """Convert a string to a quoted string good enough for printing.
             """
@@ -184,12 +183,13 @@ class Job(models.Model):
             return ("'%s'" % string if issubclass(type(string), basestring)
                 else repr(string))
 
-        def pkwarg(key, value):
-            return "%s=%s" % (key, value)
-
         arglist = loads(self.args)
+
         argstr = ' '.join([ tostr(s) for s in arglist )
         kwargs = loads(self.kwargs)
+
+        def pwkarg(key, value):
+            return "%s=%s" % (key, value)
 
         kwargstr = [pwkarg(k, v) for k, v in kwargs.items()]
 
