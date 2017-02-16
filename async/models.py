@@ -189,11 +189,11 @@ class Job(models.Model):
         kwargs = loads(self.kwargs)
 
         def pwkarg(key, value):
-            return "%s=%s" % (key, value)
+            return "%s='%s'" % (key, value)
 
         kwargarr = [pwkarg(k, v) for k, v in kwargs.items()]
-        kwargstr = ', '.join([tostr(s) for s in kwargarr])
-        args = argstr + kwargstr
+        kwargstr = ', '.join([s for s in kwargarr])
+        args = argstr + ", " + kwargstr
         return '%s(%s)' % (self.name, args)
 
 
