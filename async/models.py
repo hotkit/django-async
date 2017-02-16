@@ -184,7 +184,7 @@ class Job(models.Model):
                 else repr(string))
         args = ', '.join([tostr(s) for s in loads(self.args)] +
             ['%s=%s' % (k, tostr(v)) for k, v in loads(self.kwargs).items()])
-        return u'%s(%s)' % (self.name, args)
+        return '%s(%s)' % (self.name, args)
 
 
     def save(self, *a, **kw):
@@ -263,6 +263,7 @@ class Error(models.Model):
 
     def __unicode__(self):
         return u'%s : %s' % (self.executed, self.exception)
+
     def __str__(self):
         return '%s : %s' % (self.executed, self.exception)
 
