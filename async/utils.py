@@ -13,7 +13,6 @@ def full_name(item):
     except NameError:
         # 'unicode' is undefined, must be Python 3
         unicode = str
-        bytes = bytes
         basestring = (str, bytes)
     else:
         # 'unicode' exists, must be Python 2
