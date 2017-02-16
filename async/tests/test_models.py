@@ -138,7 +138,6 @@ class TestError(TestCase):
         try:
             self.assertTrue(unicode(error).endswith(u' : Exception text'), unicode(error))
         except NameError:
-            print("XXXX THIS IS THE ERROR: ", error)
             self.assertTrue(str(error).endswith(' : Exception text'), str(error))
 
 

@@ -263,4 +263,6 @@ class Error(models.Model):
 
     def __unicode__(self):
         return u'%s : %s' % (self.executed, self.exception)
+    def __str__(self):
+        return '%s : %s' % (self.executed, self.exception)
 
