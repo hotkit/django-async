@@ -65,7 +65,7 @@ class TestGroupedAggregate(TestCase):
         self.assertEquals(unexecuted_jobs[job2_a.name]['count'], 1)
 
 
-@unittest.skipIf(NoSlumber, )
+@unittest.skipIf(NoSlumber, True)
 class TestHealth(TestCase):
     """ Tests health of the queue.
     """

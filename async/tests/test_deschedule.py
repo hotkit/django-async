@@ -28,7 +28,7 @@ class TestDeschedule(TestCase):
         job2 = Job(name='async.tests.test_deschedule._example',
             args="[]", kwargs="{}")
         try:
-            self.assertEqual(job1.identity, sha1(unicode(job2)).encode('utf-8').hexdigest())
+            self.assertEqual(job1.identity, sha1(unicode(job2).encode('utf-8')).hexdigest())
         except NameError:
             self.assertEqual(job1.identity, sha1(str(job2).encode('utf-8')).hexdigest())
 
