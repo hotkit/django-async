@@ -18,7 +18,6 @@ def full_name(item):
     later on.
     """
 
-
     if isinstance(item, basestring):
         return item
     if ismethod(item):
