@@ -188,7 +188,7 @@ class Job(models.Model):
 
         kwargs = loads(self.kwargs)
 
-        def pkwarg(key, value):
+        def pwkarg(key, value):
             return "%s=%s" % (key, value)
 
         kwargstr = [pwkarg(k, v) for k, v in kwargs.items()]
