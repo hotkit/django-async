@@ -16,9 +16,7 @@ def full_name(item):
         basestring = (str, bytes)
     else:
         # 'unicode' exists, must be Python 2
-        unicode = unicode
         bytes = str
-        basestring = basestring
 
     if isinstance(item, basestring):
         return item
