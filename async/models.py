@@ -191,9 +191,9 @@ class Job(models.Model):
         def pwkarg(key, value):
             return "%s=%s" % (key, value)
 
-        kwargstr = [pwkarg(k, v) for k, v in kwargs.items()]
-
-        args = argstr.join(kwargstr)
+        kwargarr = [pwkarg(k, v) for k, v in kwargs.items()]
+        kwargstr = ', '.join([tostr(s) for s in kwargarr])
+        args = argstr + kwargstr
         return '%s(%s)' % (self.name, args)
 
 
