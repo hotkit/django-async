@@ -185,7 +185,7 @@ class Job(models.Model):
 
         arglist = loads(self.args)
 
-        argstr = ' '.join([ tostr(s)] for s in arglist )
+        argstr = ' '.join([tostr(s) for s in arglist])
         kwargs = loads(self.kwargs)
 
         def pwkarg(key, value):
