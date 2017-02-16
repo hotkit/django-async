@@ -265,7 +265,7 @@ class TestRemoveOldJobs(TestCase):
             lambda x: x in jobs_must_gone_ids,
             Job.objects.filter(name=job_name).values_list('id', flat=True)
         )
-        self.assertEqual(len(not_expected_result), 0)
+        self.assertIsNone(not_expected_result)
         self.assertEqual(Job.objects.filter(name=job_name).count(), 2)
         self.assertEqual(
             Job.objects.filter(name=job_name, executed__isnull=False).count(),
