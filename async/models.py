@@ -195,7 +195,10 @@ class Job(models.Model):
             execution.
         """
         try:
-            _logger.info("%s %s", self.id, unicode(self))
+            try:
+                _logger.info("%s %s", self.id, unicode(self))
+            except NameError:
+                _logger.info("%s %s", self.id, str(self))
             args = loads(self.args)
             kwargs = non_unicode_kwarg_keys(loads(self.kwargs))
             function = object_at_end_of_path(self.name)

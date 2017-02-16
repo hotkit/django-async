@@ -125,8 +125,8 @@ class TestHealth(TestCase):
     def test_health(self):
         """Excecute command.
         """
-        print health()
-        print management.call_command('queue_health')
+        print( health())
+        print( management.call_command('queue_health'))
         with patch(
                 'async.management.commands.queue_health.dumps',
                 lambda x: self.assertEqual(x, health())):

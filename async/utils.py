@@ -31,7 +31,7 @@ def object_at_end_of_path(path):
     """
     access_path = path.split('.')
     module = None
-    for index in xrange(1, len(access_path)):
+    for index in range(1, len(access_path)):
         try:
             # import top level module
             module_name = '.'.join(access_path[:-index])
