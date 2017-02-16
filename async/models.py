@@ -182,8 +182,18 @@ class Job(models.Model):
             basestring = (str, bytes)
             return ("'%s'" % string if issubclass(type(string), basestring)
                 else repr(string))
-        args = ', '.join([tostr(s) for s in loads(self.args)] +
-            ['%s=%s' % (k, tostr(v)) for k, v in loads(self.kwargs).items()])
+
+        arglist = loads(self.args)
+        argstr = ', '.join([tostr(s) for s in arglist])
+
+        kwargs = loads(self.kwargs)
+
+        def pkwarg(key, value):
+            return "%s=%s" % (key, value)
+
+        kwargstr = [pwkarg(k, v) for k, v in kwargs.items()]
+
+        args = argstr + kwargstr
         return '%s(%s)' % (self.name, args)
 
 
