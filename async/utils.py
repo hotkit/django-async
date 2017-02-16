@@ -13,7 +13,6 @@ else:
     # 'unicode' exists, must be Python 2
     bytes = str
 
-
 def full_name(item):
     """Return the full name of a something passed in so it can be retrieved
     later on.
@@ -22,7 +21,7 @@ def full_name(item):
     if isinstance(item, basestring):
         return item
     if ismethod(item):
-        module_name = full_name(dict(getmembers(item))['im_self'])
+        module_name = full_name(dict(getmembers(item))[__self__])
     else:
         module_name = getmodule(item).__name__
     name = item.__name__
