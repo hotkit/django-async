@@ -65,7 +65,7 @@ class TestGroupedAggregate(TestCase):
         self.assertEquals(unexecuted_jobs[job2_a.name]['count'], 1)
 
 
-@unittest.skipIf(NoSlumber, True)
+@unittest.skipIf(NoSlumber, )
 class TestHealth(TestCase):
     """ Tests health of the queue.
     """
@@ -265,7 +265,7 @@ class TestRemoveOldJobs(TestCase):
             lambda x: x in jobs_must_gone_ids,
             Job.objects.filter(name=job_name).values_list('id', flat=True)
         )
-        self.assertIsNone(not_expected_result)
+        self.assertEqual(len(list(not_expected_result)), 0)
         self.assertEqual(Job.objects.filter(name=job_name).count(), 2)
         self.assertEqual(
             Job.objects.filter(name=job_name, executed__isnull=False).count(),
