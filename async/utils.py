@@ -13,6 +13,7 @@ else:
     # 'unicode' exists, must be Python 2
     bytes = str
 
+
 def full_name(item):
     """Return the full name of a something passed in so it can be retrieved
     later on.

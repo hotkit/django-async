@@ -32,10 +32,9 @@ matrix:
     allow_failures:
         - env: DJANGO=1_10
         - env: DJANGO=1_11
-
+        - python: "3.4"
 
     exclude:
-      - python: "2.7"
       - python: "3.5"
       - python: "3.6"
       - env: DJANGO=1_0 OPTS=d1
