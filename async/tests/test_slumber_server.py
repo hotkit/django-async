@@ -29,7 +29,7 @@ except ImportError:
 # pylint: disable=E1103
 
 
-@unittest.skipIf(NoSlumber)
+@unittest.skipIf(NoSlumber, True)
 class TestSlumber(TestCase):
     """Make sure that Slumber is wired in properly.
     """
@@ -43,7 +43,7 @@ class TestSlumber(TestCase):
         json = loads(response.content)
         self.assertIsNone(json['services'], dumps(json, indent=2))
 
-@unittest.skipIf(NoSlumber)
+@unittest.skipIf(NoSlumber, True)
 class WithUser(object):
     def setUp(self):
         super(WithUser, self).setUp()
@@ -54,7 +54,7 @@ class WithUser(object):
         self.permission = Permission.objects.get(codename='add_job')
         self.user.user_permissions.add(self.permission)
 
-@unittest.skipIf(NoSlumber)
+@unittest.skipIf(NoSlumber, True)
 class TestSchedule(WithUser, TestCase):
     """Make sure the schedule API wrapper works.
     """
@@ -217,7 +217,7 @@ class TestSchedule(WithUser, TestCase):
         self.assertEqual(json['operations']['progress'],
             '/slumber/async/Group/progress/space%20test/')
 
-@unittest.skipIf(NoSlumber)
+@unittest.skipIf(NoSlumber, True)
 class TestProgress(WithUser, TestCase):
     URL = '/slumber/async/Group/progress/'
 
@@ -404,7 +404,7 @@ class TestProgress(WithUser, TestCase):
         self.assertIsNone(remaining)
         self.assertIsNone(consumed)
 
-@unittest.skipIf(NoSlumber)
+@unittest.skipIf(NoSlumber, True)
 class TestHealth(WithUser, TestCase):
     URL = '/slumber/async/Job/health/'
 
