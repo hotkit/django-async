@@ -184,22 +184,32 @@ class Job(models.Model):
                 else repr(string))
 
         arglist = loads(self.args)
-        argstr = ', '.join([tostr(s) for s in arglist])
+        if len(arglist):
+            argstr = ', '.join([tostr(s) for s in arglist])
 
         kwargs = loads(self.kwargs)
 
         def pwkarg(key, value):
-            return "%s='%s'" % (key, value)
+            if value != None:
+                return "%s='%s'" % (key, value)
+            else:
+                return "%s=%s" % (key, value)
 
+        kwargstr = ''
         kwargarr = [pwkarg(k, v) for k, v in kwargs.items()]
-        kwargstr = ', '.join([s for s in kwargarr])
-        if kwargstr == ', ':
-            kwargstr = ''
-        if argstr == ', ':
-            argstr = ''
-        args = argstr + ", " + kwargstr
-        if args == ', ':
-            args = ''
+
+        if len(kwargarr):
+            kwargstr = ', '.join([s for s in kwargarr])
+        args = ''
+        if len(argstr):
+            if len(kwargstr):
+                args = argstr + ", " + kwargstr
+            else:
+                args = argstr
+        else:
+            if len(kwargstr):
+                args = kwargstr
+
 
         return '%s(%s)' % (self.name, args)
 
