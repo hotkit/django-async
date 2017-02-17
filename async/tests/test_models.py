@@ -114,7 +114,6 @@ class TestJob(TransactionTestCase):
         self.assertEqual(job.identity,
             '60941ebcc096c0223ba1db02b3d256f19ba553a3')
 
-    #@unittest.skip("Sorting Needed")
     def test_unicode_with_args_and_kwargs(self):
         """Make sure unicode handling deals with kwargs properly.
         """

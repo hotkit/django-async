@@ -39,6 +39,9 @@ class Group(models.Model):
     final = models.ForeignKey('Job', blank=True, null=True,
         related_name='ends')
 
+    class Meta:
+        app_label = 'Group'
+
     def __unicode__(self):
         return u'%s' % self.reference
 
