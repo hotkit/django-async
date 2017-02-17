@@ -18,7 +18,9 @@ env:
     - DJANGO=1_9
     - DJANGO=1_10
     - DJANGO=1_11
+
 install:
+   -  pip install tox-travis coveralls
     - "pip install -r test-projects/common.pip -r test-projects/django_${DJANGO}/setup.pip"
 
 before_script:
@@ -27,6 +29,7 @@ before_script:
 script:
     #- "pylint --rcfile=pylintrc --output-format=colorized async"
     - "cd test-projects/django_${DJANGO} && python -tt manage.py test ${OPTS} async"
+    - tox
 
 matrix:
     allow_failures:
