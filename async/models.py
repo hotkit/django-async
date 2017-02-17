@@ -39,9 +39,6 @@ class Group(models.Model):
     final = models.ForeignKey('Job', blank=True, null=True,
         related_name='ends')
 
-    class Meta:
-        app_label = 'Group'
-
     def __unicode__(self):
         return u'%s' % self.reference
 
@@ -193,7 +190,7 @@ class Job(models.Model):
         kwargs = loads(self.kwargs)
 
         def pwkarg(key, value):
-            if value :
+            if value:
                 return "%s='%s'" % (key, value)
             else:
                 return "%s=%s" % (key, value)
