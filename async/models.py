@@ -190,7 +190,7 @@ class Job(models.Model):
         kwargs = loads(self.kwargs)
 
         def pwkarg(key, value):
-            if value != 'None':
+            if value :
                 return "%s='%s'" % (key, value)
             else:
                 return "%s=%s" % (key, value)

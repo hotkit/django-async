@@ -100,7 +100,6 @@ class TestJob(TransactionTestCase):
             #         'async.tests.test_models._fn', args=[dict(k='v', x=None)])),
             #     "async.tests.test_models._fn({'x': None, 'k': 'v'})")
 
-    @unittest.skip("Sorting Needed")
     def test_unicode_with_kwargs(self):
         """Make sure unicode handling deals with kwargs properly.
         """
@@ -126,7 +125,7 @@ class TestJob(TransactionTestCase):
             "async.tests.test_models._fn('argument', x=None, k='v')")
         except:
             self.assertEqual(str(job),
-            "async.tests.test_models._fn('argument', x='None', k='v')")
+            "async.tests.test_models._fn('argument', x=None, k='v')")
         self.assertEqual(job.identity,
             '2ce2bb7935439a6ab3f111882f359a06b36bf995')
 
