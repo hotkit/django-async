@@ -194,9 +194,9 @@ class Job(models.Model):
         kwargarr = [pwkarg(k, v) for k, v in kwargs.items()]
         kwargstr = ', '.join([s for s in kwargarr])
         if kwargstr == ', ':
-            kwargstr == ''
+            kwargstr = ''
         if argstr == ', ':
-            argstr == ''
+            argstr = ''
         args = argstr + ", " + kwargstr
         return '%s(%s)' % (self.name, args)
 
