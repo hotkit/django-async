@@ -166,7 +166,7 @@ class Job(models.Model):
         def tostr(string):
             """Convert a string to a quoted string good enough for printing.
             """
-            basestring = (str, bytes)
+            #basestring = (str, bytes)
             return ("'%s'" % string if issubclass(type(string), basestring)
                 else repr(string))
         args = ', '.join([tostr(s) for s in loads(self.args)] +
@@ -179,7 +179,7 @@ class Job(models.Model):
         def tostr(string):
             """Convert a string to a quoted string good enough for printing.
             """
-            basestring = (str, bytes)
+            #basestring = (str, bytes)
             return ("'%s'" % string if issubclass(type(string), basestring)
                 else repr(string))
         argstr = ''
