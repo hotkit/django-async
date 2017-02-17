@@ -198,6 +198,9 @@ class Job(models.Model):
         if argstr == ', ':
             argstr = ''
         args = argstr + ", " + kwargstr
+        if args == ', ':
+            args = ''
+
         return '%s(%s)' % (self.name, args)
 
 
