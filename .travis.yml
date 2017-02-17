@@ -19,8 +19,10 @@ env:
     - DJANGO=1_10
     - DJANGO=1_11
 
+before_install:
+  -  pip install tox-travis coveralls
+
 install:
-   -  pip install tox-travis coveralls
     - "pip install -r test-projects/common.pip -r test-projects/django_${DJANGO}/setup.pip"
 
 before_script:
