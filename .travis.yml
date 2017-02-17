@@ -30,13 +30,7 @@ script:
 
 matrix:
     allow_failures:
-        - env: DJANGO=1_10
-        - env: DJANGO=1_11
-        - python: "3.5"
-        - python: "3.6"
         - env: DJANGO=1_0 OPTS=d1
-        - env: DJANGO=1_9
-          python: "3.4"
 
     exclude:
       - env: DJANGO=1_0 OPTS=d1
