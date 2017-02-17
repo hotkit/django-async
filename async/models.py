@@ -182,7 +182,7 @@ class Job(models.Model):
             basestring = (str, bytes)
             return ("'%s'" % string if issubclass(type(string), basestring)
                 else repr(string))
-
+        argstr = ''
         arglist = loads(self.args)
         if len(arglist):
             argstr = ', '.join([tostr(s) for s in arglist])
@@ -190,7 +190,7 @@ class Job(models.Model):
         kwargs = loads(self.kwargs)
 
         def pwkarg(key, value):
-            if value != None:
+            if value:
                 return "%s='%s'" % (key, value)
             else:
                 return "%s=%s" % (key, value)
@@ -210,9 +210,7 @@ class Job(models.Model):
             if len(kwargstr):
                 args = kwargstr
 
-
         return '%s(%s)' % (self.name, args)
-
 
     def save(self, *a, **kw):
         # Stop us from cheating by adding the new jobs to the old group.
