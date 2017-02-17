@@ -199,7 +199,7 @@ class Job(models.Model):
         kwargarr = [pwkarg(k, v) for k, v in kwargs.items()]
 
         if len(kwargarr):
-            kwargstr = ', '.join([s for s in kwargarr])
+            kwargstr = ', '.join([s for s in sorted(kwargarr, reverse=True)])
         args = ''
         if len(argstr):
             if len(kwargstr):
