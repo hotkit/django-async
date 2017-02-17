@@ -31,7 +31,7 @@ before_script:
 script:
     #- "pylint --rcfile=pylintrc --output-format=colorized async"
     - "cd test-projects/django_${DJANGO} && python -tt manage.py test ${OPTS} async"
-    - tox
+    - "cd ../.. && tox"
 
 matrix:
     allow_failures:
