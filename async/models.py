@@ -171,7 +171,7 @@ class Job(models.Model):
         arglist = loads(self.args)
         arglist = [repr(s) for s in arglist]
         kwargs = loads(self.kwargs)
-        kwargs = ["%s=%s" % (k, repr(v)) for k, v in kwargs.items()]
+        kwargs = sorted(["%s=%s" % (k, repr(v)) for k, v in kwargs.items()])
         args = ', '.join(arglist + kwargs)
         return '%s(%s)' % (self.name, args)
 
