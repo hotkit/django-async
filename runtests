@@ -15,27 +15,25 @@ workon async_1.9
 cd test-projects/django_1_9
 echo Django 1.9
 check_worked python manage.py test async
+check_worked pylint --rcfile=../../pylintrc --output-format=colorized ../../async
 
 workon async_1.10
-cd test-projects/django_1_10
+cd ../django_1_10
 echo Django 1.10
 check_worked python manage.py test async
 
 workon async_1.11
-cd test-projects/django_1_11
+cd ../django_1_11
 echo Django 1.11
 check_worked python manage.py test async
 
 workon async_1.3
-cd test-projects/django_1_3
+cd ../django_1_3
 echo Django 1.3
 check_worked python -tt manage.py test async
 
-cd ../..
-check_worked pylint --rcfile=pylintrc --output-format=colorized async
-
 workon async_1.8
-cd test-projects/django_1_8
+cd ../django_1_8
 echo Django 1.8
 check_worked python manage.py test async
 
