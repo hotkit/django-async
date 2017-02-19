@@ -20,6 +20,7 @@ except ImportError:
 from async import schedule
 from async.models import Error, Job, Group
 
+
 def _fn(*_a, **_kw):
     """Test function.
     """
@@ -107,12 +108,12 @@ class TestJob(TransactionTestCase):
             kwargs=dict(k='v', x=None))
         try:
             self.assertEqual(unicode(job),
-            "async.tests.test_models._fn(x=None, k='v')")
+            "async.tests.test_models._fn(k='v', x=None)")
         except NameError:
             self.assertEqual(str(job),
-            "async.tests.test_models._fn(x=None, k='v')")
+            "async.tests.test_models._fn(k='v', x=None)")
         self.assertEqual(job.identity,
-            '60941ebcc096c0223ba1db02b3d256f19ba553a3')
+            '236a244a0cd845bb5a427db495ec830fa4ab9d93')
 
     def test_unicode_with_args_and_kwargs(self):
         """Make sure unicode handling deals with kwargs properly.
@@ -121,12 +122,12 @@ class TestJob(TransactionTestCase):
             args=['argument'], kwargs=dict(k='v', x=None))
         try:
             self.assertEqual(unicode(job),
-            "async.tests.test_models._fn('argument', x=None, k='v')")
+            "async.tests.test_models._fn('argument', k='v', x=None)")
         except:
             self.assertEqual(str(job),
-            "async.tests.test_models._fn('argument', x=None, k='v')")
+            "async.tests.test_models._fn('argument', k='v', x=None)")
         self.assertEqual(job.identity,
-            '2ce2bb7935439a6ab3f111882f359a06b36bf995')
+            '9abc86055107d5b5aa97ea32e098580543680c27')
 
 
 class TestError(TestCase):

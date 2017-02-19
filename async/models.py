@@ -163,52 +163,16 @@ class Job(models.Model):
     def __unicode__(self):
         # __unicode__: Instance of 'bool' has no 'items' member
         # pylint: disable=E1103
-        def tostr(string):
-            """Convert a string to a quoted string good enough for printing.
-            """
-            #basestring = (str, bytes)
-            return ("'%s'" % string if issubclass(type(string), basestring)
-                else repr(string))
-        args = ', '.join([tostr(s) for s in loads(self.args)] +
-            ['%s=%s' % (k, tostr(v)) for k, v in loads(self.kwargs).items()])
+        args = u', '.join([repr(s) for s in loads(self.args)] +
+            sorted([u'%s=%s' % (k, repr(v)) for k, v in loads(self.kwargs).items()]))
         return u'%s(%s)' % (self.name, args)
 
     def __str__(self):
-        # __unicode__: Instance of 'bool' has no 'items' member
-        # pylint: disable=E1103
-        def tostr(string):
-            """Convert a string to a quoted string good enough for printing.
-            """
-            return ("'%s'" % string if isinstance(type(string), str)
-                else repr(string))
-        argstr = ''
         arglist = loads(self.args)
-        if len(arglist):
-            argstr = ', '.join([tostr(s) for s in arglist])
-
+        arglist = [repr(s) for s in arglist]
         kwargs = loads(self.kwargs)
-
-        def pwkarg(key, value):
-            if value:
-                return "%s='%s'" % (key, value)
-            else:
-                return "%s=%s" % (key, value)
-
-        kwargstr = ''
-        kwargarr = [pwkarg(k, v) for k, v in kwargs.items()]
-
-        if len(kwargarr):
-            kwargstr = ', '.join([s for s in sorted(kwargarr, reverse=True)])
-        args = ''
-        if len(argstr):
-            if len(kwargstr):
-                args = argstr + ", " + kwargstr
-            else:
-                args = argstr
-        else:
-            if len(kwargstr):
-                args = kwargstr
-
+        kwargs = ["%s=%s" % (k, repr(v)) for k, v in kwargs.items()]
+        args = ', '.join(arglist + kwargs)
         return '%s(%s)' % (self.name, args)
 
     def save(self, *a, **kw):
