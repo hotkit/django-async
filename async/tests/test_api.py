@@ -1,6 +1,7 @@
 """
     Test for apis..
 """
+import django
 from django.test import TestCase
 from django.core import management
 try:
@@ -34,6 +35,7 @@ def get_d_before_dt_by_days(base_dt, d):
 
 class TestGroupedAggregate(TestCase):
 
+    @unittest.skipIf(django.VERSION[:2], (1, 0))
     def test_for_executed_jobs(self):
         job1 = TestRemoveOldJobs.create_job(1)
         job_started = timezone.now()

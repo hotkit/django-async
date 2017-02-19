@@ -29,9 +29,6 @@ script:
     - "cd test-projects/django_${DJANGO} && python -tt manage.py test ${OPTS} async"
 
 matrix:
-    allow_failures:
-        - env: DJANGO=1_0 OPTS=d1
-
     exclude:
       - env: DJANGO=1_0 OPTS=d1
         python: "3.4"

@@ -5,6 +5,8 @@ from datetime import timedelta
 from simplejson import dumps, loads
 from mock import patch
 import unittest
+
+import django
 from django.contrib.auth.models import User, Permission
 from django.test import TestCase
 from django.core.exceptions import ValidationError
@@ -221,6 +223,7 @@ class TestSchedule(WithUser, TestCase):
 class TestProgress(WithUser, TestCase):
     URL = '/slumber/async/Group/progress/'
 
+    @unittest.skipIf(django.VERSION[:2], (1, 0))
     def test_get_work(self):
         """Test normal get request work.
         """
@@ -264,6 +267,7 @@ class TestProgress(WithUser, TestCase):
         self.assertIsNone(json_progress.get('estimated_total_time'))
         self.assertEqual(json_progress.get('remaining_seconds'), 0)
 
+    @unittest.skipIf(django.VERSION[:2], (1, 0))
     def test_no_any_job_in_group(self):
         """Create group but no job create for that group.
         """
@@ -289,6 +293,7 @@ class TestProgress(WithUser, TestCase):
             response = self.client.get(self.URL + 'fake-group/')
             self.assertEqual(response.status, 404)
 
+    @unittest.skipIf(django.VERSION[:2], (1, 0))
     def test_all_jobs_executed(self):
         """Test get detail from group with all executed jobs.
         """
@@ -319,6 +324,7 @@ class TestProgress(WithUser, TestCase):
         self.assertEqual(json_progress.get('total_unexecuted_jobs'), 0)
         self.assertEqual(json_progress.get('total_error_jobs'), 0)
 
+    @unittest.skipIf(django.VERSION[:2], (1, 0))
     def test_all_jobs_executed_with_error(self):
         """Test get detail from group with job errors.
         """
@@ -355,6 +361,7 @@ class TestProgress(WithUser, TestCase):
         self.assertEqual(json_progress.get('total_unexecuted_jobs'), 0)
         self.assertEqual(json_progress.get('total_error_jobs'), 2)
 
+    @unittest.skipIf(django.VERSION[:2], (1, 0))
     def test_estimate_execution_duration_can_produce_result(self):
         """Just to test if estimate function produce result,
         not checking the result.
@@ -392,6 +399,7 @@ class TestProgress(WithUser, TestCase):
         self.assertTrue(isinstance(consumed, timedelta))
 
 
+    @unittest.skipIf(django.VERSION[:2], (1, 0))
     def test_estimate_execution_duration_with_no_job_valid(self):
         """Calculate function return None if no data for process.
         """
@@ -408,6 +416,7 @@ class TestProgress(WithUser, TestCase):
 class TestHealth(WithUser, TestCase):
     URL = '/slumber/async/Job/health/'
 
+    @unittest.skipIf(django.VERSION[:2], (1, 0))
     def test_get_wired(self):
         response = self.client.get(self.URL)
         self.assertEqual(response.status_code, 200)
