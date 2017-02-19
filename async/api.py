@@ -56,9 +56,11 @@ def deschedule(function, args=None, kwargs=None):
         name=full_name(function),
             args=dumps(args or []), kwargs=dumps(kwargs or {}))
     try:
-        mark_cancelled = Job.objects.filter(executed=None, identity=sha1(unicode(job)).hexdigest())
+        mark_cancelled = Job.objects.filter(executed=None,
+            identity=sha1(unicode(job)).hexdigest())
     except NameError:
-        mark_cancelled = Job.objects.filter(executed=None, identity=sha1(str(job).encode('utf-8')).hexdigest())
+        mark_cancelled = Job.objects.filter(executed=None,
+            identity=sha1(str(job).encode('utf-8')).hexdigest())
     mark_cancelled.update(cancelled=_get_now())
 
 

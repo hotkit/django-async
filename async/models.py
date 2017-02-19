@@ -28,7 +28,6 @@ from async.logger import _logger
 from async.utils import object_at_end_of_path, non_unicode_kwarg_keys
 
 
-
 class Group(models.Model):
     """
         A group for jobs that need to be executed.
@@ -163,8 +162,11 @@ class Job(models.Model):
     def __unicode__(self):
         # __unicode__: Instance of 'bool' has no 'items' member
         # pylint: disable=E1103
-        args = u', '.join([repr(s) for s in loads(self.args)] +
-            sorted([u'%s=%s' % (k, repr(v)) for k, v in loads(self.kwargs).items()]))
+        arglist = loads(self.args)
+        arglist = [repr(s) for s in arglist]
+        kwargs = loads(self.kwargs)
+        kwargs = sorted([u"%s=%s" % (k, repr(v)) for k, v in kwargs.items()])
+        args = u', '.join(arglist + kwargs)
         return u'%s(%s)' % (self.name, args)
 
     def __str__(self):

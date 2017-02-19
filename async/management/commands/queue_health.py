@@ -1,6 +1,7 @@
 """
     Django manage.py command to show the queue health
 """
+from __future__ import print_function
 from django.core.management.base import BaseCommand, CommandError
 from simplejson import dumps
 
@@ -35,4 +36,4 @@ class Command(BaseCommand):
             estimation_fn = estimate_queue_completion
         else:
             raise CommandError("Unknown option for estimation algorithm")
-        print( dumps(health(estimation_fn)))
+        print(dumps(health(estimation_fn)))

@@ -1,17 +1,18 @@
 """
     Various Python utilities.
 """
-from inspect import getmembers, getmodule, isfunction, ismethod
+from inspect import getmembers, getmodule, ismethod
 
 try:
-    unicode = unicode
+    _ = unicode
 except NameError:
     # 'unicode' is undefined, must be Python 3
+    # pylint: disable=redefined-builtin,invalid-name
     unicode = str
     basestring = (str, bytes)
 else:
     # 'unicode' exists, must be Python 2
-    bytes = str
+    pass
 
 def full_name(item):
     """Return the full name of a something passed in so it can be retrieved
@@ -21,7 +22,7 @@ def full_name(item):
     if isinstance(item, basestring):
         return item
     if ismethod(item):
-            module_name = full_name(dict(getmembers(item))['__self__'])
+        module_name = full_name(dict(getmembers(item))['__self__'])
     else:
         module_name = getmodule(item).__name__
     name = item.__name__

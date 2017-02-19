@@ -1,6 +1,7 @@
 """
     Django Async management commands.
 """
+from __future__ import print_function
 from django.core.management.base import BaseCommand
 try:
     # No name 'timezone' in module 'django.utils'
@@ -27,7 +28,7 @@ def acquire_lock(lockname):
             try:
                 lock.acquire(timeout=-1)
             except AlreadyLocked: # pragma: no cover
-                print ('Lock is already set, aborting.')
+                print('Lock is already set, aborting.')
                 return
             try:
                 handler(*args)
@@ -108,7 +109,7 @@ class Command(BaseCommand):
         parser.add_argument('--outof', '-o', dest='outof',
                             help='How many workers there are')
         parser.add_argument('--filter', '-f', dest='filter',
-                            help='Filter jobs by fully qualified name'),
+                            help='Filter jobs by fully qualified name')
 
 
     def handle(self, **options):
