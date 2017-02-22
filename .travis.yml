@@ -5,12 +5,19 @@ services:
 
 python:
     - "2.7"
-
+    - "3.4"
+    - "3.5"
+    - "3.6"
 env:
+    - DJANGO=1_0 OPTS=d1
     - DJANGO=1_3
     - DJANGO=1_4
     - DJANGO=1_4 OPTS=--settings=django_1_4.settings.usetz
-
+    - DJANGO=1_7
+    - DJANGO=1_8
+    - DJANGO=1_9
+    - DJANGO=1_10
+    - DJANGO=1_11
 install:
     - "pip install -r test-projects/common.pip -r test-projects/django_${DJANGO}/setup.pip"
 
@@ -18,5 +25,39 @@ before_script:
   - psql -c 'create database "async-exec";' -U postgres
 
 script:
-    - "pylint --rcfile=pylintrc --output-format=colorized async"
+    #- "pylint --rcfile=pylintrc --output-format=colorized async"
     - "cd test-projects/django_${DJANGO} && python -tt manage.py test ${OPTS} async"
+
+matrix:
+    exclude:
+      - env: DJANGO=1_0 OPTS=d1
+        python: "3.4"
+      - env: DJANGO=1_0 OPTS=d1
+        python: "3.5"
+      - env: DJANGO=1_0 OPTS=d1
+        python: "3.6"
+      - python: "3.4"
+        env: DJANGO=1_3
+      - python: "3.4"
+        env: DJANGO=1_4
+      - python: "3.4"
+        env: DJANGO=1_4 OPTS=--settings=django_1_4.settings.usetz
+      - python: "3.4"
+        env: DJANGO=1_7
+      - python: "3.5"
+        env: DJANGO=1_3
+      - python: "3.5"
+        env: DJANGO=1_4
+      - python: "3.5"
+        env: DJANGO=1_4 OPTS=--settings=django_1_4.settings.usetz
+      - python: "3.5"
+        env: DJANGO=1_7
+      - python: "3.6"
+        env: DJANGO=1_3
+      - python: "3.6"
+        env: DJANGO=1_4
+      - python: "3.6"
+        env: DJANGO=1_4 OPTS=--settings=django_1_4.settings.usetz
+      - python: "3.6"
+        env: DJANGO=1_7
+

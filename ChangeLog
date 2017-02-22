@@ -1,5 +1,54 @@
+2017-02-22  Tobias Carlander  <tobias.carlander@wfp.org>
+ New versions of Django and new versions of Python. Switch to tox for testing.
+
+2016-08-17  Yothin Muangsommuk  <yothin@proteus-tech.com>
+ Optimisation for the flush_queue management command.
+
+2016-07-05  Kirit Saelensminde  <kirit@felspar.com>
+ * Encode before hashing to calculate the Job identity.
+ * Code fixes for the latest pylint.
+ * Use an older Django nose for the older Django versions.
+
+2016-03-31  Yothin Muangsommuk  <yothin@proteus-tech.com>
+ Try to initialize slumber applications before running commands
+
+2015-11-21  Pawan Jain  <pawan@flywheel.com>
+ Ability to filter jobs by name
+
+2015-08-25  Nui Narongwet  <narongwet@proteus-tech.com>
+ Add clear_queue decorator
+
+2015-06-11  Wutcharin Munjai  <wmunjai@gmail.com>
+ Fixed async health numbers not correct in not-executed, cancelled and not-executed-details
+
+2015-06-09  Wutcharin Munjai  <wmunjai@gmail.com>
+ Convert a string to a quoted string good enough for printing.
+ Remove test model for dict in test_unicode_with_args
+
+2015-05-07  Kirit Saelensminde  <kirit@felspar.com>
+ Get the Django 1.0 tests to run using Postgres.
+
+2015-04-16  Kirit Saelensminde  <kirit@felspar.com>
+ Added Django 1.0 to the tests. These don't all pass.
+
+2015-04-14  Kirit Saelensminde  <kirit@felspar.com>
+ Change an import to try to keep Slumber optional.
+ No longer include coverage in the 1.7 tests as it doesn't properly work anyway.
+
+2015-04-10  Kirit Saelensminde  <kirit@felspar.com>
+ Added Django 1.8 to the tests.
+
+2015-03-31  Kirit Saelensminde  <kirit@felspar.com>
+ Add Django 1.7 to the tests and update migrations so they are 1.7 compatible.
+
+2014-10-19  Kirit Saelensminde  <kirit@felspar.com>
+ Wire up the server health API to a Slumber operation. Tidy up the output somewhat.
+
+2014-10-07  Suhrid Satyal  <suhridsatyal@proteus-tech.com>
+ Add completion estimates of jobs in output of health command
+
 2014-07-08  Chirapat Harigulrak  <chirapat@proteus-tech.com>
-Fix admin error when a job has no group
+ Fix admin error when a job has no group
 
 2014-06-15  Kirit Saelensminde  <kirit@felspar.com>
  Fixed a bug that stopped us from running jobs in top level modules.

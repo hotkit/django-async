@@ -11,12 +11,15 @@ from async.models import Job, Group
 def do_job():
     pass
 
+def do_job2():
+    pass
 
 class TestFlushQueue(TestCase):
     def setUp(self):
         self.group = Group.objects.create(reference='1of2')
         self.j1 = schedule(do_job, group=self.group)
         self.j2 = schedule(do_job, group=self.group)
+        self.j3 = schedule(do_job2, group=self.group)
 
     def test_0of2(self):
         management.call_command('flush_queue', which=0, outof=2)
@@ -50,6 +53,13 @@ class TestFlushQueue(TestCase):
         else:
             self.assertIsNotNone(j1.executed)
             self.assertIsNone(j2.executed)
+
+    def test_namefilter(self):
+        management.call_command('flush_queue', filter='async.tests.test_flush_queue.do_job2')
+        j1 = Job.objects.get(pk=self.j1.pk)
+        j3 = Job.objects.get(pk=self.j3.pk)
+        self.assertIsNone(j1.executed)
+        self.assertIsNotNone(j3.executed)
 
 class TestFinalJob(TestCase):
     def test_final_when_added_last(self):

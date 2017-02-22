@@ -2,13 +2,21 @@
     Django Async models.
 """
 from datetime import  timedelta
-from django.db import models, transaction
-from django.db.models import Count, Q
+from django.core.exceptions import ValidationError
+from django.db import models
+try:
+    # pylint: disable=no-name-in-module
+    from django.db.transaction import atomic
+except ImportError:
+    # pylint: disable=no-name-in-module
+    from django.db.transaction import commit_on_success as atomic
+from django.db.models import Q
 try:
     # No name 'timezone' in module 'django.utils'
     # pylint: disable=E0611
     from django.utils import timezone
 except ImportError: # pragma: no cover
+    # pylint: disable = ungrouped-imports
     from datetime import datetime as timezone
 # No name 'sha1' in module 'hashlib'
 # pylint: disable=E0611
@@ -18,8 +26,6 @@ from traceback import format_exc
 
 from async.logger import _logger
 from async.utils import object_at_end_of_path, non_unicode_kwarg_keys
-
-from django.core.exceptions import ValidationError
 
 
 class Group(models.Model):
@@ -34,6 +40,9 @@ class Group(models.Model):
 
     def __unicode__(self):
         return u'%s' % self.reference
+
+    def __str__(self):
+        return '%s' % self.reference
 
     def save(self, *args, **kwargs):
         # We can't create a new group with that reference
@@ -61,6 +70,8 @@ class Group(models.Model):
         """Estimate of the total amount of time (in seconds) that the group
         will take to execute.
         """
+        # Have this import here so we can use most things on Django 1.0
+        from django.db.models import Count
         result = self.jobs.aggregate(
             job_count=Count('id'), executed_job_count=Count('executed'),
             cancelled_job_count=Count('cancelled'))
@@ -151,9 +162,20 @@ class Job(models.Model):
     def __unicode__(self):
         # __unicode__: Instance of 'bool' has no 'items' member
         # pylint: disable=E1103
-        args = ', '.join([repr(s) for s in loads(self.args)] +
-            ['%s=%s' % (k, repr(v)) for k, v in loads(self.kwargs).items()])
+        arglist = loads(self.args)
+        arglist = [repr(s) for s in arglist]
+        kwargs = loads(self.kwargs)
+        kwargs = sorted([u"%s=%s" % (k, repr(v)) for k, v in kwargs.items()])
+        args = u', '.join(arglist + kwargs)
         return u'%s(%s)' % (self.name, args)
+
+    def __str__(self):
+        arglist = loads(self.args)
+        arglist = [repr(s) for s in arglist]
+        kwargs = loads(self.kwargs)
+        kwargs = sorted(["%s=%s" % (k, repr(v)) for k, v in kwargs.items()])
+        args = ', '.join(arglist + kwargs)
+        return '%s(%s)' % (self.name, args)
 
     def save(self, *a, **kw):
         # Stop us from cheating by adding the new jobs to the old group.
@@ -167,7 +189,11 @@ class Job(models.Model):
                     "Cannot add job [%s] to group [%s] because this group "
                         "has executed jobs." %
                             (self.name, self.group.reference))
-        self.identity = sha1(unicode(self)).hexdigest()
+        try:
+            self.identity = sha1(unicode(self).encode('utf-8')).hexdigest()
+        except NameError:
+            self.identity = sha1(str(self).encode('utf-8')).hexdigest()
+
         return super(Job, self).save(*a, **kw)
 
     def execute(self, **_meta):
@@ -176,7 +202,10 @@ class Job(models.Model):
             execution.
         """
         try:
-            _logger.info("%s %s", self.id, unicode(self))
+            try:
+                _logger.info("%s %s", self.id, unicode(self))
+            except NameError:
+                _logger.info("%s %s", self.id, str(self))
             args = loads(self.args)
             kwargs = non_unicode_kwarg_keys(loads(self.kwargs))
             function = object_at_end_of_path(self.name)
@@ -187,11 +216,12 @@ class Job(models.Model):
                 self.started = timezone.now()
                 result = function(*args, **kwargs)
                 self.executed = timezone.now()
+                self.cancelled = None
                 self.result = dumps(result)
                 self.save()
                 return result
-            return transaction.commit_on_success(execute)()
-        except Exception, exception:
+            return atomic(execute)()
+        except Exception as exception:
             self.started = None
             errors = 1 + self.errors.count()
             self.scheduled = (timezone.now() +
@@ -208,7 +238,7 @@ class Job(models.Model):
                 Error.objects.create(job=self, exception=repr(exception),
                     traceback=format_exc())
                 self.save()
-            transaction.commit_on_success(record)()
+            atomic(record)()
             raise
 
 
@@ -223,4 +253,7 @@ class Error(models.Model):
 
     def __unicode__(self):
         return u'%s : %s' % (self.executed, self.exception)
+
+    def __str__(self):
+        return '%s : %s' % (self.executed, self.exception)
 

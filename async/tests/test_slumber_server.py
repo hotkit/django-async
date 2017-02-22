@@ -4,7 +4,9 @@
 from datetime import timedelta
 from simplejson import dumps, loads
 from mock import patch
+import unittest
 
+import django
 from django.contrib.auth.models import User, Permission
 from django.test import TestCase
 from django.core.exceptions import ValidationError
@@ -16,14 +18,20 @@ except ImportError:
     from datetime import datetime as timezone
 
 from async.models import Job, Group, Error
-from async.slumber_operations import Progress
 
+NoSlumber = False
+try:
+    from slumber import data_link
+    from async.slumber_operations import Progress
+except ImportError:
+    NoSlumber = True
 
 # Instance of 'WSGIRequest' has no 'status_code' member
 #  (but some types could not be inferred)
 # pylint: disable=E1103
 
 
+@unittest.skipIf(NoSlumber, True)
 class TestSlumber(TestCase):
     """Make sure that Slumber is wired in properly.
     """
@@ -35,36 +43,20 @@ class TestSlumber(TestCase):
         response = self.client.get('/slumber/')
         self.assertEqual(response.status_code, 200)
         json = loads(response.content)
-        self.assertEqual(json, dict(
-            services=None,
-            configuration={},
-            apps={
-                'async': '/slumber/async/',
-                'django.contrib.sites': '/slumber/django/contrib/sites/',
-                'django.contrib.admin': '/slumber/django/contrib/admin/',
-                'django.contrib.auth': '/slumber/django/contrib/auth/',
-                'django.contrib.contenttypes':
-                    '/slumber/django/contrib/contenttypes/',
-                'django.contrib.messages': '/slumber/django/contrib/messages/',
-                'django.contrib.sessions': '/slumber/django/contrib/sessions/',
-                'django.contrib.staticfiles':
-                    '/slumber/django/contrib/staticfiles/',
-                'django_nose': '/slumber/django_nose/',
-                'south': '/slumber/south/'},
-            _meta={'message': 'OK', 'status': 200}), json)
+        self.assertIsNone(json['services'], dumps(json, indent=2))
 
-
+@unittest.skipIf(NoSlumber, True)
 class WithUser(object):
     def setUp(self):
         super(WithUser, self).setUp()
-        self.user = User.objects.create(username='test')
+        self.user = User(username='test', is_active=True, is_staff=True)
         self.user.set_password('password')
         self.user.save()
         self.client.login(username='test', password='password')
         self.permission = Permission.objects.get(codename='add_job')
         self.user.user_permissions.add(self.permission)
 
-
+@unittest.skipIf(NoSlumber, True)
 class TestSchedule(WithUser, TestCase):
     """Make sure the schedule API wrapper works.
     """
@@ -227,10 +219,11 @@ class TestSchedule(WithUser, TestCase):
         self.assertEqual(json['operations']['progress'],
             '/slumber/async/Group/progress/space%20test/')
 
-
+@unittest.skipIf(NoSlumber, True)
 class TestProgress(WithUser, TestCase):
     URL = '/slumber/async/Group/progress/'
 
+    @unittest.skipIf(django.VERSION[:2], (1, 0))
     def test_get_work(self):
         """Test normal get request work.
         """
@@ -274,6 +267,7 @@ class TestProgress(WithUser, TestCase):
         self.assertIsNone(json_progress.get('estimated_total_time'))
         self.assertEqual(json_progress.get('remaining_seconds'), 0)
 
+    @unittest.skipIf(django.VERSION[:2], (1, 0))
     def test_no_any_job_in_group(self):
         """Create group but no job create for that group.
         """
@@ -297,7 +291,9 @@ class TestProgress(WithUser, TestCase):
         # now it just thrown TemplateDoesNotExist
         with self.assertRaises(Exception) as e:
             response = self.client.get(self.URL + 'fake-group/')
+            self.assertEqual(response.status, 404)
 
+    @unittest.skipIf(django.VERSION[:2], (1, 0))
     def test_all_jobs_executed(self):
         """Test get detail from group with all executed jobs.
         """
@@ -328,6 +324,7 @@ class TestProgress(WithUser, TestCase):
         self.assertEqual(json_progress.get('total_unexecuted_jobs'), 0)
         self.assertEqual(json_progress.get('total_error_jobs'), 0)
 
+    @unittest.skipIf(django.VERSION[:2], (1, 0))
     def test_all_jobs_executed_with_error(self):
         """Test get detail from group with job errors.
         """
@@ -364,6 +361,7 @@ class TestProgress(WithUser, TestCase):
         self.assertEqual(json_progress.get('total_unexecuted_jobs'), 0)
         self.assertEqual(json_progress.get('total_error_jobs'), 2)
 
+    @unittest.skipIf(django.VERSION[:2], (1, 0))
     def test_estimate_execution_duration_can_produce_result(self):
         """Just to test if estimate function produce result,
         not checking the result.
@@ -401,6 +399,7 @@ class TestProgress(WithUser, TestCase):
         self.assertTrue(isinstance(consumed, timedelta))
 
 
+    @unittest.skipIf(django.VERSION[:2], (1, 0))
     def test_estimate_execution_duration_with_no_job_valid(self):
         """Calculate function return None if no data for process.
         """
@@ -412,4 +411,15 @@ class TestProgress(WithUser, TestCase):
         self.assertIsNone(total)
         self.assertIsNone(remaining)
         self.assertIsNone(consumed)
+
+@unittest.skipIf(NoSlumber, True)
+class TestHealth(WithUser, TestCase):
+    URL = '/slumber/async/Job/health/'
+
+    @unittest.skipIf(django.VERSION[:2], (1, 0))
+    def test_get_wired(self):
+        response = self.client.get(self.URL)
+        self.assertEqual(response.status_code, 200)
+        json = loads(response.content)
+        self.assertTrue(json.has_key('health'))
 

@@ -1,0 +1,4 @@
+django < 1.8
+django-nose
+psycopg2
+git+https://github.com/KayEss/django-slumber.git@develop

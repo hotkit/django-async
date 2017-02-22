@@ -2,7 +2,10 @@
     Tests for task execution.
 """
 from django.contrib.auth.models import User
-from django.test import TransactionTestCase
+try:
+    from django.test import TransactionTestCase
+except ImportError:
+    from django.test import TestCase as TransactionTestCase
 
 from async import schedule
 from async.models import Job

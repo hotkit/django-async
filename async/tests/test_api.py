@@ -1,6 +1,7 @@
 """
     Test for apis..
 """
+import django
 from django.test import TestCase
 from django.core import management
 try:
@@ -11,10 +12,17 @@ except ImportError:
     from datetime import datetime as timezone
 
 import datetime
+import unittest
 
-from async import api
+from async import api, stats
 from async.models import Job, Group, Error
 from mock import patch, Mock
+
+NoSlumber = False
+try:
+    from slumber.server.meta import applications
+except ImportError:
+    NoSlumber = True
 
 
 def get_now():
@@ -23,6 +31,152 @@ def get_now():
 
 def get_d_before_dt_by_days(base_dt, d):
     return base_dt - datetime.timedelta(days=d)
+
+
+class TestGroupedAggregate(TestCase):
+
+    @unittest.skipIf(django.VERSION[:2], (1, 0))
+    def test_for_executed_jobs(self):
+        job1 = TestRemoveOldJobs.create_job(1)
+        job_started = timezone.now()
+        job1.started = job_started
+        job1.executed = job_started + datetime.timedelta(seconds=5)
+        job1.save()
+
+        job2 = TestRemoveOldJobs.create_job(2)
+        job2.started = job_started
+        job2.executed = job_started + datetime.timedelta(seconds=10)
+        job2.save()
+
+        job2_a = TestRemoveOldJobs.create_job(2)
+        job2_a.started = job_started
+        job2_a.cancelled = job_started
+        job2_a.save()
+
+        job1a = TestRemoveOldJobs.create_job(1)
+        job1a.executed = job_started + datetime.timedelta(seconds=20)
+        job1a.save()
+
+        cancelled_jobs = api.get_grouped_aggregate(jobs_type='cancelled')
+        self.assertEqual(cancelled_jobs[job2_a.name]['count'], 1)
+        executed_jobs = api.get_grouped_aggregate(jobs_type='executed')
+        self.assertEqual(executed_jobs[job1.name]['count'], 2)
+        self.assertEqual(executed_jobs[job2.name]['count'], 1)
+        unexecuted_jobs = api.get_grouped_aggregate(
+            jobs_type='executed', complement=True)
+        self.assertEquals(unexecuted_jobs[job2_a.name]['count'], 1)
+
+
+@unittest.skipIf(NoSlumber, True)
+class TestHealth(TestCase):
+    """ Tests health of the queue.
+    """
+    def setUp(self):
+        # Ensure we bootstrap Slumber's server side
+        applications()
+
+
+    def test_health_for_executed_jobs(self):
+        job1 = TestRemoveOldJobs.create_job(1)
+        job_started = timezone.now()
+        job1.started = job_started
+        job1.executed = job_started + datetime.timedelta(seconds=5)
+        job1.save()
+
+        job2 = TestRemoveOldJobs.create_job(2)
+        job2.started = job_started
+        job2.executed = job_started + datetime.timedelta(seconds=10)
+        job2.save()
+
+        job2_a = TestRemoveOldJobs.create_job(2)
+        job2_a.started = job_started
+        job2_a.save()
+
+        TestRemoveOldJobs.create_job(1)
+
+        queue_health = api.health().get('queue', None)
+
+        self.assertEquals(queue_health['not-executed'], 2)
+        self.assertEquals(queue_health['executed'], 2)
+        self.assertEquals(queue_health['oldest-executed'],
+            '/slumber/async/Job/data/%s/' % job1.pk)
+        self.assertEquals(queue_health['most-recent-executed'],
+            '/slumber/async/Job/data/%s/' % job2.pk)
+
+
+    def test_health_for_not_executed_jobs(self):
+        TestRemoveOldJobs.create_job(1)
+        TestRemoveOldJobs.create_job(2)
+
+        queue_health = api.health().get('queue', None)
+
+        self.assertEquals(queue_health['not-executed'], 2)
+        self.assertEquals(queue_health['executed'], 0)
+        self.assertEquals(queue_health['cancelled'], 0)
+
+
+
+    def test_health_for_cancelled_jobs(self):
+        dt_now = timezone.now()
+        job1 = TestRemoveOldJobs.create_job(1)
+        job1.cancelled = dt_now
+        job1.save()
+
+        job2 = TestRemoveOldJobs.create_job(2)
+        job2.cancelled = dt_now + datetime.timedelta(seconds=10)
+        job2.save()
+
+        TestRemoveOldJobs.create_job(2)
+        TestRemoveOldJobs.create_job(1)
+
+        queue_health = api.health().get('queue', None)
+
+        self.assertEquals(queue_health['cancelled'], 2)
+        self.assertEquals(queue_health['oldest-cancelled'],
+            '/slumber/async/Job/data/%s/' % job1.pk)
+        self.assertEquals(queue_health['most-recent-cancelled'],
+            '/slumber/async/Job/data/%s/' % job2.pk)
+
+
+    def test_health_for_errors(self):
+        dt_now = timezone.now()
+        job1 = api.schedule('job-1', group=None)
+        error1 = Error.objects.create(job=job1, executed=dt_now, exception="First", traceback="None")
+
+        dt_now = dt_now + datetime.timedelta(seconds=10)
+        error2 = Error.objects.create(job=job1, executed=dt_now, exception="Second", traceback="None")
+
+        queue_errors = api.health().get('errors', None)
+
+        self.assertEquals(queue_errors['number'], 2)
+
+
+    @patch('async.stats._get_now')
+    def test_health_for_queue_completion_estimates(self, mock_now):
+        mock_now.return_value = timezone.now()
+        job = TestRemoveOldJobs.create_job(1)
+        queue_health = api.health(stats.estimate_queue_completion).get('queue', None)
+        self.assertEquals(queue_health['estimated-completion-current-job'], 0)
+        self.assertEquals(queue_health['estimated-completion'], 0)
+
+        job_started = mock_now.return_value - datetime.timedelta(seconds=9)
+        job.started = job_started
+        job.executed = job_started + datetime.timedelta(seconds=5)
+        job.save()
+
+        queue_health = api.health(stats.estimate_queue_completion).get('queue', None)
+        self.assertEquals(queue_health['estimated-completion-current-job'], 0)
+        self.assertEquals(queue_health['estimated-completion'], 0)
+
+        job2 = TestRemoveOldJobs.create_job(1)
+        job2.started = mock_now.return_value - datetime.timedelta(seconds=3)
+        job2.save()
+
+        #queue_health = api.health().get('queue', None)
+        queue_health = api.health(stats.estimate_queue_completion).get('queue', None)
+        self.assertAlmostEqual(queue_health['estimated-completion-current-job'], 2.0)
+        self.assertAlmostEqual(queue_health['estimated-completion'], 2.0)
+
 
 
 class TestRemoveOldJobs(TestCase):
@@ -113,7 +267,7 @@ class TestRemoveOldJobs(TestCase):
             lambda x: x in jobs_must_gone_ids,
             Job.objects.filter(name=job_name).values_list('id', flat=True)
         )
-        self.assertEqual(len(not_expected_result), 0)
+        self.assertEqual(len(list(not_expected_result)), 0)
         self.assertEqual(Job.objects.filter(name=job_name).count(), 2)
         self.assertEqual(
             Job.objects.filter(name=job_name, executed__isnull=False).count(),

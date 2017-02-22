@@ -1,23 +1,31 @@
 """
     Various Python utilities.
 """
-from inspect import getmembers, getmodule, isfunction, ismethod
+from inspect import getmembers, getmodule, ismethod
 
+try:
+    _ = unicode
+except NameError:
+    # 'unicode' is undefined, must be Python 3
+    # pylint: disable=redefined-builtin,invalid-name
+    unicode = str
+    basestring = (str, bytes)
+else:
+    # 'unicode' exists, must be Python 2
+    pass
 
 def full_name(item):
     """Return the full name of a something passed in so it can be retrieved
     later on.
     """
+
     if isinstance(item, basestring):
         return item
     if ismethod(item):
-        module_name = full_name(dict(getmembers(item))['im_self'])
+        module_name = full_name(dict(getmembers(item))['__self__'])
     else:
         module_name = getmodule(item).__name__
-    if isfunction(item):
-        name = item.func_name
-    else:
-        name = item.__name__
+    name = item.__name__
     return '.'.join([module_name, name])
 
 
@@ -27,7 +35,7 @@ def object_at_end_of_path(path):
     """
     access_path = path.split('.')
     module = None
-    for index in xrange(1, len(access_path)):
+    for index in range(1, len(access_path)):
         try:
             # import top level module
             module_name = '.'.join(access_path[:-index])
