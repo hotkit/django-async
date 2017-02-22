@@ -12,7 +12,7 @@ def read(fname1, fname2):
 
 setup(
     name = "django-async",
-    version = "0.7",
+    version = "0.7.1",
     author = "Kirit Saelensminde",
     author_email = "kirit@felspar.com",
     url='http://www.kirit.com/Django%20Async',
@@ -21,7 +21,7 @@ setup(
     license = "Boost Software License - Version 1.0 - August 17th, 2003",
     keywords = "django async taskqueue task queue",
     classifiers = [
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Framework :: Django",
         "Intended Audience :: Developers",
         "Programming Language :: Python",
