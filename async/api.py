@@ -55,8 +55,12 @@ def deschedule(function, args=None, kwargs=None):
     job = Job(
         name=full_name(function),
             args=dumps(args or []), kwargs=dumps(kwargs or {}))
-    mark_cancelled = Job.objects.filter(executed=None,
-        identity=sha1(unicode(job)).hexdigest())
+    try:
+        mark_cancelled = Job.objects.filter(executed=None,
+            identity=sha1(unicode(job)).hexdigest())
+    except NameError:
+        mark_cancelled = Job.objects.filter(executed=None,
+            identity=sha1(str(job).encode('utf-8')).hexdigest())
     mark_cancelled.update(cancelled=_get_now())
 
 
@@ -65,8 +69,10 @@ def health(estimation_fn=estimate_rough_queue_completion):
     can be turned into JSON.
     """
     # Import this here so that we only need slumber if health is called.
-    from slumber import data_link
-
+    try:
+        from slumber import data_link
+    except ImportError:  # pragma: no cover
+        return {}
     output = {'queue': {}, 'errors': {}}
 
     output['queue']['all-jobs'] = Job.objects.all().count()

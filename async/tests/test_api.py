@@ -1,6 +1,7 @@
 """
     Test for apis..
 """
+import django
 from django.test import TestCase
 from django.core import management
 try:
@@ -11,11 +12,17 @@ except ImportError:
     from datetime import datetime as timezone
 
 import datetime
+import unittest
 
 from async import api, stats
 from async.models import Job, Group, Error
 from mock import patch, Mock
-from slumber.server.meta import applications
+
+NoSlumber = False
+try:
+    from slumber.server.meta import applications
+except ImportError:
+    NoSlumber = True
 
 
 def get_now():
@@ -25,8 +32,10 @@ def get_now():
 def get_d_before_dt_by_days(base_dt, d):
     return base_dt - datetime.timedelta(days=d)
 
+
 class TestGroupedAggregate(TestCase):
 
+    @unittest.skipIf(django.VERSION[:2], (1, 0))
     def test_for_executed_jobs(self):
         job1 = TestRemoveOldJobs.create_job(1)
         job_started = timezone.now()
@@ -58,7 +67,7 @@ class TestGroupedAggregate(TestCase):
         self.assertEquals(unexecuted_jobs[job2_a.name]['count'], 1)
 
 
-
+@unittest.skipIf(NoSlumber, True)
 class TestHealth(TestCase):
     """ Tests health of the queue.
     """
@@ -169,6 +178,7 @@ class TestHealth(TestCase):
         self.assertAlmostEqual(queue_health['estimated-completion'], 2.0)
 
 
+
 class TestRemoveOldJobs(TestCase):
     """Tests removing old jobs.
     """
@@ -257,7 +267,7 @@ class TestRemoveOldJobs(TestCase):
             lambda x: x in jobs_must_gone_ids,
             Job.objects.filter(name=job_name).values_list('id', flat=True)
         )
-        self.assertEqual(len(not_expected_result), 0)
+        self.assertEqual(len(list(not_expected_result)), 0)
         self.assertEqual(Job.objects.filter(name=job_name).count(), 2)
         self.assertEqual(
             Job.objects.filter(name=job_name, executed__isnull=False).count(),

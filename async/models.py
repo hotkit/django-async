@@ -28,7 +28,6 @@ from async.logger import _logger
 from async.utils import object_at_end_of_path, non_unicode_kwarg_keys
 
 
-
 class Group(models.Model):
     """
         A group for jobs that need to be executed.
@@ -41,6 +40,9 @@ class Group(models.Model):
 
     def __unicode__(self):
         return u'%s' % self.reference
+
+    def __str__(self):
+        return '%s' % self.reference
 
     def save(self, *args, **kwargs):
         # We can't create a new group with that reference
@@ -160,14 +162,20 @@ class Job(models.Model):
     def __unicode__(self):
         # __unicode__: Instance of 'bool' has no 'items' member
         # pylint: disable=E1103
-        def tostr(string):
-            """Convert a string to a quoted string good enough for printing.
-            """
-            return ("'%s'" % string if issubclass(type(string), basestring)
-                else repr(string))
-        args = ', '.join([tostr(s) for s in loads(self.args)] +
-            ['%s=%s' % (k, tostr(v)) for k, v in loads(self.kwargs).items()])
+        arglist = loads(self.args)
+        arglist = [repr(s) for s in arglist]
+        kwargs = loads(self.kwargs)
+        kwargs = sorted([u"%s=%s" % (k, repr(v)) for k, v in kwargs.items()])
+        args = u', '.join(arglist + kwargs)
         return u'%s(%s)' % (self.name, args)
+
+    def __str__(self):
+        arglist = loads(self.args)
+        arglist = [repr(s) for s in arglist]
+        kwargs = loads(self.kwargs)
+        kwargs = sorted(["%s=%s" % (k, repr(v)) for k, v in kwargs.items()])
+        args = ', '.join(arglist + kwargs)
+        return '%s(%s)' % (self.name, args)
 
     def save(self, *a, **kw):
         # Stop us from cheating by adding the new jobs to the old group.
@@ -181,7 +189,11 @@ class Job(models.Model):
                     "Cannot add job [%s] to group [%s] because this group "
                         "has executed jobs." %
                             (self.name, self.group.reference))
-        self.identity = sha1(unicode(self).encode('utf-8')).hexdigest()
+        try:
+            self.identity = sha1(unicode(self).encode('utf-8')).hexdigest()
+        except NameError:
+            self.identity = sha1(str(self).encode('utf-8')).hexdigest()
+
         return super(Job, self).save(*a, **kw)
 
     def execute(self, **_meta):
@@ -190,7 +202,10 @@ class Job(models.Model):
             execution.
         """
         try:
-            _logger.info("%s %s", self.id, unicode(self))
+            try:
+                _logger.info("%s %s", self.id, unicode(self))
+            except NameError:
+                _logger.info("%s %s", self.id, str(self))
             args = loads(self.args)
             kwargs = non_unicode_kwarg_keys(loads(self.kwargs))
             function = object_at_end_of_path(self.name)
@@ -206,7 +221,7 @@ class Job(models.Model):
                 self.save()
                 return result
             return atomic(execute)()
-        except Exception, exception:
+        except Exception as exception:
             self.started = None
             errors = 1 + self.errors.count()
             self.scheduled = (timezone.now() +
@@ -238,4 +253,7 @@ class Error(models.Model):
 
     def __unicode__(self):
         return u'%s : %s' % (self.executed, self.exception)
+
+    def __str__(self):
+        return '%s : %s' % (self.executed, self.exception)
 

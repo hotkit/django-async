@@ -2,7 +2,10 @@
 /django-async.kdev4
 /.idea/*
 /.kdev4
+/.tox
 /test-projects/django_1_3/.coverage
 /test-projects/django_1_4/.coverage
 /test-projects/django_1_7/.coverage
 *.pyc
+django_async.egg-info
+.cache

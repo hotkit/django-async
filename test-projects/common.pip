@@ -4,9 +4,5 @@ lockfile
 # Used for testing
 coverage
 mock
-unittest2
 pylint
 
-# Used to test the optional Slumber compatibility.
-# django-slumber >= 0.8
-git+https://github.com/KayEss/django-slumber.git@develop

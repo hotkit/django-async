@@ -2,8 +2,12 @@
     Implementation of the Slumber operations.
 """
 from django.shortcuts import Http404
-from slumber.operations import ModelOperation, InstanceOperation
-from slumber.server.http import require_user, require_permission
+
+try:
+    from slumber.operations import ModelOperation, InstanceOperation
+    from slumber.server.http import require_user, require_permission
+except ImportError:  # pragma: no cover
+    pass
 from urllib import quote
 
 from async import schedule

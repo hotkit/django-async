@@ -1,7 +1,10 @@
 """
     Async Slumber server configuration
 """
-from slumber import configure
+try:
+    from slumber import configure
+except ImportError:  # pragma: no cover
+    pass
 
 from async.models import Job, Group
 from async.slumber_operations import Health, Schedule, Progress

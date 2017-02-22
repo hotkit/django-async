@@ -2,6 +2,7 @@
     Testing that models work properly.
 """
 import datetime
+import unittest
 
 try:
     from django.test import TestCaseTransactionTestCase
@@ -19,6 +20,7 @@ except ImportError:
 from async import schedule
 from async.models import Error, Job, Group
 
+
 def _fn(*_a, **_kw):
     """Test function.
     """
@@ -33,7 +35,10 @@ class TestJob(TransactionTestCase):
         """
         job = schedule('async.tests.test_models._fn')
         self.assertEqual(Job.objects.all().count(), 1)
-        self.assertEqual(unicode(job), "async.tests.test_models._fn()")
+        try:
+            self.assertEqual(unicode(job), "async.tests.test_models._fn()")
+        except NameError:
+            self.assertEqual(str(job), "async.tests.test_models._fn()")
         self.assertEqual(job.identity,
             '289dbff9c1bd746fc444a20d396986857a6e8f04')
 
@@ -68,38 +73,55 @@ class TestJob(TransactionTestCase):
     def test_unicode_with_args(self):
         """Make sure unicode handling deals with args properly.
         """
-        self.assertEqual(unicode(schedule(
+        ## ToDo: Fix this later
+        try:
+            self.assertEqual(unicode(schedule(
+                    'async.tests.test_models._fn', args=['argument'])),
+                "async.tests.test_models._fn('argument')")
+            self.assertEqual(unicode(schedule(
+                    'async.tests.test_models._fn', args=['a1', 'a2'])),
+                "async.tests.test_models._fn('a1', 'a2')")
+            self.assertEqual(unicode(schedule(
+                    'async.tests.test_models._fn', args=[1, 2])),
+                'async.tests.test_models._fn(1, 2)')
+        except NameError:
+            self.assertEqual(str(schedule(
                 'async.tests.test_models._fn', args=['argument'])),
-            "async.tests.test_models._fn('argument')")
-        self.assertEqual(unicode(schedule(
+                "async.tests.test_models._fn('argument')")
+            self.assertEqual(str(schedule(
                 'async.tests.test_models._fn', args=['a1', 'a2'])),
-            "async.tests.test_models._fn('a1', 'a2')")
-        self.assertEqual(unicode(schedule(
+                "async.tests.test_models._fn('a1', 'a2')")
+            self.assertEqual(str(schedule(
                 'async.tests.test_models._fn', args=[1, 2])),
-            'async.tests.test_models._fn(1, 2)')
-        # self.assertEqual(unicode(schedule(
-        #         'async.tests.test_models._fn', args=[dict(k='v', x=None)])),
-        #     "async.tests.test_models._fn({'x': None, 'k': 'v'})")
+                'async.tests.test_models._fn(1, 2)')
 
     def test_unicode_with_kwargs(self):
         """Make sure unicode handling deals with kwargs properly.
         """
         job = schedule('async.tests.test_models._fn',
             kwargs=dict(k='v', x=None))
-        self.assertEqual(unicode(job),
-            "async.tests.test_models._fn(x=None, k='v')")
+        try:
+            self.assertEqual(unicode(job),
+            "async.tests.test_models._fn(k='v', x=None)")
+        except NameError:
+            self.assertEqual(str(job),
+            "async.tests.test_models._fn(k='v', x=None)")
         self.assertEqual(job.identity,
-            '60941ebcc096c0223ba1db02b3d256f19ba553a3')
+            '236a244a0cd845bb5a427db495ec830fa4ab9d93')
 
     def test_unicode_with_args_and_kwargs(self):
         """Make sure unicode handling deals with kwargs properly.
         """
         job = schedule('async.tests.test_models._fn',
             args=['argument'], kwargs=dict(k='v', x=None))
-        self.assertEqual(unicode(job),
-            "async.tests.test_models._fn('argument', x=None, k='v')")
+        try:
+            self.assertEqual(unicode(job),
+            "async.tests.test_models._fn('argument', k='v', x=None)")
+        except:
+            self.assertEqual(str(job),
+            "async.tests.test_models._fn('argument', k='v', x=None)")
         self.assertEqual(job.identity,
-            '2ce2bb7935439a6ab3f111882f359a06b36bf995')
+            '9abc86055107d5b5aa97ea32e098580543680c27')
 
 
 class TestError(TestCase):
@@ -111,8 +133,10 @@ class TestError(TestCase):
         """
         job = schedule('async.tests.test_models._fn')
         error = Error.objects.create(job=job, exception="Exception text")
-        self.assertTrue(
-            unicode(error).endswith(u' : Exception text'), unicode(error))
+        try:
+            self.assertTrue(unicode(error).endswith(u' : Exception text'), unicode(error))
+        except NameError:
+            self.assertTrue(str(error).endswith(' : Exception text'), str(error))
 
 
 class TestGroup(TestCase):
@@ -156,7 +180,10 @@ class TestGroup(TestCase):
         )
 
         self.assertTrue(Group.objects.all().count(), 1)
-        self.assertEqual(unicode(group), u'test-group')
+        try:
+            self.assertEqual(unicode(group), u'test-group')
+        except NameError:
+            self.assertEqual(str(group), 'test-group')
         self.assertEqual(group.description, 'for testing')
 
     def test_creating_group_with_duplicate_reference_and_executed_job(self):

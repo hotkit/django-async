@@ -3,5 +3,5 @@ south>1.0
 django-nose == 1.4.3
 git+git://github.com/nose-devs/nose.git
 psycopg2
-
+git+https://github.com/KayEss/django-slumber.git@develop
 pytz

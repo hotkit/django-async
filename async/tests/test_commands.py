@@ -95,7 +95,7 @@ class TestFlushQueue(TestCase):
         """Make sure that the number of job run is the same
         as the input jobs limit.
         """
-        for _ in xrange(5):
+        for _ in range(5):
             schedule(_dummy)
         management.call_command('flush_queue', jobs=2)
         self.assertEqual(Job.objects.filter(executed=None).count(), 3)
@@ -103,7 +103,7 @@ class TestFlushQueue(TestCase):
     def test_flush_queue_without_jobs_limit_limit_at_300_by_default(self):
         """Make sure that the number of job run by default is 300.
         """
-        for _ in xrange(305):
+        for _ in range(305):
             schedule(_dummy)
         management.call_command('flush_queue')
         self.assertEqual(Job.objects.filter(executed=None).count(), 5)
@@ -111,7 +111,7 @@ class TestFlushQueue(TestCase):
     def test_flush_queue_with_cancelled_jobs__should_not_be_executed(self):
         """Make sure that the number of job run by default is 300.
         """
-        for _ in xrange(5):
+        for _ in range(5):
             job = schedule(_dummy)
             deschedule(job.name)
         management.call_command('flush_queue')
@@ -125,8 +125,8 @@ class TestHealth(TestCase):
     def test_health(self):
         """Excecute command.
         """
-        print health()
-        print management.call_command('queue_health')
+        print( health())
+        print( management.call_command('queue_health'))
         with patch(
                 'async.management.commands.queue_health.dumps',
                 lambda x: self.assertEqual(x, health())):

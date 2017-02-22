@@ -13,4 +13,4 @@ All documentation can be found at http://www.kirit.com/Django%20Async
 
 _This project uses git flow. Don't forget to do `git flow init -d`_
 
-To create virtual environments for running the tests you can execute `test-projects/make-virtual-environments`. To run the tests execute `runtests`.
+To test just run `tox`. But if you want to go the old way then to create virtual environments for running the tests you can execute `test-projects/make-virtual-environments`. To run the tests execute `runtests`.

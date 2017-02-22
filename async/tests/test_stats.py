@@ -1,3 +1,4 @@
+import django
 from django.test import TestCase
 try:
     # No name 'timezone' in module 'django.utils'
@@ -7,6 +8,7 @@ except ImportError:
     from datetime import datetime as timezone
 
 import datetime
+import unittest
 
 from async import stats, api
 from async.models import Group, Error
@@ -48,6 +50,7 @@ class TestStats(TestCase):
         self.assertAlmostEqual(stats._estimate_completion_ungrouped(), 19.2, 1)
         self.assertAlmostEqual(stats.estimate_queue_completion(), 19.2, 1)
 
+    @unittest.skipIf(django.VERSION[:2], (1, 0))
     @patch('async.stats._get_now')
     def test_estimate_completion_time_for_all_jobs(self, mock_now):
         job_started = timezone.now()

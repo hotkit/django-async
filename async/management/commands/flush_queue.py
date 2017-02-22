@@ -1,6 +1,7 @@
 """
     Django Async management commands.
 """
+from __future__ import print_function
 from django.core.management.base import BaseCommand
 try:
     # No name 'timezone' in module 'django.utils'
@@ -8,7 +9,7 @@ try:
     from django.utils import timezone
 except ImportError: # pragma: no cover
     from datetime import datetime as timezone
-from optparse import make_option
+#from optparse import make_option
 from lockfile import FileLock, AlreadyLocked
 
 from async.models import Job
@@ -27,7 +28,7 @@ def acquire_lock(lockname):
             try:
                 lock.acquire(timeout=-1)
             except AlreadyLocked: # pragma: no cover
-                print 'Lock is already set, aborting.'
+                print('Lock is already set, aborting.')
                 return
             try:
                 handler(*args)
@@ -56,7 +57,7 @@ def run_queue(which, outof, limit, name_filter):
                             job.group.final.pk == job.pk):
                         if not job.group.has_completed(job):
                             continue
-                    print "%s: %s" % (job.id, unicode(job))
+                    print ("%s: %s" % (job.id, job))
                     job.execute()
                     executed = executed + 1
                     if executed >= limit:
@@ -71,7 +72,7 @@ def run_queue(which, outof, limit, name_filter):
             try:
                 priority = by_priority[0].priority
             except IndexError:
-                print "No jobs to execute"
+                print("No jobs to execute")
                 return
             executed = 1
             while executed and limit:
@@ -98,17 +99,18 @@ class Command(BaseCommand):
         Invoke using:
             python manage.py flush_queue
     """
-    option_list = BaseCommand.option_list + (
-        make_option('--jobs', '-j', dest='jobs',
-            help='The maximum number of jobs to run'),
-        make_option('--which', '-w', dest='which',
-            help='The worker ID number'),
-        make_option('--outof', '-o', dest='outof',
-            help='How many workers there are'),
-        make_option('--filter', '-f', dest='filter',
-            help='Filter jobs by fully qualified name'),
-    )
     help = 'Does a single pass over the asynchronous queue'
+
+    def add_arguments(self, parser):
+        parser.add_argument('--jobs', '-j', dest='jobs',
+                            help='The maximum number of jobs to run')
+        parser.add_argument('--which', '-w', dest='which',
+                            help='The worker ID number')
+        parser.add_argument('--outof', '-o', dest='outof',
+                            help='How many workers there are')
+        parser.add_argument('--filter', '-f', dest='filter',
+                            help='Filter jobs by fully qualified name')
+
 
     def handle(self, **options):
         """
