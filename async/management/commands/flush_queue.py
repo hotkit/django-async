@@ -2,6 +2,7 @@
     Django Async management commands.
 """
 from __future__ import print_function
+import django
 from django.core.management.base import BaseCommand
 try:
     # No name 'timezone' in module 'django.utils'
@@ -9,10 +10,11 @@ try:
     from django.utils import timezone
 except ImportError: # pragma: no cover
     from datetime import datetime as timezone
-#from optparse import make_option
 from lockfile import FileLock, AlreadyLocked
-
 from async.models import Job
+
+if django.VERSION < (1,8):
+    from optparse import make_option
 
 
 def acquire_lock(lockname):
@@ -100,6 +102,18 @@ class Command(BaseCommand):
             python manage.py flush_queue
     """
     help = 'Does a single pass over the asynchronous queue'
+
+    if django.VERSION < (1,8):
+        option_list = BaseCommand.option_list + (
+            make_option('--jobs', '-j', dest='jobs',
+                        help='The maximum number of jobs to run'),
+            make_option('--which', '-w', dest='which',
+                        help='The worker ID number'),
+            make_option('--outof', '-o', dest='outof',
+                        help='How many workers there are'),
+            make_option('--filter', '-f', dest='filter',
+                        help='Filter jobs by fully qualified name'),
+        )
 
     def add_arguments(self, parser):
         parser.add_argument('--jobs', '-j', dest='jobs',
