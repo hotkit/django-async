@@ -13,7 +13,7 @@ except ImportError: # pragma: no cover
 from lockfile import FileLock, AlreadyLocked
 from async.models import Job
 
-if django.VERSION[1] <= 7:
+if django.VERSION < (1,8):
     from optparse import make_option
 
 
@@ -103,7 +103,7 @@ class Command(BaseCommand):
     """
     help = 'Does a single pass over the asynchronous queue'
 
-    if django.VERSION[1] <= 7:
+    if django.VERSION < (1,8):
         option_list = BaseCommand.option_list + (
             make_option('--jobs', '-j', dest='jobs',
                         help='The maximum number of jobs to run'),
