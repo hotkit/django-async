@@ -1,3 +1,6 @@
+2017-04-21  Kirit Saelensminde  <kirit@felspar.com>
+ Flush stdout after printing the job we're about to start to work on.
+
 2017-03-07  Tobias Carlander  <tobias.carlander@wfp.org>
  Fix command line options regression.
 

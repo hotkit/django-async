@@ -11,6 +11,7 @@ try:
 except ImportError: # pragma: no cover
     from datetime import datetime as timezone
 from lockfile import FileLock, AlreadyLocked
+from sys import stdout
 from async.models import Job
 
 if django.VERSION < (1,8):
@@ -60,6 +61,7 @@ def run_queue(which, outof, limit, name_filter):
                         if not job.group.has_completed(job):
                             continue
                     print ("%s: %s" % (job.id, job))
+                    stdout.flush()
                     job.execute()
                     executed = executed + 1
                     if executed >= limit:
