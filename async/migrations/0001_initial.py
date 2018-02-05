@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                 ('started', models.DateTimeField(null=True, blank=True)),
                 ('executed', models.DateTimeField(null=True, blank=True)),
                 ('cancelled', models.DateTimeField(null=True, blank=True)),
-                ('group', models.ForeignKey(related_name='jobs', blank=True, to='async.Group', null=True)),
+                ('group', models.ForeignKey(related_name='jobs', blank=True, to='async.Group', null=True, on_delete=models.SET_NULL)),
             ],
             options={
             },
@@ -59,13 +59,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='group',
             name='final',
-            field=models.ForeignKey(related_name='ends', blank=True, to='async.Job', null=True),
+            field=models.ForeignKey(related_name='ends', blank=True, to='async.Job', null=True, on_delete=models.SET_NULL),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='error',
             name='job',
-            field=models.ForeignKey(related_name='errors', to='async.Job'),
+            field=models.ForeignKey(related_name='errors', to='async.Job', on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

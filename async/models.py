@@ -35,8 +35,10 @@ class Group(models.Model):
     reference = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
-    final = models.ForeignKey('Job', blank=True, null=True,
-        related_name='ends')
+    final = models.ForeignKey('Job',
+                              on_delete=models.SET_NULL,
+                              blank=True, null=True,
+                              related_name='ends')
 
     def __unicode__(self):
         return u'%s' % self.reference
@@ -156,8 +158,10 @@ class Job(models.Model):
     executed = models.DateTimeField(null=True, blank=True)
     cancelled = models.DateTimeField(null=True, blank=True)
 
-    group = models.ForeignKey(Group, related_name='jobs',
-        null=True, blank=True)
+    group = models.ForeignKey(Group,
+                              on_delete=models.SET_NULL,
+                              related_name='jobs',
+                              null=True, blank=True)
 
     def __unicode__(self):
         # __unicode__: Instance of 'bool' has no 'items' member
@@ -246,7 +250,9 @@ class Error(models.Model):
     """
         Recorded when an error happens during execution of a job.
     """
-    job = models.ForeignKey(Job, related_name='errors')
+    job = models.ForeignKey(Job,
+                            on_delete=models.CASCADE,
+                            related_name='errors')
     executed = models.DateTimeField(auto_now_add=True)
     exception = models.TextField()
     traceback = models.TextField()
