@@ -9,7 +9,6 @@ python:
     - "3.5"
     - "3.6"
 env:
-    - DJANGO=1_0 OPTS=d1
     - DJANGO=1_3
     - DJANGO=1_4
     - DJANGO=1_4 OPTS=--settings=django_1_4.settings.usetz
