@@ -1,0 +1,7 @@
+{
+    "files": [".travis.yml"],
+    "ignore": {
+        "startswith": ["coverage"]
+    },
+    "index": "README.markdown"
+}

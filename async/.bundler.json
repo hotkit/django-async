@@ -1,0 +1,6 @@
+{
+    "ignore": {
+        "endswith": [".pyc"]
+    },
+    "index": "__init__.py"
+}
