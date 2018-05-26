@@ -1,7 +1,7 @@
 {
     "files": [".travis.yml"],
     "ignore": {
-        "startswith": ["coverage"]
+        "startswith": ["coverage", "django_async.egg-info"]
     },
     "index": "README.markdown"
 }
