@@ -223,6 +223,7 @@ class Job(models.Model):
             return atomic(execute)()
         except Exception as exception:
             self.started = None
+            self.executed = None
             errors = 1 + self.errors.count()
             self.scheduled = (timezone.now() +
                 timedelta(seconds=60 * pow(errors, 1.6)))
