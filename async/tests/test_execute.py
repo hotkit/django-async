@@ -2,6 +2,7 @@
     Tests for task execution.
 """
 from django.contrib.auth.models import User
+from django.db import transaction
 try:
     from django.test import TransactionTestCase
 except ImportError:
@@ -9,6 +10,10 @@ except ImportError:
 
 from async import schedule
 from async.models import Job
+import mock
+from django.core.exceptions import ValidationError
+from simplejson import dumps
+
 
 
 # Redefining name '_EXECUTED' from outer scope
@@ -39,6 +44,9 @@ class _class(object):
         # pylint: disable = W0603
         global _EXECUTED
         _EXECUTED = (a, kw)
+
+def _fakedump(*a):
+    raise AssertionError
 
 
 class TestExecution(TransactionTestCase):
@@ -83,6 +91,22 @@ class TestExecution(TransactionTestCase):
         self.assertIsNotNone(job.scheduled)
         self.assertEqual(
             User.objects.filter(username='async-test-user').count(), 0)
+
+    @mock.patch("simplejson.dumps", _fakedump)
+    def test_error_recording_transaction_error(self):
+        """Function's been ran correctly, but job.result can't be written due to transaction error.
+        """
+        job = Job.objects.get(
+            pk=schedule(_function,
+                args=['async-test-user'], kwargs={'result': 'nothing'}).pk)
+        self.assertEqual(job.errors.count(), 0)
+        with self.assertRaises(AssertionError):
+            job.execute()
+
+        job = Job.objects.get(pk=job.pk)
+        self.assertEqual(job.errors.count(), 1)
+        self.assertIsNone(job.executed)
+        self.assertEqual(User.objects.filter(username='async-test-user').count(), 0)
 
     def test_class_method_works(self):
         """Make sure that we can execute a class method.

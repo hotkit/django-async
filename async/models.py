@@ -21,12 +21,12 @@ except ImportError: # pragma: no cover
 # No name 'sha1' in module 'hashlib'
 # pylint: disable=E0611
 from hashlib import sha1
-from simplejson import dumps, loads
 from traceback import format_exc
 
 from async.logger import _logger
 from async.utils import object_at_end_of_path, non_unicode_kwarg_keys
 
+import simplejson
 
 class Group(models.Model):
     """
@@ -162,17 +162,17 @@ class Job(models.Model):
     def __unicode__(self):
         # __unicode__: Instance of 'bool' has no 'items' member
         # pylint: disable=E1103
-        arglist = loads(self.args)
+        arglist = simplejson.loads(self.args)
         arglist = [repr(s) for s in arglist]
-        kwargs = loads(self.kwargs)
+        kwargs = simplejson.loads(self.kwargs)
         kwargs = sorted([u"%s=%s" % (k, repr(v)) for k, v in kwargs.items()])
         args = u', '.join(arglist + kwargs)
         return u'%s(%s)' % (self.name, args)
 
     def __str__(self):
-        arglist = loads(self.args)
+        arglist = simplejson.loads(self.args)
         arglist = [repr(s) for s in arglist]
-        kwargs = loads(self.kwargs)
+        kwargs = simplejson.loads(self.kwargs)
         kwargs = sorted(["%s=%s" % (k, repr(v)) for k, v in kwargs.items()])
         args = ', '.join(arglist + kwargs)
         return '%s(%s)' % (self.name, args)
@@ -206,8 +206,8 @@ class Job(models.Model):
                 _logger.info("%s %s", self.id, unicode(self))
             except NameError:
                 _logger.info("%s %s", self.id, str(self))
-            args = loads(self.args)
-            kwargs = non_unicode_kwarg_keys(loads(self.kwargs))
+            args = simplejson.loads(self.args)
+            kwargs = non_unicode_kwarg_keys(simplejson.loads(self.kwargs))
             function = object_at_end_of_path(self.name)
             _logger.debug(u"%s resolved to %s" % (self.name, function))
             def execute():
@@ -217,12 +217,13 @@ class Job(models.Model):
                 result = function(*args, **kwargs)
                 self.executed = timezone.now()
                 self.cancelled = None
-                self.result = dumps(result)
+                self.result = simplejson.dumps(result)
                 self.save()
                 return result
             return atomic(execute)()
         except Exception as exception:
             self.started = None
+            self.executed = None
             errors = 1 + self.errors.count()
             self.scheduled = (timezone.now() +
                 timedelta(seconds=60 * pow(errors, 1.6)))

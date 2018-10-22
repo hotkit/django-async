@@ -1,3 +1,6 @@
+2017-10-17  Viacheslav Litvinov  <viacheslavlitvinov@gmail.com>
+ Clear up executed job field on exception catch.
+
 2017-04-21  Kirit Saelensminde  <kirit@felspar.com>
  Flush stdout after printing the job we're about to start to work on.
 
